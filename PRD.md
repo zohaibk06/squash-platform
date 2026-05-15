@@ -1,11 +1,15 @@
 # Squash Platform — PRD
 
-> Working title. Per kickoff (transcript 16:06), the brand should *not* lock us
-> into one sport — squash is the wedge, not the ceiling.
+> The platform ships under Ahad's existing **ARProformance** brand (squash-
+> focused — see `BRAND.md`). "SquashIQ" was rejected at kickoff (transcript
+> 16:06); the multi-sport ambition is real but stays a later, separately-
+> branded play — squash is the wedge, not the ceiling.
 
 Sources: kickoff transcript with Ahad Raza (2026-05-10), four FigJam boards
 ("Athlete workflows", "Coaching workflows", assessment sub-flow,
-"Parent/Guardian flows") on the SquashIQ Workflows board.
+"Parent/Guardian flows") on the SquashIQ Workflows board, a prototype-review
+transcript with Ahad (2026-05-10 evening — see §11), and `BRAND.md` (the
+ARProformance design system, shared 2026-05-15).
 
 UX framing draws on Cooper, *About Face* (4e) and Tidwell, *Designing
 Interfaces* (2e/3e). Specific references are inline.
@@ -14,18 +18,18 @@ Interfaces* (2e/3e). Specific references are inline.
 
 ## 1. Vision
 
-An athlete management system with an *AR Performance* coaching lens. It
+An athlete management system with an *ARProformance* coaching lens. It
 replaces the scattered surface area today's coaches use (Gmail drafts,
 WhatsApp, Notion, ad-hoc Google Docs, ChatGPT for brainstorming) with a single
 mobile-first surface for planning sessions, capturing notes, assigning work,
 and tracking athlete development. Squash is the wedge market; the data model
 and flows should generalize to other 1:1 / small-group coached sports.
 
-The "AR Performance lens" is a goal-setting + assessment framework Ahad uses
-in practice — Vision → Outcome Goals → Process Goals, paired with assessment
-across physical / mental / technical / tactical dimensions. It is not a
-content library or curriculum; it is the structured way the platform asks
-coaches and athletes to think.
+The "ARProformance coaching lens" is a goal-setting + assessment framework Ahad
+uses in practice — Vision → Outcome Goals → Process Goals, paired with
+assessment across physical / mental / technical / tactical dimensions. It is
+not a content library or curriculum; it is the structured way the platform
+asks coaches and athletes to think.
 
 ## 2. Problem
 
@@ -184,7 +188,7 @@ Add, edit, archive athletes. Per athlete: contact info, parent/guardian link
 (if minor), assessment history, vision, goals (outcome + process), session
 history, attachments, notes (shared + private — see §10).
 
-### 6.2 Vision & goals (AR Performance framework)
+### 6.2 Vision & goals (ARProformance framework)
 - Vision: free-text, athlete's big-picture ambition
 - Outcome goals: results-oriented, time-bounded (e.g., "state champion by 2027")
 - Process goals: behaviors / habits / skill priorities (e.g., "backhand wrist
@@ -196,19 +200,29 @@ history, attachments, notes (shared + private — see §10).
 - Categories: physical, mental, technical, tactical
 - Coach can clone, customize, or author from scratch
 - Multi-select assessment types per athlete
+- Scoring is **per-drill, not cumulative** — a single total masks real
+  per-skill improvement (transcript 20:48). Trend lines are per-drill.
 - Results stored on athlete profile; feed progress chart
 
 ### 6.4 Session planning
-- One-off sessions or saved templates
+- A coach's **own previous sessions are the primary reuse mechanism** (reusable
+  across any of their students); named templates are a secondary option behind
+  a dropdown. Session-level only — no multi-week program templates, since
+  squash skill work is too varied for a generic plan (transcript 20:51)
 - Auto-populated context rail: top outcome/process goals + recent notes
 - Pick an intended focus (single vs multi — open question §10)
-- Group clinic variant: player roster, court assignments (later)
+- Group clinic variant: draws on the cohort roster (§6.10); court assignments
+  (later)
 
 ### 6.5 Session logging
 - Per-athlete notes: text + voice dictation → transcription
 - Quick-attach photo or short video clip
+- Coach can **amend past session notes/reflections** after the fact — sessions
+  are not frozen in time (transcript 21:22)
 - Send notes to each athlete post-session (push + in-app)
-- Attendance tracking for group clinics
+- Attendance tracking for group clinics; clinic notes go to **all enrolled
+  players, even absentees** (transcript 21:17), and drills / court assignments
+  can be **pre-published** so players know the focus before arriving
 
 ### 6.6 Assignments / homework
 - Coach assigns a task with a due date
@@ -235,8 +249,19 @@ history, attachments, notes (shared + private — see §10).
 - **Coach**: full read/write on their roster
 - **Athlete**: read/write on own profile; read on coach's session plan; write
   notes + reflections + uploads
-- **Parent/Guardian**: read-only on linked athlete (write scope — open §10)
+- **Parent/Guardian**: read-only on linked athlete, plus **message the coach**
+  (transcript 21:19). Schedule / pay scope — still open §10
 - Future: academy / head-coach role; multi-coach per athlete
+
+### 6.10 Cohorts / groups
+- Coach **creates a cohort once** (e.g. per term / 3-month block) rather than
+  re-picking players for every group session (transcript 21:27)
+- Cohort has its own page: roster, per-member performance trends, **group
+  messaging**
+- Group-clinic scheduling (§5.3) draws on the cohort roster
+- Later-phase gamification rides on the cohort: within-cohort leaderboard,
+  team-vs-team skill-assessment challenges (e.g. "4C vs River Grove"),
+  player-vs-player "throw down" challenges (transcript 21:23–21:27)
 
 ## 7. UX principles
 
@@ -274,6 +299,7 @@ These are the lenses every screen review uses.
 **Coach (mobile bottom nav)**
 - **Today** — sessions today, outstanding follow-ups, quick "start session"
 - **Athletes** — roster → athlete profile (Two-Panel Selector inspired)
+- **Cohorts** — groups → cohort page (roster, per-member trends, group messaging)
 - **Sessions** — calendar / list of past + upcoming
 - **Inbox** — unsent notes, voice dictations awaiting filing, athlete uploads
   awaiting review
@@ -301,7 +327,7 @@ onboarding and assessment.
 - Athlete home: today's session + most-recent coach notes
 
 **V1 — private lesson loop (weeks 3–6)**
-- Vision/goals capture (AR Performance framework)
+- Vision/goals capture (ARProformance framework)
 - Skill + self-awareness assessment templates
 - Session planner with context rail (goals + recent notes)
 - Voice dictation for notes
@@ -309,8 +335,11 @@ onboarding and assessment.
 - Push notifications
 
 **V2 — group clinic loop**
-- Group clinic scheduling
+- Cohorts: create-once groups; cohort page with per-member trends + group
+  messaging
+- Group clinic scheduling (off the cohort roster)
 - Multi-player session logging with per-player notes
+- Pre-published drills / court assignments
 - Court assignments
 - Attendance
 
@@ -336,11 +365,9 @@ onboarding and assessment.
 ## 10. Open questions
 
 ### Product / naming
-- **Brand name.** "SquashIQ" is explicitly rejected (transcript 16:06). Is
-  *AR Performance* itself the brand, or does the platform get its own name
-  that AR Performance happens to be the first deployment of?
-- **Closed beta scope.** AR Performance students only, or a handful of
+- **Closed beta scope.** ARProformance students only, or a handful of
   external squash coaches too?
+- (Brand name is resolved — the platform is **ARProformance**; see §11.4.)
 
 ### Roles & users
 - Academies — can a coach belong to one with a head coach above them?
@@ -358,12 +385,14 @@ onboarding and assessment.
   exist outside the group-clinic flow?
 - Track session duration, or only date/time start?
 - Recurring sessions (weekly slot with same student)?
-- Calendar integration: sync with Google / Apple Calendar, or replace?
+- (Calendar approach is resolved — in-app calendar that pushes out to
+  Google/Apple, not a replacement and not a two-way import; see §11.4.)
 
 ### Assessments
-- Skill + fitness items — predefined by us with AR Performance defaults,
+- Skill + fitness items — predefined by us with ARProformance defaults,
   or fully coach-authored from day one?
-- Scoring granularity — 1–5? 1–10? rubric? video-attached?
+- Scoring granularity — 1–5? 1–10? rubric? video-attached? (Per-drill, not
+  cumulative, is settled — see §11.4 — but the scale is still open.)
 - Re-assessment cadence — every N weeks, coach discretion, or both?
 - Does the athlete self-score before the coach scores (for compare-and-contrast,
   reinforcing self-awareness — which is the whole point of one of the
@@ -422,12 +451,11 @@ onboarding and assessment.
 - Auth — email + magic link, Apple/Google SSO, both?
 
 ### Design / brand
-- Is there an existing AR Performance brand kit / palette / type system we
-  should use? David's Claude-Design ebook (transcript 16:07–16:09) reportedly
-  used "the AR Performance design system" — does that asset exist where we
-  can pull from it?
-- Tone direction — clinical / professional (Strava for coaches) or warm /
-  coach-led / encouraging?
+- The ARProformance brand kit exists and was shared — see `BRAND.md`. Tone is
+  resolved there: direct, athletic, uncompromising. Confirm it carries to the
+  *product* UI, not just the marketing site.
+- Still needed from David: `colors_and_type.css` (the exact CSS variables) and
+  a logo SVG — see `BRAND.md`.
 
 ### AI
 - In-app AI session suggestion ("what's a good progression from here?"
@@ -437,7 +465,102 @@ onboarding and assessment.
 - AI nudge composition (drafting the message for the coach to send when they
   hit "Nudge") — in scope?
 
+## 11. Review round 2 — prototype walkthrough (2026-05-10 evening)
+
+Ahad walked the 5-direction `prototype.html` and Stuti's FigJam coaching
+workflows. Source: prototype-review transcript with Ahad (2026-05-10 evening,
+timestamps 20:13–21:53).
+
+### 11.1 Reactions to the five prototype directions
+The direction names (Court-Side, Broadsheet, Command Deck, Locker Room,
+Logbook) are throwaway V1/V2/V3 labels, not product names.
+
+- **Court-Side** — keep the bold upfront *intended focus*, "last 3 sessions in
+  his words", voice-note capture. Athlete view too busy; the "I'm here" toggle
+  is redundant.
+- **Broadsheet** — keep outcome goals, process goals, "what's coming up next".
+  The "cycle" framing reads as too intensive for most coaches.
+- **Command Deck** — the trend-line / metrics visual is liked but too busy.
+  Open: *what* the trend line plots — Club Locker rating (the NA rating system;
+  possible open API for rating only, not future tournaments), match W/L %, or
+  assessment results over time.
+- **Locker Room** — keep streaks, the "today's work" queue, due-date markers,
+  the **"missions"** verbiage (week 3 of 6), the **pinned vision** view, the
+  card layout. Points (+8/+18) are overkill for now.
+- **Logbook** — most calendar-forward; visually closest to ARProformance.
+  "Start session" does not belong in a logbook.
+
+**Verdict:** the next prototype should be a **hybrid of Locker Room + Logbook**,
+pulling in Court-Side's *intended focus* and Locker Room's pinned-vision /
+top-focus-then-rest layout.
+
+### 11.2 Cross-cutting feedback
+- **"Start session" is overused.** It is a **group-clinic-only** coach action
+  (capture dictated notes court-to-court). It does not belong on athlete
+  screens or on every coach screen.
+- **Minimal clicks → maximum result.** One-button actions wherever possible;
+  a persistent bottom nav is essential on mobile.
+- Several directions repeat the same content in different visual treatments —
+  fine as parallel explorations, but the chosen direction must not carry that
+  redundancy.
+
+### 11.3 New / changed product decisions
+- **Cohorts/groups are first-class** — see §6.10. Create-once, with a cohort
+  page (roster, per-member trends, group messaging).
+- **Calendar** — keep a squash-specific in-app calendar for coach and
+  athlete/parent, but it **pushes out** to Google/Apple Calendar. Out is easy,
+  import-in is hard; do not try to replace personal calendars.
+- **Templates** — a coach's own previous sessions are the primary reuse path;
+  named templates are secondary; session-level only, no multi-week programs
+  (squash skill work is too varied — unlike a running plan). See §6.4.
+- **Assessment scoring** — per-drill, never a single cumulative number. See §6.3.
+- **Parent** — can message the coach. See §6.9.
+- **Onboarding** — nothing mandatory; everything recommended/optional. New
+  users get a ~30-min guided sit-down where features are toggled to what
+  they'll actually use.
+- **Group-clinic planning** — pre-publish drills / court assignments so players
+  know the focus before arriving (today coaches scrawl it on the court glass);
+  send clinic notes to **all enrolled players, even absentees**. See §6.5.
+- **Gamification (later phase)** — within-cohort leaderboard, team-vs-team
+  skill-assessment challenges (e.g. "4C vs River Grove"), player-vs-player
+  "throw down" challenges.
+
+### 11.4 Resolved open questions (moved out of §10)
+- **Brand name** — the platform is **ARProformance** (see `BRAND.md`); "SquashIQ"
+  stays rejected.
+- **Brand kit exists** — David's ARProformance design system is real and was
+  shared; see `BRAND.md`. Barlow Condensed + DM Sans, black/navy + a single red
+  accent, sharp corners, pill buttons.
+- **Assessment scoring** — per-drill, not cumulative (the *scale* — 1–5 vs
+  1–10 — is still open).
+- **Calendar** — in-app calendar that pushes out to Google/Apple; not a
+  replacement, not a two-way import.
+- **Templates** — previous-sessions-primary, named-templates-secondary,
+  session-level only.
+- **Parent scope** — read-only plus message-the-coach (schedule / pay still
+  open).
+
+### 11.5 Validation
+4–5 coaches already want to beta test. Ahad has discussed the concept with a
+Bay Area academy owner, Laura Massaro's brother (coach at a Philadelphia prep
+school), and local 20–30-kid academy coaches, and pitched Nick Matthew and
+Laura Massaro — all positive. Potential testimonial value.
+
+### 11.6 Direction for the next prototype task (not in scope for this round)
+- Consolidate `prototype.html` from 5 directions to **2–3**, led by the
+  Locker Room + Logbook hybrid.
+- **One** of the 2–3 applies the ARProformance brand (Barlow Condensed,
+  black/navy + red accent — see `BRAND.md`).
+- The build must be a **comprehensive, clickable end-to-end flow** for the
+  **coach** and **athlete** personas — real screen-to-screen navigation, not
+  isolated views — covering the §5 journeys.
+- Reference: Ahad's own flow prototypes (coach-only — an athlete-onboarding
+  wizard, a coaching-workflows workspace, a goals-panel A/B) at
+  https://sitemap-generator--squash-iq-prototypes.netlify.app/
+
 ---
 
-*Status: Draft 1. Next: triage open questions with Ahad, lock V0 scope, and
-start on data model + auth.*
+*Status: Draft 2 — incorporates the 2026-05-10 evening prototype-review session
+(§11) and the ARProformance brand system (`BRAND.md`). Next: build the
+comprehensive coach + athlete end-to-end prototype (2–3 visual directions, one
+on the ARProformance brand), lock V0 scope, and start on data model + auth.*
