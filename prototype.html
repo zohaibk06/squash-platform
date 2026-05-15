@@ -9,14 +9,15 @@
   One consolidated information architecture (the Locker Room + Logbook hybrid
   from PRD §11), rendered in 3 swappable visual directions:
     · arpro   — the ARProformance brand (Barlow Condensed, black/navy + red)
-    · journal — light editorial training journal (Fraunces + Hanken Grotesk)
-    · clay    — soft, friendly, encouraging (Bricolage Grotesque, terracotta)
+    · logbook — black + bone sports-broadcast editorial (Clash Display, JetBrains Mono, Archivo)
+    · pulse   — oxblood — twist on the dominant black (Clash Display + Instrument Serif)
   Personas: Coach + Athlete, each with a real clickable flow across the
   PRD §5 journeys. Static HTML/CSS/JS — no build step; spec for Joe's React.
 -->
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,500;0,600;0,800;0,900;1,600&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,500&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,500&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Barlow+Condensed:wght@500;600;800;900&family=DM+Sans:wght@400;500;700&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,500&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://api.fontshare.com/v2/css?f[]=clash-display@500,600,700&display=swap" rel="stylesheet" />
 <style>
 /* ============================================================
    TOKENS — structural defaults + per-theme overrides
@@ -42,39 +43,42 @@
   --btn-tracking:.14em; --btn-transform:uppercase; --btn-weight:600;
   --nav-rule:3px;
 }
-/* ---- journal : light editorial ---- */
-[data-theme="journal"]{
-  --bg:#efe9dc; --surface:#fbf8f0; --surface-2:#f4eee0; --inverse:#211d16;
-  --text:#211d16; --text-muted:#6c6354; --text-faint:#9a917e;
-  --accent:#1f4d3a; --accent-strong:#2a6b50; --on-accent:#fbf8f0;
-  --hairline:rgba(33,29,22,.12); --border:rgba(33,29,22,.18);
-  --font-display:"Fraunces",serif; --font-body:"Hanken Grotesk",sans-serif;
-  --disp-weight:900; --disp-transform:none; --disp-tracking:-.012em; --disp-lh:1.0;
-  --r-card:13px; --r-btn:9px; --r-input:9px; --r-chip:999px;
-  --card-bg:var(--surface); --card-border:1px solid var(--hairline);
+/* ---- logbook : black + bone, sports-broadcast editorial ---- */
+[data-theme="logbook"]{
+  --bg:#0a0a0a; --surface:#0f0f0f; --surface-2:#141414; --inverse:#fafaf7;
+  --text:#fafaf7; --text-muted:rgba(250,250,247,.62); --text-faint:rgba(250,250,247,.42);
+  --accent:#e8232b; --accent-strong:#ff2a32; --on-accent:#fafaf7;
+  --hairline:rgba(250,250,247,.10); --border:rgba(250,250,247,.18);
+  --font-display:"Clash Display",sans-serif;
+  --font-body:"Archivo",sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,monospace;
+  --disp-weight:700; --disp-transform:uppercase; --disp-tracking:-.018em; --disp-lh:.9;
+  --r-card:0px; --r-btn:0px; --r-input:0px; --r-chip:0px;
+  --card-bg:transparent; --card-border:1px solid var(--hairline);
   --rule-w:3px;
-  --shadow-card:0 1px 0 rgba(33,29,22,.04),0 14px 26px -18px rgba(33,29,22,.32);
-  --shadow-pop:0 30px 60px -20px rgba(33,29,22,.4);
-  --tab-bg:rgba(251,248,240,.94); --frame:#c8bda3;
-  --btn-tracking:.02em; --btn-transform:none; --btn-weight:700;
-  --nav-rule:0px;
+  --shadow-card:none; --shadow-pop:0 24px 60px rgba(0,0,0,.7);
+  --tab-bg:rgba(10,10,10,.95); --frame:#000;
+  --btn-tracking:.16em; --btn-transform:uppercase; --btn-weight:700;
+  --nav-rule:3px;
 }
-/* ---- clay : soft + friendly ---- */
-[data-theme="clay"]{
-  --bg:#e9e4dc; --surface:#ffffff; --surface-2:#f6f2ec; --inverse:#2a2723;
-  --text:#2a2723; --text-muted:#857f74; --text-faint:#a8a193;
-  --accent:#bd5b2e; --accent-strong:#d06b3a; --on-accent:#fff;
-  --hairline:rgba(42,39,35,.08); --border:rgba(42,39,35,.12);
-  --font-display:"Bricolage Grotesque",sans-serif; --font-body:"DM Sans",sans-serif;
-  --disp-weight:800; --disp-transform:none; --disp-tracking:-.02em; --disp-lh:1.02;
-  --r-card:22px; --r-btn:14px; --r-input:13px; --r-chip:999px;
-  --card-bg:var(--surface); --card-border:1px solid transparent;
-  --rule-w:0px;
-  --shadow-card:0 2px 4px rgba(42,39,35,.04),0 18px 40px -22px rgba(42,39,35,.45);
-  --shadow-pop:0 34px 70px -24px rgba(42,39,35,.5);
-  --tab-bg:rgba(255,255,255,.94); --frame:#d6cfc4;
-  --btn-tracking:.005em; --btn-transform:none; --btn-weight:700;
-  --nav-rule:0px;
+/* ---- pulse : oxblood — twist on the dominant black, Clash + Instrument Serif ---- */
+[data-theme="pulse"]{
+  --bg:#180810; --surface:#260f1a; --surface-2:#1f0b15; --inverse:#f5ead9;
+  --text:#f5ead9; --text-muted:rgba(245,234,217,.66); --text-faint:rgba(245,234,217,.44);
+  --accent:#e8232b; --accent-strong:#ff3a40; --on-accent:#fff;
+  --hairline:rgba(245,234,217,.10); --border:rgba(245,234,217,.20);
+  --font-display:"Clash Display",sans-serif;
+  --font-body:"Instrument Sans",sans-serif;
+  --font-serif:"Instrument Serif",serif;
+  --disp-weight:600; --disp-transform:none; --disp-tracking:-.024em; --disp-lh:.95;
+  --r-card:3px; --r-btn:999px; --r-input:8px; --r-chip:999px;
+  --card-bg:var(--surface); --card-border:1px solid var(--hairline);
+  --rule-w:4px;
+  --shadow-card:0 1px 0 rgba(245,234,217,.04) inset;
+  --shadow-pop:0 36px 80px rgba(0,0,0,.6);
+  --tab-bg:rgba(24,8,16,.95); --frame:#180810;
+  --btn-tracking:.02em; --btn-transform:none; --btn-weight:600;
+  --nav-rule:2px;
 }
 
 /* ============================================================
@@ -203,7 +207,7 @@ img{max-width:100%;display:block;}
   content:"";width:14px;height:2px;background:var(--accent);
   display:inline-block;border-radius:2px;
 }
-[data-theme="clay"] .eyebrow::before{width:6px;height:6px;border-radius:999px;}
+[data-theme="pulse"] .eyebrow::before{width:6px;height:6px;border-radius:999px;}
 
 .disp{
   font-family:var(--font-display);
@@ -217,7 +221,7 @@ img{max-width:100%;display:block;}
   color:var(--text-muted);
   font-weight:600;
 }
-[data-theme="journal"] .disp .em{color:var(--accent);}
+[data-theme="logbook"] .disp .em{color:var(--accent);}
 
 .muted{color:var(--text-muted);}
 .faint{color:var(--text-faint);}
@@ -243,15 +247,11 @@ img{max-width:100%;display:block;}
   width:var(--rule-w,4px);
   height:100%;
 }
-[data-theme="journal"] .card.rule::after{
-  width:100%;height:3px;left:0;top:0;
-}
-[data-theme="clay"] .card.rule::after{display:none;}
 .card.tap{cursor:pointer;}
 .card.tap:active{transform:scale(.985);}
 [data-theme="arpro"] .card.tap:hover{border-color:var(--accent);transform:translateY(-3px);}
-[data-theme="journal"] .card.tap:hover{transform:translateY(-3px);box-shadow:var(--shadow-pop);}
-[data-theme="clay"] .card.tap:hover{transform:translateY(-3px);box-shadow:var(--shadow-pop);}
+[data-theme="logbook"] .card.tap:hover{border-color:var(--accent);}
+[data-theme="pulse"] .card.tap:hover{border-color:var(--accent);transform:translateY(-3px);box-shadow:var(--shadow-pop);}
 
 .row{display:flex;align-items:center;gap:12px;}
 .col{display:flex;flex-direction:column;}
@@ -284,7 +284,8 @@ img{max-width:100%;display:block;}
 .btn:active{transform:scale(.975);}
 .btn:hover{background:var(--accent-strong);}
 [data-theme="arpro"] .btn:hover{box-shadow:0 8px 30px -6px rgba(232,35,43,.6);}
-[data-theme="clay"] .btn:hover{box-shadow:0 14px 30px -12px rgba(189,91,46,.6);}
+[data-theme="pulse"] .btn:hover{box-shadow:0 10px 36px -8px rgba(232,35,43,.55);}
+[data-theme="logbook"] .btn:hover{box-shadow:none;}
 .btn.ghost{
   background:transparent;color:var(--text);
   border:1.5px solid var(--border);
@@ -354,7 +355,7 @@ img{max-width:100%;display:block;}
 .lrow.tap{cursor:pointer;}
 .lrow.tap:active{transform:scale(.985);}
 .lrow.tap:hover{border-color:var(--accent);}
-[data-theme="clay"] .lrow.tap:hover,[data-theme="journal"] .lrow.tap:hover{
+[data-theme="pulse"] .lrow.tap:hover,[data-theme="logbook"] .lrow.tap:hover{
   border-color:var(--border);transform:translateY(-2px);box-shadow:var(--shadow-pop);}
 
 /* progress bar */
@@ -386,9 +387,7 @@ img{max-width:100%;display:block;}
 }
 .focus.rule::after{content:"";position:absolute;left:0;top:0;height:100%;
   width:4px;background:var(--accent);}
-[data-theme="journal"] .focus.rule::after{width:100%;height:3px;}
-[data-theme="clay"] .focus.rule::after{display:none;}
-[data-theme="clay"] .focus{background:linear-gradient(150deg,var(--surface),var(--surface-2));}
+[data-theme="pulse"] .focus{background:linear-gradient(150deg,var(--surface),var(--bg));}
 
 /* hero (next session) */
 .hero{
@@ -407,8 +406,11 @@ img{max-width:100%;display:block;}
   border-left:4px solid var(--accent);
 }
 [data-theme="arpro"] .hero:hover{border-color:var(--accent);}
-[data-theme="journal"] .hero{border-top:3px solid var(--accent);}
-[data-theme="clay"] .hero{background:linear-gradient(155deg,#fff,var(--surface-2));}
+[data-theme="logbook"] .hero{border-left:3px solid var(--accent);}
+[data-theme="pulse"] .hero{
+  background:linear-gradient(155deg,var(--surface),var(--bg));
+  border-left:4px solid var(--accent);
+}
 .hero .hname{
   font-family:var(--font-display);font-weight:var(--disp-weight);
   text-transform:var(--disp-transform);letter-spacing:var(--disp-tracking);
@@ -440,11 +442,11 @@ img{max-width:100%;display:block;}
   border:2px solid var(--border);display:grid;place-items:center;
   color:transparent;transition:all var(--t) var(--ease);
 }
-[data-theme="clay"] .opt .box{border-radius:8px;}
+[data-theme="pulse"] .opt .box{border-radius:8px;}
 .opt.on{border-color:var(--accent);}
 [data-theme="arpro"] .opt.on{background:rgba(232,35,43,.07);}
-[data-theme="journal"] .opt.on{background:rgba(31,77,58,.06);}
-[data-theme="clay"] .opt.on{background:rgba(189,91,46,.06);}
+[data-theme="logbook"] .opt.on{background:rgba(232,35,43,.10);}
+[data-theme="pulse"] .opt.on{background:rgba(232,35,43,.12);}
 .opt.on .box{background:var(--accent);border-color:var(--accent);color:var(--on-accent);}
 .opt .box svg{width:14px;height:14px;}
 
@@ -529,7 +531,7 @@ textarea.field{resize:none;min-height:96px;line-height:1.5;}
   color:var(--accent);
 }
 .due.late{color:var(--accent);}
-[data-theme="journal"] .due,[data-theme="clay"] .due{letter-spacing:.04em;}
+[data-theme="logbook"] .due,[data-theme="pulse"] .due{letter-spacing:.04em;}
 
 /* ============================================================
    TAB BAR
@@ -645,6 +647,10 @@ textarea.field{resize:none;min-height:96px;line-height:1.5;}
   color:rgba(255,255,255,.34);font-size:8.5px;font-weight:700;
   letter-spacing:.14em;padding:0 4px 0 8px;
 }
+@media(max-width:899px){
+  /* desktop layout only works on wide viewports — hide its toggle below 900px */
+  .desktop-only-sep,.desktop-only-lbl,.desktop-only-grp{display:none;}
+}
 @media(max-width:480px){
   .dock{top:8px;padding:4px;gap:3px;}
   .dock button{padding:7px 8px;font-size:9.5px;letter-spacing:.04em;}
@@ -654,9 +660,231 @@ textarea.field{resize:none;min-height:96px;line-height:1.5;}
 /* utility show/hide by persona */
 [data-persona="coach"] .athlete-only{display:none!important;}
 [data-persona="athlete"] .coach-only{display:none!important;}
+
+/* ============================================================
+   THEME SIGNATURES — logbook + pulse-specific overrides
+   ============================================================ */
+
+/* ---- LOGBOOK — mono small-caps, full-red cue, bone CTA ---- */
+[data-theme="logbook"] .eyebrow,
+[data-theme="logbook"] .tag,
+[data-theme="logbook"] .qline .qd,
+[data-theme="logbook"] .chip,
+[data-theme="logbook"] .statgrid .st .k,
+[data-theme="logbook"] .due,
+[data-theme="logbook"] .agenda .tcol .td{
+  font-family:var(--font-mono);
+  letter-spacing:.16em;font-weight:500;
+}
+[data-theme="logbook"] .chip{padding:5px 10px;background:transparent;border:1px solid var(--hairline);}
+[data-theme="logbook"] .chip.accent{background:var(--accent);color:var(--on-accent);border-color:var(--accent);}
+[data-theme="logbook"] .chip.dot::before{margin-right:2px;}
+
+/* Logbook flips the primary CTA bone-on-black; ghost stays bone outline */
+[data-theme="logbook"] .btn:not(.ghost){
+  background:var(--text);color:var(--bg);
+}
+[data-theme="logbook"] .btn:not(.ghost):hover{
+  background:var(--accent);color:var(--on-accent);
+}
+[data-theme="logbook"] .btn.ghost{border-color:var(--text);color:var(--text);}
+[data-theme="logbook"] .btn.ghost:hover{border-color:var(--accent);color:var(--accent);}
+
+/* The intended-focus block becomes the signature red cue */
+[data-theme="logbook"] .focus.rule{
+  background:var(--accent);color:var(--on-accent);border:0;
+}
+[data-theme="logbook"] .focus.rule::after{display:none;}
+[data-theme="logbook"] .focus.rule .eyebrow{color:rgba(250,250,247,.9);}
+[data-theme="logbook"] .focus.rule .eyebrow::before{background:rgba(250,250,247,.9);}
+[data-theme="logbook"] .focus.rule .muted,
+[data-theme="logbook"] .focus.rule .tiny{color:rgba(250,250,247,.85);}
+[data-theme="logbook"] .focus.rule .chip{
+  background:rgba(255,255,255,.14);color:var(--on-accent);
+  border-color:rgba(255,255,255,.28);
+}
+[data-theme="logbook"] .focus.rule .chip.accent{
+  background:#0a0a0a;color:var(--on-accent);border-color:#0a0a0a;
+}
+[data-theme="logbook"] .focus.rule .btn{
+  background:var(--on-accent);color:#0a0a0a;
+}
+[data-theme="logbook"] .focus.rule .btn:hover{
+  background:#0a0a0a;color:var(--on-accent);
+}
+[data-theme="logbook"] .focus.rule .disp .em{color:rgba(10,10,10,.7);}
+
+/* tighten avatar in logbook — square, mono */
+[data-theme="logbook"] .avatar{border-radius:0;font-family:var(--font-mono);letter-spacing:.04em;font-weight:600;}
+[data-theme="logbook"] .avatar.ghost{background:transparent;border:1px solid var(--hairline);color:var(--text-muted);}
+
+/* sharp inputs in logbook */
+[data-theme="logbook"] .field{background:transparent;border-color:var(--hairline);}
+[data-theme="logbook"] .field:focus{border-color:var(--accent);}
+
+/* segmented control in logbook — flat with red active */
+[data-theme="logbook"] .seg{background:transparent;border-color:var(--hairline);}
+[data-theme="logbook"] .seg button{font-family:var(--font-mono);letter-spacing:.16em;font-weight:500;}
+
+/* week strip — sharp blocks */
+[data-theme="logbook"] .week .d{border-radius:0;background:transparent;}
+[data-theme="logbook"] .week .d .dn{font-family:var(--font-mono);}
+
+/* logbook headline italic accent stays uppercase color shift */
+[data-theme="logbook"] .disp .em{color:var(--accent);font-style:normal;}
+
+/* logbook agenda — red tick + mono time */
+[data-theme="logbook"] .agenda .tcol .tt{letter-spacing:-.01em;}
+
+/* ---- PULSE — Instrument Serif italic accent + cream-on-oxblood ---- */
+[data-theme="pulse"] .disp .em{
+  font-family:var(--font-serif);
+  font-style:italic;
+  color:var(--accent);
+  font-weight:400;
+  letter-spacing:.005em;
+}
+[data-theme="pulse"] .focus.rule .disp .em{color:var(--accent);}
+[data-theme="pulse"] .hname,
+[data-theme="pulse"] .ttl,
+[data-theme="pulse"] .s-head .ttl{letter-spacing:-.022em;}
+
+/* pulse eyebrows lean editorial — thin red bar + slightly looser tracking */
+[data-theme="pulse"] .eyebrow{letter-spacing:.18em;}
+[data-theme="pulse"] .eyebrow::before{width:18px;height:1.5px;}
+
+/* pulse chips: cream outline pills */
+[data-theme="pulse"] .chip{background:rgba(245,234,217,.04);border-color:var(--hairline);}
+[data-theme="pulse"] .chip.accent{background:var(--accent);color:#fff;}
+
+/* pulse statgrid: warm hairlines */
+[data-theme="pulse"] .statgrid{border-color:var(--hairline);background:var(--hairline);}
+
+/* pulse buttons keep the pill but add a hairline ghost-feel */
+[data-theme="pulse"] .btn.ghost{border-color:var(--text);}
+[data-theme="pulse"] .btn.ghost:hover{border-color:var(--accent);color:var(--accent);}
+
+/* pulse avatar: serif italic monogram */
+[data-theme="pulse"] .avatar{
+  font-family:var(--font-serif);font-style:italic;font-weight:400;letter-spacing:0;
+}
+[data-theme="pulse"] .avatar.ghost{background:transparent;border-color:var(--hairline);color:var(--text-muted);}
+
+/* pulse field background */
+[data-theme="pulse"] .field{background:rgba(245,234,217,.04);}
+
+/* ============================================================
+   DESKTOP LAYOUT — left sidebar + wide canvas (≥900px only)
+   ============================================================ */
+@media(min-width:900px){
+  [data-layout="desktop"] .bgwrap{
+    padding:0;align-items:stretch;justify-content:stretch;
+    min-height:100dvh;background:var(--bg);
+  }
+  [data-layout="desktop"] .device{
+    max-width:none;width:100%;
+  }
+  [data-layout="desktop"] .stage{
+    height:auto;min-height:100dvh;max-height:none;
+    border-radius:0;box-shadow:none;overflow:visible;
+    display:grid;grid-template-columns:260px minmax(0,1fr);
+  }
+  /* left sidebar brand strip */
+  [data-layout="desktop"] .stage::before{
+    content:"";grid-column:1;grid-row:1;
+    border-right:1px solid var(--hairline);
+    background:linear-gradient(180deg,var(--bg),var(--surface) 80%);
+  }
+  /* the screens area sits on the right */
+  [data-layout="desktop"] .screens{
+    grid-column:2;grid-row:1;
+    position:relative;overflow:visible;
+    min-height:100dvh;
+  }
+  [data-layout="desktop"] .screen{
+    position:relative;inset:auto;
+    min-height:100dvh;padding-bottom:80px;
+    overflow:visible;
+  }
+  [data-layout="desktop"] .screen:not(.active){display:none;}
+  [data-layout="desktop"] .s-head{
+    position:sticky;top:0;background:linear-gradient(var(--bg) 85%,transparent);
+    padding:32px 64px 22px;border-bottom:1px solid var(--hairline);
+    gap:18px;
+  }
+  [data-layout="desktop"] .s-head .ttl{font-size:38px;}
+  [data-layout="desktop"] .s-body{padding:28px 64px 80px;max-width:980px;}
+  /* desktop sidebar nav — replaces the bottom tabbar */
+  [data-layout="desktop"] .tabbar{
+    grid-column:1;grid-row:1;
+    position:relative;inset:auto;
+    flex-direction:column;align-items:stretch;
+    gap:4px;padding:36px 16px;
+    background:transparent;border:0;backdrop-filter:none;
+    -webkit-backdrop-filter:none;
+  }
+  [data-layout="desktop"] .tabbar.coach-only{display:none;}
+  [data-layout="desktop"] .tabbar.athlete-only{display:none;}
+  [data-persona="coach"][data-layout="desktop"] #coachTabs{display:flex;}
+  [data-persona="athlete"][data-layout="desktop"] #athleteTabs{display:flex;}
+  [data-layout="desktop"] .tabbar button{
+    flex-direction:row;justify-content:flex-start;
+    gap:14px;padding:14px 18px;border-radius:var(--r-btn);
+    position:relative;
+  }
+  [data-layout="desktop"] .tabbar button .lab{font-size:13px;letter-spacing:.02em;}
+  [data-theme="arpro"][data-layout="desktop"] .tabbar button .lab{
+    letter-spacing:.12em;font-size:11.5px;
+  }
+  [data-theme="logbook"][data-layout="desktop"] .tabbar button .lab{
+    font-family:var(--font-mono);letter-spacing:.14em;font-size:11px;
+  }
+  [data-layout="desktop"] .tabbar button.on{background:var(--surface);color:var(--accent);}
+  [data-layout="desktop"] .tabbar button.on::before{display:none;}
+  [data-layout="desktop"] .tabbar button.on::after{
+    content:"";position:absolute;left:0;top:18%;
+    width:3px;height:64%;background:var(--accent);border-radius:0 3px 3px 0;
+  }
+  /* sidebar header brand label */
+  [data-layout="desktop"] .tabbar::before{
+    content:"ARPROFORMANCE";
+    display:block;
+    font-family:var(--font-display);
+    font-weight:var(--disp-weight);
+    text-transform:uppercase;letter-spacing:.04em;
+    font-size:16px;color:var(--text);
+    padding:6px 18px 32px;
+    border-bottom:1px solid var(--hairline);
+    margin-bottom:24px;
+  }
+  [data-theme="logbook"][data-layout="desktop"] .tabbar::before{
+    font-family:var(--font-display);letter-spacing:-.01em;
+  }
+  /* overlays repositioned for the wider canvas */
+  [data-layout="desktop"] .scrim,
+  [data-layout="desktop"] .sheet,
+  [data-layout="desktop"] .toast{
+    position:fixed;
+  }
+  [data-layout="desktop"] .sheet{
+    left:50%;right:auto;bottom:auto;top:50%;
+    transform:translate(-50%,calc(-50% + 30px));
+    width:min(560px,calc(100vw - 40px));
+    border-radius:var(--r-card);
+    border:1px solid var(--border);
+    padding:24px 28px 28px;
+  }
+  [data-theme="arpro"][data-layout="desktop"] .sheet{border-radius:0;border-left:3px solid var(--accent);}
+  [data-layout="desktop"] .sheet.show{transform:translate(-50%,-50%);}
+  [data-layout="desktop"] .sheet .grab{display:none;}
+  [data-layout="desktop"] .toast{bottom:30px;}
+  /* hero & focus get more breathing room */
+  [data-layout="desktop"] .hero .hname{font-size:64px;}
+  [data-layout="desktop"] .focus{padding:28px 28px;}
+}
 </style>
 </head>
-<body data-theme="arpro" data-persona="coach">
+<body data-theme="arpro" data-persona="coach" data-layout="phone">
 
 <!-- icon sprite -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
@@ -1681,14 +1909,20 @@ textarea.field{resize:none;min-height:96px;line-height:1.5;}
   <span class="lbl">Style</span>
   <div class="grp" id="themeGrp">
     <button class="on" data-theme-set="arpro">ARPro</button>
-    <button data-theme-set="journal">Journal</button>
-    <button data-theme-set="clay">Clay</button>
+    <button data-theme-set="logbook">Logbook</button>
+    <button data-theme-set="pulse">Pulse</button>
   </div>
   <div class="sep"></div>
   <span class="lbl">View</span>
   <div class="grp" id="personaGrp">
     <button class="on" data-persona-set="coach">Coach</button>
     <button data-persona-set="athlete">Athlete</button>
+  </div>
+  <div class="sep desktop-only-sep"></div>
+  <span class="lbl desktop-only-lbl">Layout</span>
+  <div class="grp desktop-only-grp" id="layoutGrp">
+    <button class="on" data-layout-set="phone">Phone</button>
+    <button data-layout-set="desktop">Desktop</button>
   </div>
 </div>
 
@@ -1725,6 +1959,9 @@ textarea.field{resize:none;min-height:96px;line-height:1.5;}
     void el.offsetWidth;
     el.classList.add('active');
     el.scrollTop = 0;
+    if(body.getAttribute('data-layout') === 'desktop'){
+      window.scrollTo(0,0);
+    }
     resetFlow(el);
     current = id;
     syncTabs();
@@ -1773,6 +2010,17 @@ textarea.field{resize:none;min-height:96px;line-height:1.5;}
     });
   }
 
+  function setLayout(l){
+    body.setAttribute('data-layout', l);
+    document.querySelectorAll('#layoutGrp button').forEach(function(b){
+      b.classList.toggle('on', b.getAttribute('data-layout-set') === l);
+    });
+    // desktop layout uses page scroll, not the in-stage scroll
+    if(l === 'desktop'){
+      document.documentElement.style.overflow = '';
+    }
+  }
+
   /* ---- overlays ---- */
   var scrim = document.getElementById('scrim');
   var toastEl = document.getElementById('toast');
@@ -1815,7 +2063,7 @@ textarea.field{resize:none;min-height:96px;line-height:1.5;}
 
   /* ---- global click delegation ---- */
   document.addEventListener('click', function(e){
-    var t = e.target.closest('[data-nav],[data-back],[data-tab],[data-persona-set],[data-theme-set],[data-sheet],[data-close-sheet],[data-step-go],[data-toast]');
+    var t = e.target.closest('[data-nav],[data-back],[data-tab],[data-persona-set],[data-theme-set],[data-layout-set],[data-sheet],[data-close-sheet],[data-step-go],[data-toast]');
     if(!t) return;
 
     // toast can ride along with nav / sheet actions
@@ -1832,6 +2080,7 @@ textarea.field{resize:none;min-height:96px;line-height:1.5;}
     if(t.hasAttribute('data-sheet')){ openSheet(t.getAttribute('data-sheet')); return; }
     if(t.hasAttribute('data-close-sheet')){ closeSheets(); return; }
     if(t.hasAttribute('data-theme-set')){ setTheme(t.getAttribute('data-theme-set')); return; }
+    if(t.hasAttribute('data-layout-set')){ setLayout(t.getAttribute('data-layout-set')); return; }
     if(t.hasAttribute('data-persona-set')){ setPersona(t.getAttribute('data-persona-set')); return; }
     if(t.hasAttribute('data-tab')){ tab(t.getAttribute('data-tab')); return; }
     if(t.hasAttribute('data-back')){ back(); return; }
