@@ -1,0 +1,1862 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>ARProformance · Prototype</title>
+<!--
+  ARProformance — comprehensive end-to-end coach + athlete prototype.
+  One consolidated information architecture (the Locker Room + Logbook hybrid
+  from PRD §11), rendered in 3 swappable visual directions:
+    · arpro   — the ARProformance brand (Barlow Condensed, black/navy + red)
+    · journal — light editorial training journal (Fraunces + Hanken Grotesk)
+    · clay    — soft, friendly, encouraging (Bricolage Grotesque, terracotta)
+  Personas: Coach + Athlete, each with a real clickable flow across the
+  PRD §5 journeys. Static HTML/CSS/JS — no build step; spec for Joe's React.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,500;0,600;0,800;0,900;1,600&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,500&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,500&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+/* ============================================================
+   TOKENS — structural defaults + per-theme overrides
+   ============================================================ */
+:root{
+  --maxw:438px;
+  --ease:cubic-bezier(.2,.7,.2,1);
+  --t-fast:120ms; --t:220ms; --t-slow:420ms;
+}
+/* ---- arpro : ARProformance brand ---- */
+[data-theme="arpro"]{
+  --bg:#0a0a0a; --surface:#111827; --surface-2:#161f30; --inverse:#f4f4f2;
+  --text:#f6f6f4; --text-muted:rgba(246,246,244,.62); --text-faint:rgba(246,246,244,.4);
+  --accent:#e8232b; --accent-strong:#ff2a32; --on-accent:#fff;
+  --hairline:rgba(255,255,255,.10); --border:rgba(255,255,255,.14);
+  --font-display:"Barlow Condensed",sans-serif; --font-body:"DM Sans",sans-serif;
+  --disp-weight:900; --disp-transform:uppercase; --disp-tracking:.005em; --disp-lh:.92;
+  --r-card:0px; --r-btn:999px; --r-input:6px; --r-chip:999px;
+  --card-bg:var(--surface); --card-border:1px solid var(--hairline);
+  --rule-w:4px;
+  --shadow-card:none; --shadow-pop:0 24px 60px rgba(0,0,0,.6);
+  --tab-bg:rgba(10,10,10,.92); --frame:#000;
+  --btn-tracking:.14em; --btn-transform:uppercase; --btn-weight:600;
+  --nav-rule:3px;
+}
+/* ---- journal : light editorial ---- */
+[data-theme="journal"]{
+  --bg:#efe9dc; --surface:#fbf8f0; --surface-2:#f4eee0; --inverse:#211d16;
+  --text:#211d16; --text-muted:#6c6354; --text-faint:#9a917e;
+  --accent:#1f4d3a; --accent-strong:#2a6b50; --on-accent:#fbf8f0;
+  --hairline:rgba(33,29,22,.12); --border:rgba(33,29,22,.18);
+  --font-display:"Fraunces",serif; --font-body:"Hanken Grotesk",sans-serif;
+  --disp-weight:900; --disp-transform:none; --disp-tracking:-.012em; --disp-lh:1.0;
+  --r-card:13px; --r-btn:9px; --r-input:9px; --r-chip:999px;
+  --card-bg:var(--surface); --card-border:1px solid var(--hairline);
+  --rule-w:3px;
+  --shadow-card:0 1px 0 rgba(33,29,22,.04),0 14px 26px -18px rgba(33,29,22,.32);
+  --shadow-pop:0 30px 60px -20px rgba(33,29,22,.4);
+  --tab-bg:rgba(251,248,240,.94); --frame:#c8bda3;
+  --btn-tracking:.02em; --btn-transform:none; --btn-weight:700;
+  --nav-rule:0px;
+}
+/* ---- clay : soft + friendly ---- */
+[data-theme="clay"]{
+  --bg:#e9e4dc; --surface:#ffffff; --surface-2:#f6f2ec; --inverse:#2a2723;
+  --text:#2a2723; --text-muted:#857f74; --text-faint:#a8a193;
+  --accent:#bd5b2e; --accent-strong:#d06b3a; --on-accent:#fff;
+  --hairline:rgba(42,39,35,.08); --border:rgba(42,39,35,.12);
+  --font-display:"Bricolage Grotesque",sans-serif; --font-body:"DM Sans",sans-serif;
+  --disp-weight:800; --disp-transform:none; --disp-tracking:-.02em; --disp-lh:1.02;
+  --r-card:22px; --r-btn:14px; --r-input:13px; --r-chip:999px;
+  --card-bg:var(--surface); --card-border:1px solid transparent;
+  --rule-w:0px;
+  --shadow-card:0 2px 4px rgba(42,39,35,.04),0 18px 40px -22px rgba(42,39,35,.45);
+  --shadow-pop:0 34px 70px -24px rgba(42,39,35,.5);
+  --tab-bg:rgba(255,255,255,.94); --frame:#d6cfc4;
+  --btn-tracking:.005em; --btn-transform:none; --btn-weight:700;
+  --nav-rule:0px;
+}
+
+/* ============================================================
+   BASE
+   ============================================================ */
+*,*::before,*::after{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-body);
+  -webkit-font-smoothing:antialiased;
+  min-height:100dvh;
+  transition:background var(--t) var(--ease),color var(--t) var(--ease);
+}
+button{font-family:inherit;cursor:pointer;}
+img{max-width:100%;display:block;}
+::selection{background:var(--accent);color:var(--on-accent);}
+
+/* desktop : float a phone on a dim stage */
+.bgwrap{
+  min-height:100dvh;
+  display:flex;align-items:center;justify-content:center;
+  padding:0;
+  background:
+    radial-gradient(900px 600px at 50% -10%,rgba(255,255,255,.05),transparent 70%),
+    var(--bg);
+}
+.device{ width:100%; max-width:var(--maxw); }
+.stage{
+  position:relative;
+  width:100%;
+  background:var(--bg);
+  overflow:hidden;
+  min-height:100dvh;
+  display:flex;flex-direction:column;
+}
+@media(min-width:900px){
+  .bgwrap{padding:30px 0 40px;}
+  .stage{
+    height:888px;min-height:888px;max-height:888px;
+    border-radius:42px;
+    box-shadow:0 0 0 10px var(--frame),0 0 0 11px rgba(0,0,0,.5),
+               0 50px 120px -20px rgba(0,0,0,.7);
+    transition:box-shadow var(--t) var(--ease);
+  }
+}
+
+/* ============================================================
+   SCREEN SYSTEM
+   ============================================================ */
+.screens{position:relative;flex:1;overflow:hidden;}
+.screen{
+  position:absolute;inset:0;
+  overflow-y:auto;overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  padding-bottom:104px;
+  display:none;
+}
+.screen.active{display:block;}
+.screen::-webkit-scrollbar{width:0;}
+
+/* page-load stagger on the active screen */
+.s-body>*{opacity:0;}
+.screen.active .s-body>*{
+  animation:rise var(--t-slow) var(--ease) both;
+}
+.screen.active .s-body>*:nth-child(1){animation-delay:.02s;}
+.screen.active .s-body>*:nth-child(2){animation-delay:.06s;}
+.screen.active .s-body>*:nth-child(3){animation-delay:.1s;}
+.screen.active .s-body>*:nth-child(4){animation-delay:.14s;}
+.screen.active .s-body>*:nth-child(5){animation-delay:.18s;}
+.screen.active .s-body>*:nth-child(6){animation-delay:.22s;}
+.screen.active .s-body>*:nth-child(7){animation-delay:.26s;}
+.screen.active .s-body>*:nth-child(8){animation-delay:.3s;}
+.screen.active .s-body>*:nth-child(n+9){animation-delay:.34s;}
+@keyframes rise{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+@media(prefers-reduced-motion:reduce){
+  .screen.active .s-body>*{animation:none;opacity:1;}
+}
+
+/* ============================================================
+   APP HEADER (per screen)
+   ============================================================ */
+.s-head{
+  position:sticky;top:0;z-index:8;
+  display:flex;align-items:center;gap:12px;
+  padding:16px 20px 12px;
+  background:linear-gradient(var(--bg) 72%,transparent);
+  backdrop-filter:blur(2px);
+}
+.s-head .ttl{
+  font-family:var(--font-display);
+  font-weight:var(--disp-weight);
+  text-transform:var(--disp-transform);
+  letter-spacing:var(--disp-tracking);
+  line-height:1;
+  font-size:23px;
+  flex:1;min-width:0;
+}
+.iconbtn{
+  width:38px;height:38px;flex:0 0 auto;
+  display:grid;place-items:center;
+  border-radius:var(--r-btn);
+  background:var(--surface);
+  border:1px solid var(--hairline);
+  color:var(--text);
+  transition:transform var(--t-fast) var(--ease),background var(--t) var(--ease);
+}
+.iconbtn:active{transform:scale(.93);}
+.iconbtn svg{width:19px;height:19px;}
+.s-head .avatar{margin-left:auto;}
+
+/* ============================================================
+   PRIMITIVES
+   ============================================================ */
+.s-body{padding:4px 20px 8px;}
+.eyebrow{
+  font-family:var(--font-body);
+  font-size:10.5px;font-weight:700;
+  letter-spacing:.2em;text-transform:uppercase;
+  color:var(--text-faint);
+  display:flex;align-items:center;gap:7px;
+}
+.eyebrow::before{
+  content:"";width:14px;height:2px;background:var(--accent);
+  display:inline-block;border-radius:2px;
+}
+[data-theme="clay"] .eyebrow::before{width:6px;height:6px;border-radius:999px;}
+
+.disp{
+  font-family:var(--font-display);
+  font-weight:var(--disp-weight);
+  text-transform:var(--disp-transform);
+  letter-spacing:var(--disp-tracking);
+  line-height:var(--disp-lh);
+}
+.disp .em{
+  font-style:italic;
+  color:var(--text-muted);
+  font-weight:600;
+}
+[data-theme="journal"] .disp .em{color:var(--accent);}
+
+.muted{color:var(--text-muted);}
+.faint{color:var(--text-faint);}
+.tiny{font-size:11px;}
+.center{text-align:center;}
+
+.card{
+  background:var(--card-bg);
+  border:var(--card-border);
+  border-radius:var(--r-card);
+  box-shadow:var(--shadow-card);
+  padding:16px 16px;
+  position:relative;
+  transition:transform var(--t) var(--ease),border-color var(--t) var(--ease),
+             box-shadow var(--t) var(--ease);
+}
+.card.rule::after{
+  content:"";position:absolute;
+  background:var(--accent);
+}
+.card.rule::after{
+  left:0;top:0;
+  width:var(--rule-w,4px);
+  height:100%;
+}
+[data-theme="journal"] .card.rule::after{
+  width:100%;height:3px;left:0;top:0;
+}
+[data-theme="clay"] .card.rule::after{display:none;}
+.card.tap{cursor:pointer;}
+.card.tap:active{transform:scale(.985);}
+[data-theme="arpro"] .card.tap:hover{border-color:var(--accent);transform:translateY(-3px);}
+[data-theme="journal"] .card.tap:hover{transform:translateY(-3px);box-shadow:var(--shadow-pop);}
+[data-theme="clay"] .card.tap:hover{transform:translateY(-3px);box-shadow:var(--shadow-pop);}
+
+.row{display:flex;align-items:center;gap:12px;}
+.col{display:flex;flex-direction:column;}
+.between{justify-content:space-between;}
+.wrap{flex-wrap:wrap;}
+.gap6{gap:6px;}.gap8{gap:8px;}.gap16{gap:16px;}
+.stack>*+*{margin-top:12px;}
+.stack-lg>*+*{margin-top:20px;}
+.grow{flex:1;min-width:0;}
+.mt4{margin-top:4px;}.mt8{margin-top:8px;}.mt12{margin-top:12px;}
+.mt20{margin-top:20px;}.mt28{margin-top:28px;}
+
+/* buttons */
+.btn{
+  appearance:none;border:0;
+  font-family:var(--font-body);
+  font-weight:var(--btn-weight);
+  letter-spacing:var(--btn-tracking);
+  text-transform:var(--btn-transform);
+  font-size:13px;
+  padding:14px 20px;
+  border-radius:var(--r-btn);
+  display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  background:var(--accent);color:var(--on-accent);
+  transition:transform var(--t-fast) var(--ease),background var(--t) var(--ease),
+             box-shadow var(--t) var(--ease),filter var(--t) var(--ease);
+  width:100%;
+}
+.btn svg{width:17px;height:17px;}
+.btn:active{transform:scale(.975);}
+.btn:hover{background:var(--accent-strong);}
+[data-theme="arpro"] .btn:hover{box-shadow:0 8px 30px -6px rgba(232,35,43,.6);}
+[data-theme="clay"] .btn:hover{box-shadow:0 14px 30px -12px rgba(189,91,46,.6);}
+.btn.ghost{
+  background:transparent;color:var(--text);
+  border:1.5px solid var(--border);
+}
+.btn.ghost:hover{background:transparent;border-color:var(--text);box-shadow:none;}
+[data-theme="arpro"] .btn.ghost:hover{border-color:var(--accent);color:#fff;}
+.btn.sm{width:auto;padding:9px 14px;font-size:11.5px;}
+.btn.block{width:100%;}
+.btnrow{display:flex;gap:10px;}
+.btnrow .btn{flex:1;}
+
+/* chips / pills / tags */
+.chip{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:11px;font-weight:600;
+  padding:6px 11px;border-radius:var(--r-chip);
+  background:var(--surface-2);color:var(--text-muted);
+  border:1px solid var(--hairline);
+  letter-spacing:.01em;
+}
+.chip.accent{background:var(--accent);color:var(--on-accent);border-color:transparent;}
+[data-theme="arpro"] .chip{text-transform:uppercase;letter-spacing:.08em;font-size:10px;}
+.chip.dot::before{content:"";width:6px;height:6px;border-radius:999px;background:var(--accent);}
+
+.tag{
+  font-family:var(--font-display);font-weight:var(--disp-weight);
+  text-transform:uppercase;letter-spacing:.06em;font-size:11px;
+  color:var(--text-faint);
+}
+
+/* meta numbers */
+.bignum{
+  font-family:var(--font-display);font-weight:var(--disp-weight);
+  letter-spacing:var(--disp-tracking);line-height:.9;
+  color:var(--accent);
+  font-size:34px;
+}
+.statgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
+  background:var(--hairline);border:1px solid var(--hairline);border-radius:var(--r-card);overflow:hidden;}
+.statgrid .st{background:var(--card-bg);padding:14px 12px;}
+.statgrid .st .v{font-family:var(--font-display);font-weight:var(--disp-weight);
+  font-size:24px;line-height:1;letter-spacing:var(--disp-tracking);}
+.statgrid .st .k{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--text-faint);margin-top:6px;font-weight:700;}
+
+/* avatar */
+.avatar{
+  width:38px;height:38px;border-radius:999px;flex:0 0 auto;
+  display:grid;place-items:center;
+  font-family:var(--font-display);font-weight:var(--disp-weight);
+  font-size:15px;letter-spacing:.02em;
+  background:var(--accent);color:var(--on-accent);
+  text-transform:uppercase;
+}
+.avatar.lg{width:60px;height:60px;font-size:23px;}
+.avatar.sm{width:30px;height:30px;font-size:12px;}
+.avatar.ghost{background:var(--surface-2);color:var(--text-muted);border:1px solid var(--hairline);}
+
+/* list rows */
+.lrow{
+  display:flex;align-items:center;gap:13px;
+  padding:13px 14px;border-radius:var(--r-card);
+  background:var(--card-bg);border:var(--card-border);
+  box-shadow:var(--shadow-card);
+  transition:transform var(--t) var(--ease),border-color var(--t) var(--ease);
+}
+.lrow.tap{cursor:pointer;}
+.lrow.tap:active{transform:scale(.985);}
+.lrow.tap:hover{border-color:var(--accent);}
+[data-theme="clay"] .lrow.tap:hover,[data-theme="journal"] .lrow.tap:hover{
+  border-color:var(--border);transform:translateY(-2px);box-shadow:var(--shadow-pop);}
+
+/* progress bar */
+.pbar{height:6px;border-radius:999px;background:var(--surface-2);overflow:hidden;}
+.pbar>span{display:block;height:100%;background:var(--accent);border-radius:999px;}
+
+/* divider */
+.hr{height:1px;background:var(--hairline);margin:14px 0;border:0;}
+
+/* "in his words" quote line */
+.qline{
+  display:flex;gap:10px;font-size:13px;line-height:1.45;
+  padding:9px 0;border-bottom:1px solid var(--hairline);
+}
+.qline:last-child{border-bottom:0;}
+.qline .qd{
+  font-family:var(--font-display);font-weight:var(--disp-weight);
+  text-transform:uppercase;font-size:10px;letter-spacing:.08em;
+  color:var(--accent);flex:0 0 46px;padding-top:3px;
+}
+
+/* hero focus block */
+.focus{
+  border-radius:var(--r-card);
+  background:var(--card-bg);
+  border:var(--card-border);
+  box-shadow:var(--shadow-card);
+  padding:18px;position:relative;overflow:hidden;
+}
+.focus.rule::after{content:"";position:absolute;left:0;top:0;height:100%;
+  width:4px;background:var(--accent);}
+[data-theme="journal"] .focus.rule::after{width:100%;height:3px;}
+[data-theme="clay"] .focus.rule::after{display:none;}
+[data-theme="clay"] .focus{background:linear-gradient(150deg,var(--surface),var(--surface-2));}
+
+/* hero (next session) */
+.hero{
+  border-radius:var(--r-card);overflow:hidden;position:relative;
+  border:var(--card-border);box-shadow:var(--shadow-card);
+  background:var(--card-bg);
+  padding:20px 18px 18px;
+  cursor:pointer;
+  transition:transform var(--t) var(--ease),border-color var(--t) var(--ease);
+}
+.hero:active{transform:scale(.99);}
+[data-theme="arpro"] .hero{
+  background:
+    linear-gradient(180deg,rgba(232,35,43,.16),transparent 60%),
+    var(--surface);
+  border-left:4px solid var(--accent);
+}
+[data-theme="arpro"] .hero:hover{border-color:var(--accent);}
+[data-theme="journal"] .hero{border-top:3px solid var(--accent);}
+[data-theme="clay"] .hero{background:linear-gradient(155deg,#fff,var(--surface-2));}
+.hero .hname{
+  font-family:var(--font-display);font-weight:var(--disp-weight);
+  text-transform:var(--disp-transform);letter-spacing:var(--disp-tracking);
+  line-height:.94;font-size:40px;margin:8px 0 2px;
+}
+
+/* segmented control */
+.seg{
+  display:flex;gap:3px;padding:3px;border-radius:var(--r-btn);
+  background:var(--surface-2);border:1px solid var(--hairline);
+}
+.seg button{
+  flex:1;border:0;background:transparent;color:var(--text-muted);
+  font-size:11.5px;font-weight:600;padding:9px 6px;border-radius:calc(var(--r-btn) - 3px);
+  transition:background var(--t) var(--ease),color var(--t) var(--ease);
+}
+.seg button.on{background:var(--accent);color:var(--on-accent);}
+[data-theme="arpro"] .seg button{text-transform:uppercase;letter-spacing:.08em;font-size:10.5px;}
+
+/* checkbox card */
+.opt{
+  display:flex;gap:12px;align-items:flex-start;
+  padding:14px;border-radius:var(--r-card);
+  background:var(--card-bg);border:1.5px solid var(--hairline);
+  cursor:pointer;transition:border-color var(--t) var(--ease),background var(--t) var(--ease);
+}
+.opt .box{
+  width:22px;height:22px;flex:0 0 auto;border-radius:6px;
+  border:2px solid var(--border);display:grid;place-items:center;
+  color:transparent;transition:all var(--t) var(--ease);
+}
+[data-theme="clay"] .opt .box{border-radius:8px;}
+.opt.on{border-color:var(--accent);}
+[data-theme="arpro"] .opt.on{background:rgba(232,35,43,.07);}
+[data-theme="journal"] .opt.on{background:rgba(31,77,58,.06);}
+[data-theme="clay"] .opt.on{background:rgba(189,91,46,.06);}
+.opt.on .box{background:var(--accent);border-color:var(--accent);color:var(--on-accent);}
+.opt .box svg{width:14px;height:14px;}
+
+/* inputs */
+.field{
+  width:100%;background:var(--surface-2);
+  border:1.5px solid var(--hairline);
+  border-radius:var(--r-input);
+  color:var(--text);font-family:var(--font-body);font-size:14px;
+  padding:13px 14px;outline:none;
+  transition:border-color var(--t) var(--ease);
+}
+.field:focus{border-color:var(--accent);}
+textarea.field{resize:none;min-height:96px;line-height:1.5;}
+.flabel{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--text-faint);margin-bottom:7px;display:block;}
+
+/* steps indicator */
+.steps{display:flex;gap:6px;}
+.steps i{height:4px;flex:1;border-radius:999px;background:var(--surface-2);
+  transition:background var(--t) var(--ease);}
+.steps i.on{background:var(--accent);}
+
+/* mission / streak strip */
+.mission{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 16px;border-radius:var(--r-card);
+  background:var(--card-bg);border:var(--card-border);box-shadow:var(--shadow-card);
+}
+.mission .ring{
+  width:46px;height:46px;flex:0 0 auto;border-radius:999px;
+  display:grid;place-items:center;position:relative;
+  background:conic-gradient(var(--accent) var(--p,50%),var(--surface-2) 0);
+}
+.mission .ring::before{
+  content:"";position:absolute;inset:5px;border-radius:999px;background:var(--card-bg);
+}
+.mission .ring b{position:relative;font-family:var(--font-display);
+  font-weight:var(--disp-weight);font-size:13px;}
+
+/* week strip (schedule) */
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
+.week .d{
+  text-align:center;padding:9px 0;border-radius:var(--r-input);
+  background:var(--surface-2);border:1px solid var(--hairline);
+  transition:all var(--t) var(--ease);cursor:pointer;
+}
+.week .d .dn{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-faint);font-weight:700;}
+.week .d .dd{font-family:var(--font-display);font-weight:var(--disp-weight);font-size:17px;margin-top:3px;}
+.week .d.on{background:var(--accent);border-color:var(--accent);}
+.week .d.on .dn,.week .d.on .dd{color:var(--on-accent);}
+.week .d .has{width:5px;height:5px;border-radius:999px;background:var(--accent);margin:4px auto 0;}
+.week .d.on .has{background:var(--on-accent);}
+
+/* agenda item */
+.agenda{display:flex;gap:14px;}
+.agenda .tcol{flex:0 0 52px;text-align:right;}
+.agenda .tcol .tt{font-family:var(--font-display);font-weight:var(--disp-weight);font-size:15px;line-height:1;}
+.agenda .tcol .td{font-size:10px;color:var(--text-faint);margin-top:3px;}
+.agenda .line{flex:0 0 2px;background:var(--hairline);position:relative;border-radius:2px;}
+.agenda .line::before{content:"";position:absolute;left:-3px;top:3px;width:8px;height:8px;
+  border-radius:999px;background:var(--accent);}
+
+/* chart */
+.chart{width:100%;height:128px;display:block;}
+.chart .grid{stroke:var(--hairline);stroke-width:1;}
+.chart .ln{fill:none;stroke:var(--accent);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;}
+.chart .ar{fill:var(--accent);opacity:.1;}
+.chart .pt{fill:var(--card-bg);stroke:var(--accent);stroke-width:2.5;}
+
+/* notes / message bubble */
+.bubble{
+  padding:12px 14px;border-radius:var(--r-card);
+  background:var(--surface-2);font-size:13px;line-height:1.5;
+  border:1px solid var(--hairline);
+}
+.bubble.me{background:var(--accent);color:var(--on-accent);border-color:transparent;}
+
+/* badge for outstanding */
+.due{
+  font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--accent);
+}
+.due.late{color:var(--accent);}
+[data-theme="journal"] .due,[data-theme="clay"] .due{letter-spacing:.04em;}
+
+/* ============================================================
+   TAB BAR
+   ============================================================ */
+.tabbar{
+  position:absolute;left:0;right:0;bottom:0;z-index:9;
+  display:none;
+  background:var(--tab-bg);
+  backdrop-filter:blur(18px) saturate(140%);
+  -webkit-backdrop-filter:blur(18px) saturate(140%);
+  border-top:1px solid var(--hairline);
+  padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px));
+}
+.tabbar.show{display:flex;}
+.tabbar button{
+  flex:1;border:0;background:transparent;
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  padding:7px 2px 5px;color:var(--text-faint);
+  position:relative;
+  transition:color var(--t) var(--ease);
+}
+.tabbar button svg{width:21px;height:21px;}
+.tabbar button .lab{font-size:9.5px;font-weight:700;letter-spacing:.03em;}
+[data-theme="arpro"] .tabbar button .lab{text-transform:uppercase;letter-spacing:.07em;font-size:9px;}
+.tabbar button.on{color:var(--accent);}
+.tabbar button.on::before{
+  content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:24px;height:var(--nav-rule);background:var(--accent);border-radius:0 0 3px 3px;
+}
+
+/* ============================================================
+   OVERLAYS — sheet, modal, toast
+   ============================================================ */
+.scrim{
+  position:absolute;inset:0;z-index:20;
+  background:rgba(0,0,0,.62);
+  backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+  opacity:0;pointer-events:none;transition:opacity var(--t) var(--ease);
+}
+.scrim.show{opacity:1;pointer-events:auto;}
+
+.sheet{
+  position:absolute;left:0;right:0;bottom:0;z-index:21;
+  background:var(--card-bg);
+  border-top:1px solid var(--border);
+  border-radius:calc(var(--r-card) + 8px) calc(var(--r-card) + 8px) 0 0;
+  padding:10px 20px calc(24px + env(safe-area-inset-bottom,0px));
+  transform:translateY(102%);
+  transition:transform var(--t-slow) var(--ease);
+  box-shadow:var(--shadow-pop);
+}
+[data-theme="arpro"] .sheet{border-top:3px solid var(--accent);border-radius:0;}
+.sheet.show{transform:none;}
+.sheet .grab{width:38px;height:4px;border-radius:999px;background:var(--border);
+  margin:6px auto 14px;}
+
+.toast{
+  position:absolute;left:50%;bottom:120px;z-index:30;
+  transform:translate(-50%,20px);
+  background:var(--inverse);color:var(--bg);
+  font-size:12.5px;font-weight:600;
+  padding:12px 18px;border-radius:999px;
+  display:flex;align-items:center;gap:9px;
+  opacity:0;pointer-events:none;
+  transition:opacity var(--t) var(--ease),transform var(--t) var(--ease);
+  box-shadow:var(--shadow-pop);max-width:86%;
+}
+.toast svg{width:16px;height:16px;color:var(--accent);}
+.toast.show{opacity:1;transform:translate(-50%,0);}
+
+/* mic wave */
+.wave{display:inline-flex;align-items:center;gap:3px;height:16px;}
+.wave i{width:3px;background:currentColor;border-radius:2px;animation:wv 1s var(--ease) infinite;}
+.wave i:nth-child(1){height:6px;animation-delay:0s;}
+.wave i:nth-child(2){height:14px;animation-delay:.12s;}
+.wave i:nth-child(3){height:9px;animation-delay:.24s;}
+.wave i:nth-child(4){height:16px;animation-delay:.36s;}
+.wave i:nth-child(5){height:7px;animation-delay:.48s;}
+@keyframes wv{0%,100%{transform:scaleY(.4);}50%{transform:scaleY(1);}}
+
+/* recording pulse */
+.recdot{width:10px;height:10px;border-radius:999px;background:var(--accent);
+  animation:pulse 1.2s var(--ease) infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.25;}}
+
+/* ============================================================
+   PROTOTYPE CHROME — top dock
+   ============================================================ */
+.dock{
+  position:fixed;top:14px;left:50%;transform:translateX(-50%);
+  z-index:200;display:flex;gap:6px;align-items:center;
+  background:rgba(14,14,16,.82);
+  backdrop-filter:blur(22px) saturate(150%);
+  -webkit-backdrop-filter:blur(22px) saturate(150%);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:999px;padding:5px;
+  box-shadow:0 14px 40px rgba(0,0,0,.5);
+  max-width:calc(100vw - 20px);
+}
+.dock .grp{display:flex;gap:2px;}
+.dock .sep{width:1px;height:20px;background:rgba(255,255,255,.14);margin:0 3px;}
+.dock button{
+  border:0;background:transparent;
+  color:rgba(255,255,255,.5);
+  font-family:"DM Sans",sans-serif;
+  font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  padding:8px 11px;border-radius:999px;white-space:nowrap;
+  transition:color var(--t) var(--ease),background var(--t) var(--ease);
+}
+.dock button:hover{color:#fff;}
+.dock button.on{background:#fafafa;color:#0a0a0a;}
+.dock .lbl{
+  color:rgba(255,255,255,.34);font-size:8.5px;font-weight:700;
+  letter-spacing:.14em;padding:0 4px 0 8px;
+}
+@media(max-width:480px){
+  .dock{top:8px;padding:4px;gap:3px;}
+  .dock button{padding:7px 8px;font-size:9.5px;letter-spacing:.04em;}
+  .dock .lbl{display:none;}
+}
+
+/* utility show/hide by persona */
+[data-persona="coach"] .athlete-only{display:none!important;}
+[data-persona="athlete"] .coach-only{display:none!important;}
+</style>
+</head>
+<body data-theme="arpro" data-persona="coach">
+
+<!-- icon sprite -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<g id="i-home"><path d="M15 21v-7a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v7"/><path d="M3 10.5a2 2 0 0 1 .7-1.5l7-6a2 2 0 0 1 2.6 0l7 6a2 2 0 0 1 .7 1.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></g>
+<g id="i-users"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></g>
+<g id="i-layers"><path d="M12.8 2.2a2 2 0 0 0-1.6 0L2.6 6.1a1 1 0 0 0 0 1.8l8.6 3.9a2 2 0 0 0 1.6 0l8.6-3.9a1 1 0 0 0 0-1.8Z"/><path d="m6 9.5-3.4 1.6a1 1 0 0 0 0 1.8l8.6 3.9a2 2 0 0 0 1.6 0l8.6-3.9a1 1 0 0 0 0-1.8L18 9.5"/><path d="m6 14.5-3.4 1.6a1 1 0 0 0 0 1.8l8.6 3.9a2 2 0 0 0 1.6 0l8.6-3.9a1 1 0 0 0 0-1.8L18 14.5"/></g>
+<g id="i-cal"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></g>
+<g id="i-inbox"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5.1 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.5-6.9A2 2 0 0 0 16.8 4H7.2a2 2 0 0 0-1.7 1.1z"/></g>
+<g id="i-target"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></g>
+<g id="i-book"><path d="M2 6h3M2 10h3M2 14h3M2 18h3"/><rect x="5" y="2" width="15" height="20" rx="2"/></g>
+<g id="i-trend"><path d="M16 7h6v6"/><path d="m22 7-8.5 8.5-5-5L2 17"/></g>
+<g id="i-user"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></g>
+<g id="i-back"><path d="m15 18-6-6 6-6"/></g>
+<g id="i-next"><path d="m9 18 6-6-6-6"/></g>
+<g id="i-mic"><path d="M12 19v3"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><rect x="9" y="2" width="6" height="13" rx="3"/></g>
+<g id="i-plus"><path d="M5 12h14M12 5v14"/></g>
+<g id="i-bell"><path d="M10.3 21a2 2 0 0 0 3.4 0"/><path d="M3.3 15.3A1 1 0 0 0 4 17h16a1 1 0 0 0 .7-1.7C19.4 14 18 12.5 18 8a6 6 0 0 0-12 0c0 4.5-1.4 6-2.7 7.3"/></g>
+<g id="i-check"><path d="M20 6 9 17l-5-5"/></g>
+<g id="i-send"><path d="M14.5 21.7a.5.5 0 0 0 .9 0l6.5-19a.5.5 0 0 0-.6-.6l-19 6.5a.5.5 0 0 0 0 .9l7.9 3.2a2 2 0 0 1 1.1 1.1z"/><path d="m21.9 2.1-11 11"/></g>
+<g id="i-arrow"><path d="M5 12h14M12 5l7 7-7 7"/></g>
+<g id="i-clock"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></g>
+<g id="i-flame"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.4-.5-2-1-3-1.1-2.1-.2-4 2-6 .5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.2.4-2.3 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></g>
+<g id="i-video"><path d="m16 13 5.2 3.5a.5.5 0 0 0 .8-.4V7.9a.5.5 0 0 0-.8-.4L16 11"/><rect x="2" y="6" width="14" height="12" rx="2"/></g>
+<g id="i-pencil"><path d="M21.2 6.8a1 1 0 0 0-3-3L3.8 16.2a2 2 0 0 0-.5.8l-1.3 4.4a.5.5 0 0 0 .6.6l4.4-1.3a2 2 0 0 0 .8-.5z"/><path d="m15 5 4 4"/></g>
+<g id="i-x"><path d="M18 6 6 18M6 6l12 12"/></g>
+<g id="i-msg"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></g>
+<g id="i-bolt"><path d="M13 2 3 14h7l-1 8 10-12h-7z"/></g>
+<g id="i-cal-sync"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/><path d="m14 16 2 2 4-4"/></g>
+<g id="i-sliders"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></g>
+<g id="i-grip"><circle cx="9" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="18" r="1"/></g>
+</defs></svg>
+
+<div class="bgwrap">
+<div class="device">
+<div class="stage" id="stage">
+<div class="screens" id="screens">
+
+<!-- ============================================================
+     COACH · TODAY
+     ============================================================ -->
+<section class="screen" data-screen="c-today" data-home="coach">
+  <header class="s-head">
+    <div class="col grow">
+      <div class="eyebrow">Tuesday · 14 May</div>
+      <div class="ttl">Today</div>
+    </div>
+    <button class="iconbtn" data-nav="c-inbox" aria-label="Inbox"><svg><use href="#i-bell"/></svg></button>
+    <button class="avatar coach-only" data-nav="c-profile">AR</button>
+  </header>
+  <div class="s-body stack-lg">
+
+    <div>
+      <div class="row between">
+        <div class="eyebrow">Next up · in 13 min</div>
+        <span class="chip dot">Court 2</span>
+      </div>
+      <div class="hero mt8" data-nav="c-athlete">
+        <div class="row between">
+          <span class="tag">15:00 – 15:45 · Private</span>
+          <span class="tag">14 yr · L2 squad</span>
+        </div>
+        <div class="hname">Diego<br/>Elias</div>
+        <div class="muted tiny">Tap to open profile · plan &amp; context</div>
+      </div>
+    </div>
+
+    <div class="focus rule">
+      <div class="eyebrow">Intended focus</div>
+      <div class="disp mt8" style="font-size:22px">Backhand wrist stability <span class="em">under pace</span></div>
+      <div class="row wrap gap6 mt12">
+        <span class="chip">Technical</span>
+        <span class="chip">Process goal 02</span>
+        <span class="chip accent">Mission · week 3 of 6</span>
+      </div>
+      <div class="row gap8 mt12 between">
+        <div class="muted tiny grow">Carried from last session — counter-drops broke down on the rear court.</div>
+        <button class="btn sm" data-nav="c-session">Start session</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="row between">
+        <div class="eyebrow">Outstanding · prospective memory</div>
+        <span class="bignum" style="font-size:24px">3</span>
+      </div>
+      <div class="stack mt8" id="outstandingList">
+        <div class="lrow">
+          <span class="avatar sm">DE</span>
+          <div class="grow">
+            <div style="font-weight:700;font-size:13.5px">Diego Elias</div>
+            <div class="faint tiny">Match-reflection video · <span class="due late">2 days late</span></div>
+          </div>
+          <button class="btn ghost sm" data-toast="Nudge sent to Diego">Nudge</button>
+        </div>
+        <div class="lrow">
+          <span class="avatar sm">NT</span>
+          <div class="grow">
+            <div style="font-weight:700;font-size:13.5px">Nour El Tayeb</div>
+            <div class="faint tiny">Self-awareness questionnaire · <span class="due">due today</span></div>
+          </div>
+          <button class="btn ghost sm" data-toast="Nudge sent to Nour">Nudge</button>
+        </div>
+        <div class="lrow">
+          <span class="avatar sm">MA</span>
+          <div class="grow">
+            <div style="font-weight:700;font-size:13.5px">Marwan Adel</div>
+            <div class="faint tiny">3× ghosting drill clip · <span class="due">due Fri</span></div>
+          </div>
+          <button class="btn ghost sm" data-toast="Nudge sent to Marwan">Nudge</button>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="eyebrow">Rest of today</div>
+      <div class="stack mt8">
+        <div class="lrow tap" data-nav="c-cohort">
+          <div class="col" style="flex:0 0 44px;text-align:center">
+            <div class="disp" style="font-size:15px">17:30</div>
+            <div class="faint tiny">90m</div>
+          </div>
+          <div class="grow">
+            <div style="font-weight:700;font-size:13.5px">Junior Squad — group clinic</div>
+            <div class="faint tiny">8 athletes · Courts 1–3 · drills pre-published</div>
+          </div>
+          <svg width="16" height="16" style="color:var(--text-faint)"><use href="#i-next"/></svg>
+        </div>
+        <div class="lrow tap" data-nav="c-athletes">
+          <div class="col" style="flex:0 0 44px;text-align:center">
+            <div class="disp" style="font-size:15px">19:15</div>
+            <div class="faint tiny">45m</div>
+          </div>
+          <div class="grow">
+            <div style="font-weight:700;font-size:13.5px">Hania Tarek — private</div>
+            <div class="faint tiny">No plan yet · tap to build</div>
+          </div>
+          <svg width="16" height="16" style="color:var(--text-faint)"><use href="#i-next"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn ghost" data-nav="c-builder"><svg><use href="#i-plus"/></svg>Plan a session</button>
+
+  </div>
+</section>
+
+<!-- ============================================================
+     COACH · ATHLETES (roster)
+     ============================================================ -->
+<section class="screen" data-screen="c-athletes">
+  <header class="s-head">
+    <button class="iconbtn" data-back aria-label="Back"><svg><use href="#i-back"/></svg></button>
+    <div class="ttl">Athletes</div>
+    <button class="iconbtn" data-nav="c-onboard" aria-label="Add athlete"><svg><use href="#i-plus"/></svg></button>
+  </header>
+  <div class="s-body stack">
+    <div class="seg">
+      <button class="on">All · 14</button>
+      <button>Private</button>
+      <button>Squad</button>
+    </div>
+    <div class="lrow tap" data-nav="c-athlete">
+      <span class="avatar">DE</span>
+      <div class="grow">
+        <div style="font-weight:700">Diego Elias</div>
+        <div class="faint tiny">Private · next today 15:00 · <span class="due late">1 task late</span></div>
+      </div>
+      <svg width="16" height="16" style="color:var(--text-faint)"><use href="#i-next"/></svg>
+    </div>
+    <div class="lrow tap" data-nav="c-athlete">
+      <span class="avatar ghost">NT</span>
+      <div class="grow">
+        <div style="font-weight:700">Nour El Tayeb</div>
+        <div class="faint tiny">Private · Squad · questionnaire due today</div>
+      </div>
+      <svg width="16" height="16" style="color:var(--text-faint)"><use href="#i-next"/></svg>
+    </div>
+    <div class="lrow tap" data-nav="c-athlete">
+      <span class="avatar ghost">MA</span>
+      <div class="grow">
+        <div style="font-weight:700">Marwan Adel</div>
+        <div class="faint tiny">Squad · clip due Fri</div>
+      </div>
+      <svg width="16" height="16" style="color:var(--text-faint)"><use href="#i-next"/></svg>
+    </div>
+    <div class="lrow tap" data-nav="c-athlete">
+      <span class="avatar ghost">HT</span>
+      <div class="grow">
+        <div style="font-weight:700">Hania Tarek</div>
+        <div class="faint tiny">Private · next today 19:15 · no plan</div>
+      </div>
+      <svg width="16" height="16" style="color:var(--text-faint)"><use href="#i-next"/></svg>
+    </div>
+    <div class="lrow tap" data-nav="c-athlete">
+      <span class="avatar ghost">YA</span>
+      <div class="grow">
+        <div style="font-weight:700">Youssef Aboul</div>
+        <div class="faint tiny">Squad · on track</div>
+      </div>
+      <svg width="16" height="16" style="color:var(--text-faint)"><use href="#i-next"/></svg>
+    </div>
+    <button class="btn ghost mt8" data-nav="c-onboard"><svg><use href="#i-plus"/></svg>Onboard a new athlete</button>
+  </div>
+</section>
+
+<!-- ============================================================
+     COACH · ATHLETE PROFILE
+     ============================================================ -->
+<section class="screen" data-screen="c-athlete">
+  <header class="s-head">
+    <button class="iconbtn" data-back aria-label="Back"><svg><use href="#i-back"/></svg></button>
+    <div class="ttl">Profile</div>
+    <button class="iconbtn" data-toast="Messaging Diego — opening thread" aria-label="Message"><svg><use href="#i-msg"/></svg></button>
+  </header>
+  <div class="s-body stack-lg">
+
+    <div class="row gap16">
+      <span class="avatar lg">DE</span>
+      <div class="grow">
+        <div class="disp" style="font-size:26px">Diego Elias</div>
+        <div class="muted tiny">14 yr · L2 squad · Club Locker 4.12 ▲</div>
+      </div>
+    </div>
+
+    <div class="focus rule">
+      <div class="eyebrow">Vision · pinned</div>
+      <div class="disp mt8" style="font-size:21px">“Become the <span class="em">world #1</span> — and a complete competitor.”</div>
+    </div>
+
+    <div>
+      <div class="eyebrow">Outcome goals</div>
+      <div class="stack mt8">
+        <div class="card"><div class="row between"><b style="font-size:13.5px">State champion U16</b><span class="tag">2026</span></div></div>
+        <div class="card"><div class="row between"><b style="font-size:13.5px">National top 8</b><span class="tag">2027</span></div></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="eyebrow">Process goals · top 3</div>
+      <div class="stack mt8">
+        <div class="card rule"><b style="font-size:13.5px">01 · Movement — hold shape into the back corners</b><div class="pbar mt8"><span style="width:62%"></span></div></div>
+        <div class="card rule"><b style="font-size:13.5px">02 · Backhand wrist stability under pace</b><div class="pbar mt8"><span style="width:45%"></span></div></div>
+        <div class="card rule"><b style="font-size:13.5px">03 · Counter-drop discipline on the rear court</b><div class="pbar mt8"><span style="width:30%"></span></div></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="eyebrow">Last 3 sessions · in his words</div>
+      <div class="card mt8">
+        <div class="qline"><span class="qd">04 May</span><span>Felt loose on rear court, breaking on the counter-drops.</span></div>
+        <div class="qline"><span class="qd">28 Apr</span><span>Big win — held shape into the back corners under length pressure.</span></div>
+        <div class="qline"><span class="qd">22 Apr</span><span>Forearm tight late on — watch volume next week.</span></div>
+      </div>
+    </div>
+
+    <div class="row gap8">
+      <div class="card grow tap" data-nav="c-session">
+        <div class="eyebrow">Sessions</div><div class="disp mt8" style="font-size:28px">31</div>
+        <div class="faint tiny">tap to review log</div>
+      </div>
+      <div class="card grow tap" data-toast="Opening assessment history">
+        <div class="eyebrow">Assessment</div><div class="disp mt8" style="font-size:28px">+8<span style="font-size:14px">%</span></div>
+        <div class="faint tiny">vs. 6 weeks ago · per-drill</div>
+      </div>
+    </div>
+
+    <button class="btn" data-nav="c-builder"><svg><use href="#i-plus"/></svg>Plan a session for Diego</button>
+  </div>
+</section>
+
+<!-- ============================================================
+     COACH · ONBOARD WIZARD
+     ============================================================ -->
+<section class="screen" data-screen="c-onboard" data-flow="onboard">
+  <header class="s-head">
+    <button class="iconbtn" data-back aria-label="Cancel"><svg><use href="#i-x"/></svg></button>
+    <div class="ttl">New athlete</div>
+  </header>
+  <div class="s-body stack-lg">
+    <div class="steps">
+      <i class="on" data-si="1"></i><i data-si="2"></i><i data-si="3"></i><i data-si="4"></i>
+    </div>
+
+    <!-- step 1 -->
+    <div class="wstep" data-step="1">
+      <div class="eyebrow">Step 1 of 4 · Details</div>
+      <div class="disp mt8" style="font-size:24px">Who are we <span class="em">onboarding?</span></div>
+      <div class="stack mt20">
+        <div><label class="flabel">Full name</label><input class="field" value="Layla Hassan" /></div>
+        <div class="row gap8">
+          <div class="grow"><label class="flabel">Age</label><input class="field" value="13" /></div>
+          <div class="grow"><label class="flabel">Type</label>
+            <div class="seg"><button class="on">Private</button><button>Squad</button></div>
+          </div>
+        </div>
+        <div><label class="flabel">Parent / guardian email</label><input class="field" value="parent@hassan.fam" placeholder="for minors" /></div>
+      </div>
+      <button class="btn mt20" data-step-go="2">Continue<svg><use href="#i-arrow"/></svg></button>
+    </div>
+
+    <!-- step 2 -->
+    <div class="wstep" data-step="2" hidden>
+      <div class="eyebrow">Step 2 of 4 · Assessment</div>
+      <div class="disp mt8" style="font-size:24px">Pick the <span class="em">assessment</span> types</div>
+      <div class="muted tiny mt8">Multi-select — nothing is mandatory. Run them across one or several sittings.</div>
+      <div class="stack mt20">
+        <label class="opt on"><span class="box"><svg><use href="#i-check"/></svg></span>
+          <div><b style="font-size:13.5px">Skill + fitness</b><div class="faint tiny">Per-drill scoring · technical &amp; physical</div></div></label>
+        <label class="opt on"><span class="box"><svg><use href="#i-check"/></svg></span>
+          <div><b style="font-size:13.5px">Self-awareness questionnaire</b><div class="faint tiny">Mental &amp; tactical — athlete self-scores first</div></div></label>
+        <label class="opt"><span class="box"><svg><use href="#i-check"/></svg></span>
+          <div><b style="font-size:13.5px">Video match analysis</b><div class="faint tiny">Upload a match · tag the priorities</div></div></label>
+      </div>
+      <div class="btnrow mt20">
+        <button class="btn ghost" data-step-go="1">Back</button>
+        <button class="btn" data-step-go="3">Continue</button>
+      </div>
+    </div>
+
+    <!-- step 3 -->
+    <div class="wstep" data-step="3" hidden>
+      <div class="eyebrow">Step 3 of 4 · Conduct</div>
+      <div class="disp mt8" style="font-size:24px">Record the <span class="em">skill + fitness</span> baseline</div>
+      <div class="muted tiny mt8">Each drill scores on its own line — a single total would mask real per-skill improvement.</div>
+      <div class="stack mt20">
+        <div class="card rule"><div class="row between"><b style="font-size:13px">Backhand drive — 30 ball</b><input class="field" style="width:64px;text-align:center;padding:9px" value="21" /></div></div>
+        <div class="card rule"><div class="row between"><b style="font-size:13px">Forehand volley — count</b><input class="field" style="width:64px;text-align:center;padding:9px" value="14" /></div></div>
+        <div class="card rule"><div class="row between"><b style="font-size:13px">Court sprints — 6×</b><input class="field" style="width:64px;text-align:center;padding:9px" value="38s" /></div></div>
+        <div class="card rule"><div class="row between"><b style="font-size:13px">Ghosting — 90s reps</b><input class="field" style="width:64px;text-align:center;padding:9px" value="44" /></div></div>
+      </div>
+      <div class="btnrow mt20">
+        <button class="btn ghost" data-step-go="2">Back</button>
+        <button class="btn" data-step-go="4">Continue</button>
+      </div>
+    </div>
+
+    <!-- step 4 -->
+    <div class="wstep" data-step="4" hidden>
+      <div class="eyebrow">Step 4 of 4 · Vision &amp; goals</div>
+      <div class="disp mt8" style="font-size:24px">Set the <span class="em">North Star</span></div>
+      <div class="stack mt20">
+        <div><label class="flabel">Vision</label>
+          <textarea class="field">Win every rally I have the right to win — and never get out-competed.</textarea></div>
+        <div><label class="flabel">Outcome goal</label><input class="field" value="County U14 podium — 2026" /></div>
+        <div><label class="flabel">Process goal · 1 of top 3</label><input class="field" value="Racket prep before the T" /></div>
+      </div>
+      <div class="btnrow mt20">
+        <button class="btn ghost" data-step-go="3">Back</button>
+        <button class="btn" data-nav="c-athlete" data-toast="Layla Hassan onboarded">Finish<svg><use href="#i-check"/></svg></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     COACH · COHORTS
+     ============================================================ -->
+<section class="screen" data-screen="c-cohorts">
+  <header class="s-head">
+    <button class="iconbtn" data-back aria-label="Back"><svg><use href="#i-back"/></svg></button>
+    <div class="ttl">Cohorts</div>
+    <button class="iconbtn" data-toast="New cohort — pick a term &amp; roster" aria-label="New cohort"><svg><use href="#i-plus"/></svg></button>
+  </header>
+  <div class="s-body stack">
+    <div class="muted tiny">A cohort is built once per term — then every clinic, leaderboard and group message runs off its roster.</div>
+    <div class="card rule tap mt8" data-nav="c-cohort">
+      <div class="row between">
+        <div><b style="font-size:15px">Junior Squad — Spring</b><div class="faint tiny mt4">8 athletes · Mar–Jun</div></div>
+        <span class="chip accent">Clinic 17:30</span>
+      </div>
+      <div class="row gap6 mt12">
+        <span class="avatar sm">DE</span><span class="avatar sm ghost">MA</span><span class="avatar sm ghost">YA</span>
+        <span class="avatar sm ghost">NT</span><span class="avatar sm ghost">+4</span>
+      </div>
+    </div>
+    <div class="card rule tap" data-nav="c-cohort">
+      <div class="row between">
+        <div><b style="font-size:15px">Adult Improvers</b><div class="faint tiny mt4">6 athletes · rolling</div></div>
+        <span class="chip">Thu 20:00</span>
+      </div>
+      <div class="row gap6 mt12">
+        <span class="avatar sm ghost">RK</span><span class="avatar sm ghost">JL</span><span class="avatar sm ghost">+4</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     COACH · COHORT DETAIL
+     ============================================================ -->
+<section class="screen" data-screen="c-cohort">
+  <header class="s-head">
+    <button class="iconbtn" data-back aria-label="Back"><svg><use href="#i-back"/></svg></button>
+    <div class="ttl">Junior Squad</div>
+    <button class="iconbtn" data-sheet="msgSheet" aria-label="Message group"><svg><use href="#i-msg"/></svg></button>
+  </header>
+  <div class="s-body stack-lg">
+
+    <div class="statgrid">
+      <div class="st"><div class="v">8</div><div class="k">Athletes</div></div>
+      <div class="st"><div class="v">+6%</div><div class="k">Avg trend</div></div>
+      <div class="st"><div class="v">17:30</div><div class="k">Next clinic</div></div>
+    </div>
+
+    <div class="focus rule">
+      <div class="row between">
+        <div class="eyebrow">Next clinic · today</div>
+        <span class="chip dot">Courts 1–3</span>
+      </div>
+      <div class="disp mt8" style="font-size:20px">Length under pressure <span class="em">+ counter-drop</span></div>
+      <div class="muted tiny mt8">Drills &amp; court split pre-published — athletes already see the focus.</div>
+      <button class="btn mt12" data-nav="c-builder"><svg><use href="#i-bolt"/></svg>Start group clinic</button>
+    </div>
+
+    <div>
+      <div class="eyebrow">Roster · per-member trend</div>
+      <div class="stack mt8">
+        <div class="lrow"><span class="avatar sm">DE</span><div class="grow"><b style="font-size:13px">Diego Elias</b><div class="faint tiny">Backhand stability</div></div><span class="due" style="color:var(--accent)">▲ +9%</span></div>
+        <div class="lrow"><span class="avatar sm ghost">MA</span><div class="grow"><b style="font-size:13px">Marwan Adel</b><div class="faint tiny">Ghosting volume</div></div><span class="due" style="color:var(--accent)">▲ +5%</span></div>
+        <div class="lrow"><span class="avatar sm ghost">YA</span><div class="grow"><b style="font-size:13px">Youssef Aboul</b><div class="faint tiny">Volley count</div></div><span class="faint tiny">— flat</span></div>
+        <div class="lrow"><span class="avatar sm ghost">NT</span><div class="grow"><b style="font-size:13px">Nour El Tayeb</b><div class="faint tiny">Self-awareness</div></div><span class="due" style="color:var(--accent)">▲ +7%</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="row between">
+        <div class="eyebrow">Cohort leaderboard</div><span class="chip">Backhand 30-ball</span>
+      </div>
+      <div class="stack mt8">
+        <div class="row between"><span class="tag" style="color:var(--accent)">01 · Diego E.</span><b>34</b></div>
+        <div class="row between"><span class="tag">02 · Nour E.</span><b>29</b></div>
+        <div class="row between"><span class="tag">03 · Marwan A.</span><b>26</b></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     COACH · SESSION BUILDER
+     ============================================================ -->
+<section class="screen" data-screen="c-builder" data-flow="builder">
+  <header class="s-head">
+    <button class="iconbtn" data-back aria-label="Cancel"><svg><use href="#i-x"/></svg></button>
+    <div class="ttl">Build session</div>
+  </header>
+  <div class="s-body stack-lg">
+    <div class="steps"><i class="on" data-bi="1"></i><i data-bi="2"></i><i data-bi="3"></i></div>
+
+    <!-- session context rail -->
+    <div class="card rule">
+      <div class="eyebrow">For · Diego Elias</div>
+      <div class="row wrap gap6 mt8">
+        <span class="chip">Outcome: State champ U16</span>
+        <span class="chip">Process 02: wrist stability</span>
+      </div>
+      <div class="qline mt8" style="border:0;padding-bottom:0"><span class="qd">04 May</span><span class="tiny">“Breaking on the counter-drops.”</span></div>
+    </div>
+
+    <!-- step 1 : source -->
+    <div class="bstep" data-step="1">
+      <div class="eyebrow">Step 1 · Start from</div>
+      <div class="muted tiny mt4">Your own previous sessions are the fastest start — templates are there if you want them.</div>
+      <div class="stack mt12">
+        <label class="opt on"><span class="box"><svg><use href="#i-check"/></svg></span>
+          <div><b style="font-size:13.5px">Previous session · 04 May</b><div class="faint tiny">Rear-court counter-drop progression — reusable for any athlete</div></div></label>
+        <label class="opt"><span class="box"><svg><use href="#i-check"/></svg></span>
+          <div><b style="font-size:13.5px">Template · Backhand under pace</b><div class="faint tiny">Your saved skill-development template</div></div></label>
+        <label class="opt"><span class="box"><svg><use href="#i-check"/></svg></span>
+          <div><b style="font-size:13.5px">Blank session</b><div class="faint tiny">Build it from scratch</div></div></label>
+      </div>
+      <button class="btn mt20" data-step-go="2">Continue<svg><use href="#i-arrow"/></svg></button>
+    </div>
+
+    <!-- step 2 : focus + drills -->
+    <div class="bstep" data-step="2" hidden>
+      <div class="eyebrow">Step 2 · Focus &amp; drills</div>
+      <div class="stack mt12">
+        <div><label class="flabel">Intended focus — one per session</label>
+          <input class="field" value="Backhand wrist stability under pace" /></div>
+        <div class="card"><div class="row between"><div><b style="font-size:13px">Warm-up · solo length</b><div class="faint tiny">8 min</div></div><svg width="16" height="16" style="color:var(--text-faint)"><use href="#i-grip"/></svg></div></div>
+        <div class="card"><div class="row between"><div><b style="font-size:13px">Backhand drive — both walls</b><div class="faint tiny">12 min · wrist cue</div></div><svg width="16" height="16" style="color:var(--text-faint)"><use href="#i-grip"/></svg></div></div>
+        <div class="card"><div class="row between"><div><b style="font-size:13px">Conditioned game — backhand boast</b><div class="faint tiny">15 min</div></div><svg width="16" height="16" style="color:var(--text-faint)"><use href="#i-grip"/></svg></div></div>
+        <button class="btn ghost sm" data-toast="Add a drill">+ Add drill</button>
+      </div>
+      <div class="btnrow mt20">
+        <button class="btn ghost" data-step-go="1">Back</button>
+        <button class="btn" data-step-go="3">Review</button>
+      </div>
+    </div>
+
+    <!-- step 3 : review -->
+    <div class="bstep" data-step="3" hidden>
+      <div class="eyebrow">Step 3 · Review</div>
+      <div class="disp mt8" style="font-size:22px">Ready for <span class="em">Diego</span></div>
+      <div class="card rule mt12">
+        <b style="font-size:13.5px">Backhand wrist stability under pace</b>
+        <div class="faint tiny mt4">3 drills · 35 min · private</div>
+        <div class="hr"></div>
+        <div class="muted tiny">Athlete sees the focus &amp; drill queue the moment you save.</div>
+      </div>
+      <div class="btnrow mt20">
+        <button class="btn ghost" data-back data-toast="Saved for later">Save for later</button>
+        <button class="btn" data-nav="c-session"><svg><use href="#i-bolt"/></svg>Start now</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     COACH · LIVE PRIVATE SESSION
+     ============================================================ -->
+<section class="screen" data-screen="c-session">
+  <header class="s-head">
+    <button class="iconbtn" data-back aria-label="Back"><svg><use href="#i-back"/></svg></button>
+    <div class="col grow"><div class="eyebrow">Live · Diego Elias</div><div class="ttl">Session</div></div>
+    <span class="chip dot">15:00</span>
+  </header>
+  <div class="s-body stack-lg">
+    <div class="focus rule">
+      <div class="eyebrow">Intended focus</div>
+      <div class="disp mt8" style="font-size:20px">Backhand wrist stability <span class="em">under pace</span></div>
+    </div>
+
+    <div>
+      <div class="eyebrow">Drill queue</div>
+      <div class="stack mt8">
+        <label class="opt on"><span class="box"><svg><use href="#i-check"/></svg></span><div><b style="font-size:13px">Warm-up · solo length</b><div class="faint tiny">8 min · done</div></div></label>
+        <label class="opt on"><span class="box"><svg><use href="#i-check"/></svg></span><div><b style="font-size:13px">Backhand drive — both walls</b><div class="faint tiny">12 min · done</div></div></label>
+        <label class="opt"><span class="box"><svg><use href="#i-check"/></svg></span><div><b style="font-size:13px">Conditioned game — backhand boast</b><div class="faint tiny">15 min</div></div></label>
+      </div>
+    </div>
+
+    <div>
+      <div class="eyebrow">Session notes</div>
+      <div class="card mt8">
+        <textarea class="field" style="background:transparent;border:0;padding:0;min-height:62px">Wrist held far better at 3/4 pace — broke down once tempo lifted. Counter-drop still rushed.</textarea>
+        <div class="hr"></div>
+        <div class="row between">
+          <span class="faint tiny">Typed · or dictate hands-free</span>
+          <button class="iconbtn" data-sheet="voiceSheet" aria-label="Dictate" style="background:var(--accent);color:var(--on-accent);border-color:transparent"><svg><use href="#i-mic"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="eyebrow">Assign homework</div>
+      <div class="row between mt8">
+        <div class="grow"><b style="font-size:13px">3× counter-drop clip</b><div class="faint tiny">due before next session</div></div>
+        <span class="chip"><svg width="13" height="13"><use href="#i-video"/></svg> Clip</span>
+      </div>
+    </div>
+
+    <button class="btn" data-nav="c-today" data-toast="Notes sent to Diego"><svg><use href="#i-send"/></svg>End &amp; send notes</button>
+  </div>
+</section>
+
+<!-- ============================================================
+     COACH · LIVE GROUP CLINIC
+     ============================================================ -->
+<section class="screen" data-screen="c-clinic">
+  <header class="s-head">
+    <button class="iconbtn" data-back aria-label="Back"><svg><use href="#i-back"/></svg></button>
+    <div class="col grow"><div class="eyebrow">Live · Junior Squad</div><div class="ttl">Clinic</div></div>
+    <span class="row gap6"><span class="recdot"></span></span>
+  </header>
+  <div class="s-body stack-lg">
+    <div class="focus rule">
+      <div class="eyebrow">Clinic focus · Courts 1–3</div>
+      <div class="disp mt8" style="font-size:19px">Length under pressure <span class="em">+ counter-drop</span></div>
+    </div>
+
+    <div>
+      <div class="row between">
+        <div class="eyebrow">Roster · tap to note &amp; mark in</div>
+        <span class="faint tiny">6 of 8 in</span>
+      </div>
+      <div class="stack mt8">
+        <div class="lrow"><span class="avatar sm">DE</span>
+          <div class="grow"><b style="font-size:13px">Diego Elias</b><div class="faint tiny">“Racket up earlier off the T.”</div></div>
+          <button class="iconbtn" data-sheet="voiceSheet" style="width:34px;height:34px" aria-label="Note"><svg><use href="#i-mic"/></svg></button>
+        </div>
+        <div class="lrow"><span class="avatar sm ghost">MA</span>
+          <div class="grow"><b style="font-size:13px">Marwan Adel</b><div class="faint tiny">Tap to add a note</div></div>
+          <button class="iconbtn" data-sheet="voiceSheet" style="width:34px;height:34px" aria-label="Note"><svg><use href="#i-mic"/></svg></button>
+        </div>
+        <div class="lrow"><span class="avatar sm ghost">YA</span>
+          <div class="grow"><b style="font-size:13px">Youssef Aboul</b><div class="faint tiny">“Move laterally off the T, not back.”</div></div>
+          <button class="iconbtn" data-sheet="voiceSheet" style="width:34px;height:34px" aria-label="Note"><svg><use href="#i-mic"/></svg></button>
+        </div>
+        <div class="lrow" style="opacity:.55"><span class="avatar sm ghost">NT</span>
+          <div class="grow"><b style="font-size:13px">Nour El Tayeb</b><div class="faint tiny">Absent — still gets the clinic notes</div></div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn" data-nav="c-today" data-toast="Clinic notes sent to all 8 enrolled"><svg><use href="#i-send"/></svg>End &amp; send to everyone</button>
+  </div>
+</section>
+
+<!-- ============================================================
+     COACH · SCHEDULE
+     ============================================================ -->
+<section class="screen" data-screen="c-schedule">
+  <header class="s-head">
+    <button class="iconbtn" data-back aria-label="Back"><svg><use href="#i-back"/></svg></button>
+    <div class="ttl">Schedule</div>
+    <button class="iconbtn" data-toast="Synced — pushed to Google Calendar" aria-label="Sync"><svg><use href="#i-cal-sync"/></svg></button>
+  </header>
+  <div class="s-body stack-lg">
+    <div class="week">
+      <div class="d"><div class="dn">Mon</div><div class="dd">13</div><div class="has"></div></div>
+      <div class="d on"><div class="dn">Tue</div><div class="dd">14</div><div class="has"></div></div>
+      <div class="d"><div class="dn">Wed</div><div class="dd">15</div><div class="has"></div></div>
+      <div class="d"><div class="dn">Thu</div><div class="dd">16</div></div>
+      <div class="d"><div class="dn">Fri</div><div class="dd">17</div><div class="has"></div></div>
+      <div class="d"><div class="dn">Sat</div><div class="dd">18</div><div class="has"></div></div>
+      <div class="d"><div class="dn">Sun</div><div class="dd">19</div></div>
+    </div>
+
+    <div class="card" style="background:var(--surface-2)">
+      <div class="row gap8">
+        <svg width="17" height="17" style="color:var(--accent)"><use href="#i-cal-sync"/></svg>
+        <div class="grow tiny muted">In-app calendar — sessions push out to Google / Apple. Your personal calendar stays yours.</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="eyebrow">Tuesday 14 May</div>
+      <div class="stack mt8">
+        <div class="agenda">
+          <div class="tcol"><div class="tt">15:00</div><div class="td">45m</div></div>
+          <div class="line"></div>
+          <div class="card grow tap" data-nav="c-session"><b style="font-size:13px">Diego Elias — private</b><div class="faint tiny">Backhand wrist stability · Court 2</div></div>
+        </div>
+        <div class="agenda">
+          <div class="tcol"><div class="tt">17:30</div><div class="td">90m</div></div>
+          <div class="line"></div>
+          <div class="card grow tap" data-nav="c-cohort"><b style="font-size:13px">Junior Squad — group clinic</b><div class="faint tiny">8 athletes · Courts 1–3</div></div>
+        </div>
+        <div class="agenda">
+          <div class="tcol"><div class="tt">19:15</div><div class="td">45m</div></div>
+          <div class="line"></div>
+          <div class="card grow tap" data-nav="c-builder"><b style="font-size:13px">Hania Tarek — private</b><div class="faint tiny" style="color:var(--accent)">No plan yet — tap to build</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     COACH · INBOX
+     ============================================================ -->
+<section class="screen" data-screen="c-inbox">
+  <header class="s-head">
+    <button class="iconbtn" data-back aria-label="Back"><svg><use href="#i-back"/></svg></button>
+    <div class="ttl">Inbox</div>
+  </header>
+  <div class="s-body stack">
+    <div class="eyebrow">Needs you · 3</div>
+    <div class="lrow tap" data-toast="Reviewing Diego’s match clip">
+      <span class="iconbtn" style="background:var(--accent);color:var(--on-accent);border-color:transparent"><svg><use href="#i-video"/></svg></span>
+      <div class="grow"><b style="font-size:13px">Diego Elias sent a clip</b><div class="faint tiny">Match reflection · 0:48 · review</div></div>
+    </div>
+    <div class="lrow tap" data-toast="Filing voice dictation to Marwan’s log">
+      <span class="iconbtn"><svg><use href="#i-mic"/></svg></span>
+      <div class="grow"><b style="font-size:13px">Voice note to file</b><div class="faint tiny">Marwan · clinic dictation · 0:21</div></div>
+    </div>
+    <div class="lrow tap" data-toast="Opening parent thread">
+      <span class="iconbtn"><svg><use href="#i-msg"/></svg></span>
+      <div class="grow"><b style="font-size:13px">Message · Hania’s parent</b><div class="faint tiny">“Can we add a Saturday slot?”</div></div>
+    </div>
+    <div class="eyebrow mt8">Cleared</div>
+    <div class="lrow" style="opacity:.55">
+      <span class="iconbtn"><svg><use href="#i-check"/></svg></span>
+      <div class="grow"><b style="font-size:13px">Nour — questionnaire reviewed</b><div class="faint tiny">Filed to assessment history</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     COACH · PROFILE
+     ============================================================ -->
+<section class="screen" data-screen="c-profile">
+  <header class="s-head">
+    <button class="iconbtn" data-back aria-label="Back"><svg><use href="#i-back"/></svg></button>
+    <div class="ttl">Profile</div>
+  </header>
+  <div class="s-body stack-lg">
+    <div class="row gap16">
+      <span class="avatar lg">AR</span>
+      <div><div class="disp" style="font-size:24px">Coach Ahad</div><div class="muted tiny">ARProformance · 14 athletes · 2 cohorts</div></div>
+    </div>
+    <div class="statgrid">
+      <div class="st"><div class="v">3.1h</div><div class="k">Admin saved / wk</div></div>
+      <div class="st"><div class="v">96%</div><div class="k">Notes on time</div></div>
+      <div class="st"><div class="v">31</div><div class="k">Sessions / mo</div></div>
+    </div>
+    <div class="stack">
+      <div class="lrow tap" data-toast="Onboarding setup — toggle features on/off"><span class="iconbtn"><svg><use href="#i-sliders"/></svg></span><div class="grow"><b style="font-size:13px">Feature setup</b><div class="faint tiny">Nothing mandatory — switch on what you use</div></div></div>
+      <div class="lrow tap" data-toast="Calendar — connected to Google"><span class="iconbtn"><svg><use href="#i-cal-sync"/></svg></span><div class="grow"><b style="font-size:13px">Calendar sync</b><div class="faint tiny">Pushing to Google Calendar</div></div></div>
+      <div class="lrow tap" data-toast="Notification quiet hours: 21:00–08:00"><span class="iconbtn"><svg><use href="#i-bell"/></svg></span><div class="grow"><b style="font-size:13px">Notifications</b><div class="faint tiny">Quiet hours for athletes</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     ATHLETE · TODAY
+     ============================================================ -->
+<section class="screen" data-screen="a-today" data-home="athlete">
+  <header class="s-head">
+    <div class="col grow"><div class="eyebrow">Tuesday · 14 May</div><div class="ttl">Today</div></div>
+    <button class="iconbtn" data-nav="a-profile" aria-label="Profile"><svg><use href="#i-user"/></svg></button>
+  </header>
+  <div class="s-body stack-lg">
+
+    <div>
+      <div class="eyebrow">Your session · in 13 min</div>
+      <div class="hero mt8" data-nav="a-session">
+        <span class="tag">15:00 · Court 2 · with Coach Ahad</span>
+        <div class="hname">Backhand<br/>under pace</div>
+        <div class="muted tiny">Tap for the brief &amp; drill queue</div>
+      </div>
+    </div>
+
+    <div class="focus rule">
+      <div class="eyebrow">Today’s intended focus</div>
+      <div class="disp mt8" style="font-size:19px">Wrist stays <span class="em">quiet</span> when the tempo lifts</div>
+      <div class="row wrap gap6 mt12">
+        <span class="chip">Process goal 02</span><span class="chip accent">Mission · week 3 of 6</span>
+      </div>
+    </div>
+
+    <div>
+      <div class="row between"><div class="eyebrow">Open tasks · 2</div><span class="due late">1 late</span></div>
+      <div class="stack mt8">
+        <div class="lrow tap" data-nav="a-task">
+          <span class="iconbtn" style="background:var(--accent);color:var(--on-accent);border-color:transparent"><svg><use href="#i-video"/></svg></span>
+          <div class="grow"><b style="font-size:13px">Match-reflection clip</b><div class="faint tiny"><span class="due late">2 days late</span> · tap to upload</div></div>
+        </div>
+        <div class="lrow tap" data-nav="a-task">
+          <span class="iconbtn"><svg><use href="#i-pencil"/></svg></span>
+          <div class="grow"><b style="font-size:13px">Write your match identity</b><div class="faint tiny">due Fri · 1 short paragraph</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card rule">
+      <div class="eyebrow">New from Coach Ahad</div>
+      <div class="bubble mt8">Held shape really well into the back corners on Sunday — that’s process goal 01 moving. Keep the racket up earlier off the T.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     ATHLETE · PLAN
+     ============================================================ -->
+<section class="screen" data-screen="a-plan">
+  <header class="s-head">
+    <div class="ttl">Plan</div>
+    <button class="iconbtn" data-nav="a-profile" aria-label="Profile"><svg><use href="#i-user"/></svg></button>
+  </header>
+  <div class="s-body stack-lg">
+    <div class="focus rule">
+      <div class="eyebrow">Vision · pinned</div>
+      <div class="disp mt8" style="font-size:23px">Become the <span class="em">world #1</span> — and a complete competitor.</div>
+    </div>
+
+    <div class="mission" style="--p:50%">
+      <div class="ring"><b>3/6</b></div>
+      <div class="grow"><b style="font-size:13.5px">Mission · Backhand under pace</b><div class="faint tiny">Week 3 of 6 · process goal 02</div></div>
+      <svg width="16" height="16" style="color:var(--accent)"><use href="#i-flame"/></svg>
+    </div>
+
+    <div>
+      <div class="eyebrow">Outcome goals</div>
+      <div class="stack mt8">
+        <div class="card"><div class="row between"><b style="font-size:13.5px">State champion U16</b><span class="tag">2026</span></div></div>
+        <div class="card"><div class="row between"><b style="font-size:13.5px">National top 8</b><span class="tag">2027</span></div></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="eyebrow">Process goals · how I get there</div>
+      <div class="stack mt8">
+        <div class="card rule"><b style="font-size:13px">01 · Hold shape into the back corners</b><div class="pbar mt8"><span style="width:62%"></span></div></div>
+        <div class="card rule"><b style="font-size:13px">02 · Backhand wrist stability under pace</b><div class="pbar mt8"><span style="width:45%"></span></div></div>
+        <div class="card rule"><b style="font-size:13px">03 · Counter-drop discipline on the rear court</b><div class="pbar mt8"><span style="width:30%"></span></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     ATHLETE · SESSIONS
+     ============================================================ -->
+<section class="screen" data-screen="a-sessions">
+  <header class="s-head">
+    <div class="ttl">Sessions</div>
+    <button class="iconbtn" data-nav="a-profile" aria-label="Profile"><svg><use href="#i-user"/></svg></button>
+  </header>
+  <div class="s-body stack">
+    <div class="eyebrow">Upcoming</div>
+    <div class="lrow tap" data-nav="a-session">
+      <div class="col" style="flex:0 0 44px;text-align:center"><div class="disp" style="font-size:15px">Today</div><div class="faint tiny">15:00</div></div>
+      <div class="grow"><b style="font-size:13px">Private · Backhand under pace</b><div class="faint tiny">Coach Ahad · Court 2</div></div>
+      <svg width="16" height="16" style="color:var(--text-faint)"><use href="#i-next"/></svg>
+    </div>
+    <div class="eyebrow mt8">Past · in my words</div>
+    <div class="lrow tap" data-nav="a-session">
+      <div class="col" style="flex:0 0 44px;text-align:center"><div class="disp" style="font-size:15px">04</div><div class="faint tiny">May</div></div>
+      <div class="grow"><b style="font-size:13px">Rear-court counter-drop</b><div class="faint tiny">“Breaking on the counter-drops.”</div></div>
+      <svg width="16" height="16" style="color:var(--text-faint)"><use href="#i-next"/></svg>
+    </div>
+    <div class="lrow tap" data-nav="a-session">
+      <div class="col" style="flex:0 0 44px;text-align:center"><div class="disp" style="font-size:15px">28</div><div class="faint tiny">Apr</div></div>
+      <div class="grow"><b style="font-size:13px">Length under pressure</b><div class="faint tiny">“Big win — held shape under pressure.”</div></div>
+      <svg width="16" height="16" style="color:var(--text-faint)"><use href="#i-next"/></svg>
+    </div>
+    <div class="lrow tap" data-nav="a-session">
+      <div class="col" style="flex:0 0 44px;text-align:center"><div class="disp" style="font-size:15px">22</div><div class="faint tiny">Apr</div></div>
+      <div class="grow"><b style="font-size:13px">Volley &amp; movement</b><div class="faint tiny">“Forearm tight late on.”</div></div>
+      <svg width="16" height="16" style="color:var(--text-faint)"><use href="#i-next"/></svg>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     ATHLETE · SESSION DETAIL
+     ============================================================ -->
+<section class="screen" data-screen="a-session">
+  <header class="s-head">
+    <button class="iconbtn" data-back aria-label="Back"><svg><use href="#i-back"/></svg></button>
+    <div class="col grow"><div class="eyebrow">Today · 15:00 · Court 2</div><div class="ttl">Brief</div></div>
+  </header>
+  <div class="s-body stack-lg">
+    <div class="focus rule">
+      <div class="eyebrow">Intended focus</div>
+      <div class="disp mt8" style="font-size:20px">Backhand wrist stability <span class="em">under pace</span></div>
+      <div class="muted tiny mt8">Why: process goal 02 — it’s what broke down at speed on 04 May.</div>
+    </div>
+    <div>
+      <div class="eyebrow">Drill queue</div>
+      <div class="stack mt8">
+        <div class="card rule"><b style="font-size:13px">Warm-up · solo length</b><div class="faint tiny">8 min</div></div>
+        <div class="card rule"><b style="font-size:13px">Backhand drive — both walls</b><div class="faint tiny">12 min · keep the wrist quiet</div></div>
+        <div class="card rule"><b style="font-size:13px">Conditioned game — backhand boast</b><div class="faint tiny">15 min</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="eyebrow">In my words</div>
+      <textarea class="field mt8" placeholder="How did it feel? — saved to your log">Wrist felt quiet until the last game. Counter-drop still rushed.</textarea>
+      <button class="btn ghost sm mt12" data-sheet="voiceSheet"><svg width="14" height="14"><use href="#i-mic"/></svg> Dictate instead</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     ATHLETE · PROGRESS
+     ============================================================ -->
+<section class="screen" data-screen="a-progress">
+  <header class="s-head">
+    <div class="ttl">Progress</div>
+    <button class="iconbtn" data-nav="a-profile" aria-label="Profile"><svg><use href="#i-user"/></svg></button>
+  </header>
+  <div class="s-body stack-lg">
+    <div class="mission" style="--p:78%">
+      <div class="ring"><b>12</b></div>
+      <div class="grow"><b style="font-size:13.5px">12-day streak</b><div class="faint tiny">Tasks in on time — keep it alive</div></div>
+      <svg width="18" height="18" style="color:var(--accent)"><use href="#i-flame"/></svg>
+    </div>
+
+    <div class="card">
+      <div class="row between">
+        <div class="eyebrow">Per-drill trend</div>
+        <span class="chip">Backhand 30-ball</span>
+      </div>
+      <svg class="chart mt8" viewBox="0 0 300 120" preserveAspectRatio="none">
+        <line class="grid" x1="0" y1="30" x2="300" y2="30"/>
+        <line class="grid" x1="0" y1="60" x2="300" y2="60"/>
+        <line class="grid" x1="0" y1="90" x2="300" y2="90"/>
+        <path class="ar" d="M0,92 L60,80 L120,84 L180,58 L240,46 L300,30 L300,120 L0,120 Z"/>
+        <path class="ln" d="M0,92 L60,80 L120,84 L180,58 L240,46 L300,30"/>
+        <circle class="pt" cx="0" cy="92" r="3.5"/><circle class="pt" cx="60" cy="80" r="3.5"/>
+        <circle class="pt" cx="120" cy="84" r="3.5"/><circle class="pt" cx="180" cy="58" r="3.5"/>
+        <circle class="pt" cx="240" cy="46" r="3.5"/><circle class="pt" cx="300" cy="30" r="3.5"/>
+      </svg>
+      <div class="row between mt8">
+        <span class="faint tiny">6 weeks ago · 19</span>
+        <span class="bignum" style="font-size:20px">34</span>
+      </div>
+    </div>
+
+    <div class="statgrid">
+      <div class="st"><div class="v">+8%</div><div class="k">Skill avg</div></div>
+      <div class="st"><div class="v">4.12</div><div class="k">Club Locker</div></div>
+      <div class="st"><div class="v">9–2</div><div class="k">Match W–L</div></div>
+    </div>
+
+    <div>
+      <div class="eyebrow">Milestones</div>
+      <div class="stack mt8">
+        <div class="lrow"><span class="iconbtn" style="background:var(--accent);color:var(--on-accent);border-color:transparent"><svg><use href="#i-check"/></svg></span><div class="grow"><b style="font-size:13px">Backhand 30-ball · personal best</b><div class="faint tiny">34 — up from 19</div></div></div>
+        <div class="lrow"><span class="iconbtn"><svg><use href="#i-flame"/></svg></span><div class="grow"><b style="font-size:13px">Cohort leaderboard · #1</b><div class="faint tiny">Junior Squad — backhand drill</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     ATHLETE · TASK COMPLETE
+     ============================================================ -->
+<section class="screen" data-screen="a-task">
+  <header class="s-head">
+    <button class="iconbtn" data-back aria-label="Back"><svg><use href="#i-x"/></svg></button>
+    <div class="ttl">Match reflection</div>
+  </header>
+  <div class="s-body stack-lg">
+    <div class="card rule">
+      <div class="eyebrow">From Coach Ahad</div>
+      <div class="muted mt8" style="font-size:13.5px;line-height:1.5">Send a short clip of your match — and one line on what you’d do differently. <span class="due late">2 days late</span></div>
+    </div>
+
+    <div class="card center" style="border-style:dashed">
+      <svg width="28" height="28" style="color:var(--accent);margin:6px auto"><use href="#i-video"/></svg>
+      <b style="font-size:13.5px">Upload your clip</b>
+      <div class="faint tiny mt4">Tap to record or choose · viewable in-app</div>
+      <button class="btn sm mt12" data-toast="Clip attached · match-vs-Omar.mp4">Choose clip</button>
+    </div>
+
+    <div>
+      <label class="flabel">One line — what would you do differently?</label>
+      <textarea class="field" placeholder="Keep it short and honest.">Take the ball earlier on the backhand instead of letting it drop.</textarea>
+      <button class="btn ghost sm mt12" data-sheet="voiceSheet"><svg width="14" height="14"><use href="#i-mic"/></svg> Dictate instead</button>
+    </div>
+
+    <button class="btn" data-nav="a-today" data-toast="Sent to Coach Ahad — streak safe"><svg><use href="#i-send"/></svg>Submit reflection</button>
+  </div>
+</section>
+
+<!-- ============================================================
+     ATHLETE · PROFILE
+     ============================================================ -->
+<section class="screen" data-screen="a-profile">
+  <header class="s-head">
+    <button class="iconbtn" data-back aria-label="Back"><svg><use href="#i-back"/></svg></button>
+    <div class="ttl">Profile</div>
+  </header>
+  <div class="s-body stack-lg">
+    <div class="row gap16">
+      <span class="avatar lg">DE</span>
+      <div><div class="disp" style="font-size:24px">Diego Elias</div><div class="muted tiny">14 yr · Junior Squad · Coach Ahad</div></div>
+    </div>
+    <div class="stack">
+      <div class="lrow tap" data-toast="Opening thread with Coach Ahad"><span class="iconbtn"><svg><use href="#i-msg"/></svg></span><div class="grow"><b style="font-size:13px">Message Coach Ahad</b><div class="faint tiny">Questions between sessions</div></div></div>
+      <div class="lrow tap" data-toast="Reminders: 1 day before tasks"><span class="iconbtn"><svg><use href="#i-bell"/></svg></span><div class="grow"><b style="font-size:13px">Reminders</b><div class="faint tiny">Nudges before work is due</div></div></div>
+      <div class="lrow tap" data-toast="Parent linked: parent@elias.fam"><span class="iconbtn"><svg><use href="#i-users"/></svg></span><div class="grow"><b style="font-size:13px">Linked parent</b><div class="faint tiny">Read-only view of your plan</div></div></div>
+    </div>
+  </div>
+</section>
+
+</div><!-- /screens -->
+
+<!-- ============================================================
+     TAB BARS
+     ============================================================ -->
+<nav class="tabbar coach-only" id="coachTabs">
+  <button data-tab="c-today"><svg><use href="#i-home"/></svg><span class="lab">Today</span></button>
+  <button data-tab="c-athletes"><svg><use href="#i-users"/></svg><span class="lab">Athletes</span></button>
+  <button data-tab="c-cohorts"><svg><use href="#i-layers"/></svg><span class="lab">Cohorts</span></button>
+  <button data-tab="c-schedule"><svg><use href="#i-cal"/></svg><span class="lab">Schedule</span></button>
+  <button data-tab="c-inbox"><svg><use href="#i-inbox"/></svg><span class="lab">Inbox</span></button>
+</nav>
+<nav class="tabbar athlete-only" id="athleteTabs">
+  <button data-tab="a-today"><svg><use href="#i-home"/></svg><span class="lab">Today</span></button>
+  <button data-tab="a-plan"><svg><use href="#i-target"/></svg><span class="lab">Plan</span></button>
+  <button data-tab="a-sessions"><svg><use href="#i-book"/></svg><span class="lab">Sessions</span></button>
+  <button data-tab="a-progress"><svg><use href="#i-trend"/></svg><span class="lab">Progress</span></button>
+  <button data-tab="a-profile"><svg><use href="#i-user"/></svg><span class="lab">Profile</span></button>
+</nav>
+
+<!-- ============================================================
+     OVERLAYS
+     ============================================================ -->
+<div class="scrim" id="scrim"></div>
+
+<div class="sheet" id="voiceSheet">
+  <div class="grab"></div>
+  <div class="eyebrow">Dictating</div>
+  <div class="row gap16 mt12" style="align-items:center">
+    <span class="recdot"></span>
+    <div class="wave grow" style="color:var(--accent)"><i></i><i></i><i></i><i></i><i></i></div>
+    <span class="disp" style="font-size:18px">0:14</span>
+  </div>
+  <div class="bubble mt12">“Racket up earlier off the T — move laterally, not back. Counter-drop still rushed at full pace.”</div>
+  <div class="btnrow mt20">
+    <button class="btn ghost" data-close-sheet>Discard</button>
+    <button class="btn" data-close-sheet data-toast="Note transcribed &amp; attached"><svg><use href="#i-check"/></svg>Save note</button>
+  </div>
+</div>
+
+<div class="sheet" id="msgSheet">
+  <div class="grab"></div>
+  <div class="eyebrow">Message · Junior Squad</div>
+  <div class="muted tiny mt4">Goes to all 8 athletes &amp; their linked parents.</div>
+  <textarea class="field mt12" placeholder="e.g. Courts 1–3 tonight — bring your match shoes.">Tonight’s clinic: length under pressure + counter-drop. Drills are already on your Today screen.</textarea>
+  <div class="btnrow mt16">
+    <button class="btn ghost" data-close-sheet>Cancel</button>
+    <button class="btn" data-close-sheet data-toast="Sent to Junior Squad"><svg><use href="#i-send"/></svg>Send</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"><svg><use href="#i-check"/></svg><span id="toastMsg">Done</span></div>
+
+</div><!-- /stage -->
+</div><!-- /device -->
+</div><!-- /bgwrap -->
+
+<!-- ============================================================
+     PROTOTYPE CHROME — theme + persona dock
+     ============================================================ -->
+<div class="dock">
+  <span class="lbl">Style</span>
+  <div class="grp" id="themeGrp">
+    <button class="on" data-theme-set="arpro">ARPro</button>
+    <button data-theme-set="journal">Journal</button>
+    <button data-theme-set="clay">Clay</button>
+  </div>
+  <div class="sep"></div>
+  <span class="lbl">View</span>
+  <div class="grp" id="personaGrp">
+    <button class="on" data-persona-set="coach">Coach</button>
+    <button data-persona-set="athlete">Athlete</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var body = document.body;
+  var screens = document.querySelectorAll('.screen');
+  var stack = [];
+  var current = 'c-today';
+
+  function byScreen(id){ return document.querySelector('.screen[data-screen="'+id+'"]'); }
+
+  function resetFlow(el){
+    if(!el) return;
+    var flow = el.getAttribute('data-flow');
+    if(!flow) return;
+    // reset wizard / builder to step 1
+    var stepClass = flow === 'onboard' ? 'wstep' : 'bstep';
+    var ind = flow === 'onboard' ? 'si' : 'bi';
+    el.querySelectorAll('.'+stepClass).forEach(function(s){
+      s.hidden = s.getAttribute('data-step') !== '1';
+    });
+    el.querySelectorAll('.steps i').forEach(function(i){
+      i.classList.toggle('on', i.getAttribute('data-'+ind) === '1');
+    });
+  }
+
+  function show(id, isBack){
+    var el = byScreen(id);
+    if(!el) return;
+    screens.forEach(function(s){ s.classList.remove('active'); });
+    // re-trigger entry animation
+    void el.offsetWidth;
+    el.classList.add('active');
+    el.scrollTop = 0;
+    resetFlow(el);
+    current = id;
+    syncTabs();
+  }
+
+  function nav(id){
+    if(id === current) return;
+    stack.push(current);
+    show(id);
+  }
+  function back(){
+    var prev = stack.pop();
+    show(prev || (body.getAttribute('data-persona') === 'coach' ? 'c-today' : 'a-today'), true);
+  }
+  function tab(id){
+    stack = [];
+    show(id);
+  }
+
+  function syncTabs(){
+    var persona = body.getAttribute('data-persona');
+    var tabs = document.querySelectorAll('#'+persona+'Tabs button');
+    var otherBar = document.getElementById((persona==='coach'?'athlete':'coach')+'Tabs');
+    var thisBar = document.getElementById(persona+'Tabs');
+    otherBar.classList.remove('show');
+    thisBar.classList.add('show');
+    tabs.forEach(function(b){
+      b.classList.toggle('on', b.getAttribute('data-tab') === current);
+    });
+  }
+
+  function setPersona(p){
+    if(body.getAttribute('data-persona') === p) return;
+    body.setAttribute('data-persona', p);
+    document.querySelectorAll('#personaGrp button').forEach(function(b){
+      b.classList.toggle('on', b.getAttribute('data-persona-set') === p);
+    });
+    stack = [];
+    show(p === 'coach' ? 'c-today' : 'a-today');
+  }
+
+  function setTheme(t){
+    body.setAttribute('data-theme', t);
+    document.querySelectorAll('#themeGrp button').forEach(function(b){
+      b.classList.toggle('on', b.getAttribute('data-theme-set') === t);
+    });
+  }
+
+  /* ---- overlays ---- */
+  var scrim = document.getElementById('scrim');
+  var toastEl = document.getElementById('toast');
+  var toastMsg = document.getElementById('toastMsg');
+  var toastTimer;
+  function openSheet(id){
+    var sh = document.getElementById(id);
+    if(!sh) return;
+    scrim.classList.add('show');
+    sh.classList.add('show');
+  }
+  function closeSheets(){
+    scrim.classList.remove('show');
+    document.querySelectorAll('.sheet').forEach(function(s){ s.classList.remove('show'); });
+  }
+  function toast(msg){
+    toastMsg.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toastEl.classList.remove('show'); }, 2400);
+  }
+
+  /* ---- wizard / builder steps ---- */
+  function goStep(flowEl, n){
+    var flow = flowEl.getAttribute('data-flow');
+    var stepClass = flow === 'onboard' ? 'wstep' : 'bstep';
+    var ind = flow === 'onboard' ? 'si' : 'bi';
+    flowEl.querySelectorAll('.'+stepClass).forEach(function(s){
+      var on = s.getAttribute('data-step') === n;
+      s.hidden = !on;
+      if(on){
+        s.querySelectorAll('*').forEach(function(){});
+      }
+    });
+    flowEl.querySelectorAll('.steps i').forEach(function(i){
+      i.classList.toggle('on', Number(i.getAttribute('data-'+ind)) <= Number(n));
+    });
+    flowEl.scrollTop = 0;
+  }
+
+  /* ---- global click delegation ---- */
+  document.addEventListener('click', function(e){
+    var t = e.target.closest('[data-nav],[data-back],[data-tab],[data-persona-set],[data-theme-set],[data-sheet],[data-close-sheet],[data-step-go],[data-toast]');
+    if(!t) return;
+
+    // toast can ride along with nav / sheet actions
+    if(t.hasAttribute('data-toast')){
+      // slight delay so it lands after a navigation
+      var msg = t.getAttribute('data-toast');
+      setTimeout(function(){ toast(msg); }, t.hasAttribute('data-nav')||t.hasAttribute('data-back') ? 220 : 0);
+    }
+    if(t.hasAttribute('data-step-go')){
+      var flowEl = t.closest('[data-flow]');
+      if(flowEl) goStep(flowEl, t.getAttribute('data-step-go'));
+      return;
+    }
+    if(t.hasAttribute('data-sheet')){ openSheet(t.getAttribute('data-sheet')); return; }
+    if(t.hasAttribute('data-close-sheet')){ closeSheets(); return; }
+    if(t.hasAttribute('data-theme-set')){ setTheme(t.getAttribute('data-theme-set')); return; }
+    if(t.hasAttribute('data-persona-set')){ setPersona(t.getAttribute('data-persona-set')); return; }
+    if(t.hasAttribute('data-tab')){ tab(t.getAttribute('data-tab')); return; }
+    if(t.hasAttribute('data-back')){ back(); return; }
+    if(t.hasAttribute('data-nav')){ nav(t.getAttribute('data-nav')); return; }
+  });
+
+  scrim.addEventListener('click', closeSheets);
+
+  // toggle .opt checkbox cards (non-radio, just demo state)
+  document.addEventListener('click', function(e){
+    var opt = e.target.closest('.opt');
+    if(opt) opt.classList.toggle('on');
+  });
+
+  // toggle .seg segmented controls
+  document.addEventListener('click', function(e){
+    var b = e.target.closest('.seg button');
+    if(!b) return;
+    b.parentElement.querySelectorAll('button').forEach(function(x){ x.classList.remove('on'); });
+    b.classList.add('on');
+  });
+
+  // boot
+  show('c-today');
+})();
+</script>
+</body>
+</html>

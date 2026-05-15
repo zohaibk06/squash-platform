@@ -1,0 +1,3801 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Squash Platform · Prototype</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://api.fontshare.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700;800&family=Archivo+Narrow:wght@500;700&family=Bebas+Neue&family=Funnel+Display:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    href="https://api.fontshare.com/v2/css?f[]=clash-display@300,400,500,600,700&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    /* ========================================================================
+       GLOBAL · meta-prototype shell
+       ======================================================================== */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      overscroll-behavior-y: contain;
+    }
+    body {
+      background: #0a0a0a;
+      color: #fafafa;
+      font-family: system-ui, sans-serif;
+      min-height: 100dvh;
+      padding-bottom: 88px;
+    }
+
+    /* device-frame-ish centering on desktop, full-bleed on mobile */
+    .stage {
+      width: 100%;
+      max-width: 430px;
+      margin: 0 auto;
+      min-height: 100dvh;
+      position: relative;
+    }
+    @media (min-width: 900px) {
+      body {
+        padding: 32px 0 120px;
+      }
+      .stage {
+        height: 880px;
+        min-height: 880px;
+        max-height: 880px;
+        border-radius: 32px;
+        box-shadow: 0 40px 120px rgba(0, 0, 0, 0.5),
+          0 0 0 1px rgba(255, 255, 255, 0.04);
+        overflow-y: auto;
+        overflow-x: hidden;
+      }
+    }
+
+    /* version visibility — using :not(.active) so individual [data-v] display
+       declarations on the active section win without specificity battles */
+    .version:not(.active) {
+      display: none;
+    }
+
+    /* ====== Version selector dock ====== */
+    .dock {
+      position: fixed;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      background: rgba(12, 12, 14, 0.78);
+      backdrop-filter: blur(28px) saturate(140%);
+      -webkit-backdrop-filter: blur(28px) saturate(140%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+      padding: 6px;
+      display: flex;
+      gap: 4px;
+      max-width: calc(100vw - 24px);
+      overflow-x: auto;
+      scrollbar-width: none;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+    }
+    .dock::-webkit-scrollbar {
+      display: none;
+    }
+    .dock button {
+      flex: 0 0 auto;
+      appearance: none;
+      background: transparent;
+      border: 0;
+      color: rgba(255, 255, 255, 0.55);
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 10px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: color 160ms ease, background 160ms ease;
+    }
+    .dock button .n {
+      opacity: 0.45;
+      margin-right: 6px;
+    }
+    .dock button:hover {
+      color: #fff;
+    }
+    .dock button.is-active {
+      background: #fafafa;
+      color: #0a0a0a;
+    }
+    .dock button.is-active .n {
+      opacity: 0.45;
+    }
+
+    .meta-stack {
+      position: fixed;
+      top: 14px;
+      right: 14px;
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: flex-end;
+      pointer-events: none;
+    }
+    @media (min-width: 900px) {
+      .meta-stack { top: 50px; }
+    }
+    .meta-tag {
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.45);
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .persona-switch {
+      display: inline-flex;
+      gap: 2px;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+      padding: 3px;
+      pointer-events: auto;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+    .persona-switch button {
+      appearance: none;
+      background: transparent;
+      border: 0;
+      color: rgba(255, 255, 255, 0.55);
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 5px 9px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: color 160ms ease, background 160ms ease;
+    }
+    .persona-switch button:hover { color: #fff; }
+    .persona-switch button.is-active {
+      background: #fafafa;
+      color: #0a0a0a;
+    }
+
+    /* per-version screens */
+    .screen:not(.active) { display: none; }
+    /* Court-Side uses flex column on its active screen to pin thumb buttons */
+    [data-v="courtside"] .screen.active {
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
+    }
+
+    /* generic back chevron used inside sub-screens (re-themed per version) */
+    .back-chev {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      user-select: none;
+      background: transparent;
+      border: 0;
+      padding: 0;
+      font: inherit;
+      color: inherit;
+    }
+
+    /* ========================================================================
+       VERSION 1 · COURT-SIDE
+       ======================================================================== */
+    [data-v="courtside"] {
+      background: #0a0a0a;
+      color: #fafafa;
+      font-family: "Archivo", system-ui, sans-serif;
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    [data-v="courtside"] .cs-grain {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.06;
+      background-image: radial-gradient(rgba(255, 255, 255, 0.9) 1px, transparent 1px);
+      background-size: 3px 3px;
+      mix-blend-mode: screen;
+    }
+    [data-v="courtside"] .cs-top {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      padding: 22px 22px 8px;
+    }
+    [data-v="courtside"] .cs-clock {
+      font-family: "JetBrains Mono", monospace;
+      font-weight: 600;
+      font-size: 13px;
+      letter-spacing: 0.06em;
+      color: rgba(255, 255, 255, 0.7);
+    }
+    [data-v="courtside"] .cs-outstanding {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #ffe600;
+    }
+    [data-v="courtside"] .cs-outstanding .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ffe600;
+      box-shadow: 0 0 12px #ffe600;
+      animation: cs-pulse 1.6s ease-in-out infinite;
+    }
+    @keyframes cs-pulse {
+      0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+      50% {
+        opacity: 0.4;
+        transform: scale(0.7);
+      }
+    }
+    [data-v="courtside"] .cs-eyebrow {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.45);
+      padding: 0 22px;
+      margin-top: 8px;
+    }
+    [data-v="courtside"] .cs-hero {
+      padding: 12px 22px 8px;
+    }
+    [data-v="courtside"] .cs-time {
+      font-family: "JetBrains Mono", monospace;
+      font-weight: 600;
+      font-size: 14px;
+      color: #ffe600;
+      margin-bottom: 4px;
+      letter-spacing: 0.04em;
+    }
+    [data-v="courtside"] .cs-name {
+      font-family: "Anton", "Archivo Narrow", sans-serif;
+      font-weight: 400;
+      font-size: clamp(72px, 22vw, 110px);
+      line-height: 0.86;
+      letter-spacing: -0.01em;
+      text-transform: uppercase;
+      margin: 0;
+    }
+    [data-v="courtside"] .cs-name .small {
+      display: block;
+      font-size: 0.42em;
+      color: rgba(255, 255, 255, 0.55);
+    }
+    [data-v="courtside"] .cs-focus {
+      margin: 18px 22px 0;
+      padding: 18px 18px 16px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      position: relative;
+    }
+    [data-v="courtside"] .cs-focus::before {
+      content: "INTENDED FOCUS";
+      position: absolute;
+      top: -8px;
+      left: 14px;
+      background: #0a0a0a;
+      padding: 0 8px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 9px;
+      letter-spacing: 0.18em;
+      color: rgba(255, 255, 255, 0.5);
+    }
+    [data-v="courtside"] .cs-focus-text {
+      font-family: "Archivo Narrow", "Archivo", sans-serif;
+      font-weight: 700;
+      font-size: 22px;
+      line-height: 1.1;
+      text-transform: uppercase;
+      letter-spacing: -0.005em;
+    }
+    [data-v="courtside"] .cs-focus-tags {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+    [data-v="courtside"] .cs-focus-tags span {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 5px 8px;
+      border-radius: 4px;
+      background: rgba(255, 230, 0, 0.12);
+      color: #ffe600;
+    }
+    [data-v="courtside"] .cs-context {
+      padding: 18px 22px 0;
+    }
+    [data-v="courtside"] .cs-context h4 {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.45);
+      margin: 0 0 10px;
+    }
+    [data-v="courtside"] .cs-context p {
+      font-size: 14px;
+      line-height: 1.55;
+      color: rgba(255, 255, 255, 0.78);
+      margin: 0 0 6px;
+    }
+    [data-v="courtside"] .cs-context p .src {
+      color: #ffe600;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-right: 6px;
+    }
+    [data-v="courtside"] .cs-thumb {
+      margin-top: auto;
+      padding: 14px 14px 22px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto;
+      gap: 10px;
+    }
+    [data-v="courtside"] .cs-thumb .big {
+      grid-column: 1 / -1;
+      background: #ffe600;
+      color: #0a0a0a;
+      border: 0;
+      border-radius: 16px;
+      padding: 26px 18px;
+      font-family: "Anton", "Archivo Narrow", sans-serif;
+      font-size: 30px;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: transform 120ms ease, box-shadow 200ms ease;
+    }
+    [data-v="courtside"] .cs-thumb .big:hover {
+      box-shadow: 0 0 0 6px rgba(255, 230, 0, 0.18);
+    }
+    [data-v="courtside"] .cs-thumb .big:active {
+      transform: scale(0.985);
+    }
+    [data-v="courtside"] .cs-thumb .big small {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      opacity: 0.6;
+    }
+    [data-v="courtside"] .cs-thumb .sec {
+      background: #161616;
+      color: #fafafa;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 18px 14px;
+      font-family: "Archivo Narrow", sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: flex-start;
+      transition: background 160ms ease;
+    }
+    [data-v="courtside"] .cs-thumb .sec:hover {
+      background: #1f1f1f;
+    }
+    [data-v="courtside"] .cs-thumb .sec .ico {
+      width: 22px;
+      height: 22px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.6;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    [data-v="courtside"] .cs-thumb .sec.dictate .mic-wave {
+      display: flex;
+      gap: 3px;
+      align-items: center;
+      height: 18px;
+    }
+    [data-v="courtside"] .cs-thumb .sec.dictate .mic-wave span {
+      display: block;
+      width: 3px;
+      background: #ffe600;
+      border-radius: 2px;
+    }
+    [data-v="courtside"] .cs-thumb .sec.dictate .mic-wave span:nth-child(1) { height: 30%; animation: cs-wave 1.1s ease-in-out infinite; animation-delay: -0.4s; }
+    [data-v="courtside"] .cs-thumb .sec.dictate .mic-wave span:nth-child(2) { height: 80%; animation: cs-wave 1.1s ease-in-out infinite; animation-delay: -0.2s; }
+    [data-v="courtside"] .cs-thumb .sec.dictate .mic-wave span:nth-child(3) { height: 100%; animation: cs-wave 1.1s ease-in-out infinite; }
+    [data-v="courtside"] .cs-thumb .sec.dictate .mic-wave span:nth-child(4) { height: 60%; animation: cs-wave 1.1s ease-in-out infinite; animation-delay: -0.15s; }
+    [data-v="courtside"] .cs-thumb .sec.dictate .mic-wave span:nth-child(5) { height: 40%; animation: cs-wave 1.1s ease-in-out infinite; animation-delay: -0.3s; }
+    @keyframes cs-wave {
+      0%, 100% { transform: scaleY(0.4); }
+      50% { transform: scaleY(1); }
+    }
+    /* Court-Side · sub-screen pieces */
+    [data-v="courtside"] .cs-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: transparent;
+      border: 0;
+      color: rgba(255, 255, 255, 0.6);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      cursor: pointer;
+      padding: 0;
+    }
+    [data-v="courtside"] .cs-back::before {
+      content: "←";
+      font-size: 18px;
+      line-height: 1;
+      color: #ffe600;
+    }
+    [data-v="courtside"] .cs-list {
+      list-style: none;
+      padding: 0 22px;
+      margin: 16px 0 0;
+    }
+    [data-v="courtside"] .cs-list li {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: baseline;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    [data-v="courtside"] .cs-list li .ln {
+      font-family: "Archivo Narrow", sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    [data-v="courtside"] .cs-list li .ln small {
+      display: block;
+      font-family: "JetBrains Mono", monospace;
+      font-weight: 500;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      color: rgba(255, 255, 255, 0.45);
+      margin-top: 3px;
+    }
+    [data-v="courtside"] .cs-list li .due {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      color: #ffe600;
+      text-transform: uppercase;
+    }
+    [data-v="courtside"] .cs-timer {
+      font-family: "Anton", "Archivo Narrow", sans-serif;
+      font-size: 88px;
+      line-height: 1;
+      letter-spacing: -0.01em;
+      color: #ffe600;
+      padding: 0 22px;
+    }
+    [data-v="courtside"] .cs-rec {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 9px;
+      background: rgba(255, 60, 60, 0.18);
+      color: #ff5a5a;
+      border-radius: 4px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      margin: 0 22px;
+    }
+    [data-v="courtside"] .cs-rec::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ff5a5a;
+      animation: cs-pulse 1.4s ease-in-out infinite;
+    }
+    [data-v="courtside"] .cs-note {
+      margin: 16px 22px 0;
+      padding: 14px;
+      background: #161616;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 14px;
+      line-height: 1.5;
+      color: rgba(255, 255, 255, 0.85);
+    }
+    [data-v="courtside"] .cs-note .tag {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #ffe600;
+      margin-bottom: 6px;
+      display: block;
+    }
+    [data-v="courtside"] .cs-clickable {
+      cursor: pointer;
+      transition: opacity 160ms ease;
+    }
+    [data-v="courtside"] .cs-clickable:hover { opacity: 0.85; }
+
+    /* ========================================================================
+       VERSION 2 · BROADSHEET
+       Sports magazine athlete-profile feature. Black / white / red.
+       Premise: tap into an athlete and you get a long-form profile spread —
+       hero name, big pull-quoted vision, numbered outcome goals as feature
+       sidebar, process goals as rules, today's session as a kicker card.
+       ======================================================================== */
+    [data-v="broadsheet"] {
+      background: #fafaf7;
+      color: #0a0a0a;
+      font-family: "Archivo", system-ui, sans-serif;
+      min-height: 100%;
+      position: relative;
+    }
+    [data-v="broadsheet"] .bs-mast {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 13px 18px;
+      background: #0a0a0a;
+      color: #fafaf7;
+      position: sticky;
+      top: 0;
+      z-index: 4;
+    }
+    [data-v="broadsheet"] .bs-mast-mark {
+      font-family: "Clash Display", "ClashDisplay-Variable", sans-serif;
+      font-weight: 600;
+      font-size: 13px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+    [data-v="broadsheet"] .bs-mast-mark em {
+      color: #e63329;
+      font-style: normal;
+      margin: 0 4px;
+    }
+    [data-v="broadsheet"] .bs-mast-meta {
+      font-family: "JetBrains Mono", monospace;
+      font-weight: 500;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      color: rgba(250, 250, 247, 0.55);
+    }
+
+    [data-v="broadsheet"] .bs-eyebrow {
+      padding: 28px 24px 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: "Clash Display", sans-serif;
+      font-weight: 500;
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: #e63329;
+    }
+    [data-v="broadsheet"] .bs-eyebrow .rule {
+      width: 28px;
+      height: 1px;
+      background: #e63329;
+    }
+
+    [data-v="broadsheet"] .bs-name {
+      padding: 0 24px;
+      margin: 0;
+      font-family: "Clash Display", sans-serif;
+      font-weight: 700;
+      font-size: clamp(64px, 19vw, 100px);
+      line-height: 0.86;
+      letter-spacing: -0.028em;
+      text-transform: uppercase;
+    }
+    [data-v="broadsheet"] .bs-drop {
+      color: #e63329;
+    }
+
+    [data-v="broadsheet"] .bs-sub {
+      padding: 18px 24px 0;
+      font-family: "Clash Display", sans-serif;
+      font-weight: 400;
+      font-size: 19px;
+      line-height: 1.28;
+      letter-spacing: -0.005em;
+      max-width: 28ch;
+      margin: 0;
+    }
+    [data-v="broadsheet"] .bs-sub em {
+      font-style: italic;
+      color: rgba(10, 10, 10, 0.55);
+    }
+
+    [data-v="broadsheet"] .bs-coverstats {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      border-top: 2px solid #0a0a0a;
+      border-bottom: 2px solid #0a0a0a;
+      margin: 30px 24px 28px;
+    }
+    [data-v="broadsheet"] .bs-cs {
+      padding: 14px 12px;
+      text-align: center;
+      border-right: 1px solid rgba(10, 10, 10, 0.16);
+    }
+    [data-v="broadsheet"] .bs-cs:last-child { border-right: 0; }
+    [data-v="broadsheet"] .bs-cs.alt {
+      background: #0a0a0a;
+      color: #fafaf7;
+    }
+    [data-v="broadsheet"] .bs-cs small {
+      display: block;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 9px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      opacity: 0.6;
+      margin-bottom: 4px;
+    }
+    [data-v="broadsheet"] .bs-cs b {
+      font-family: "Clash Display", sans-serif;
+      font-weight: 700;
+      font-size: 30px;
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+    [data-v="broadsheet"] .bs-cs b em {
+      font-style: normal;
+      color: #e63329;
+      font-size: 18px;
+    }
+
+    [data-v="broadsheet"] .bs-quote {
+      position: relative;
+      padding: 26px 28px;
+      margin: 0 24px 32px;
+      background: #0a0a0a;
+      color: #fafaf7;
+    }
+    [data-v="broadsheet"] .bs-quote p {
+      font-family: "Clash Display", sans-serif;
+      font-weight: 500;
+      font-size: 26px;
+      line-height: 1.05;
+      letter-spacing: -0.022em;
+      margin: 0;
+      text-transform: uppercase;
+    }
+    [data-v="broadsheet"] .bs-quote figcaption {
+      margin-top: 18px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(250, 250, 247, 0.55);
+    }
+    [data-v="broadsheet"] .bs-quote::before,
+    [data-v="broadsheet"] .bs-quote::after {
+      content: "";
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      border: 2px solid #e63329;
+    }
+    [data-v="broadsheet"] .bs-quote::before {
+      top: -2px;
+      left: -2px;
+      border-right: 0;
+      border-bottom: 0;
+    }
+    [data-v="broadsheet"] .bs-quote::after {
+      bottom: -2px;
+      right: -2px;
+      border-left: 0;
+      border-top: 0;
+    }
+
+    [data-v="broadsheet"] .bs-feat {
+      padding: 0 24px 24px;
+    }
+    [data-v="broadsheet"] .bs-feat h3 {
+      font-family: "Clash Display", sans-serif;
+      font-weight: 600;
+      font-size: 12px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: #0a0a0a;
+      margin: 0 0 14px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #0a0a0a;
+      display: flex;
+      align-items: center;
+    }
+    [data-v="broadsheet"] .bs-feat h3::before {
+      content: "";
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: #e63329;
+      margin-right: 10px;
+    }
+    [data-v="broadsheet"] .bs-num {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    [data-v="broadsheet"] .bs-num li {
+      display: grid;
+      grid-template-columns: 64px 1fr;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(10, 10, 10, 0.12);
+      align-items: baseline;
+    }
+    [data-v="broadsheet"] .bs-num li:last-child { border-bottom: 0; }
+    [data-v="broadsheet"] .bs-n {
+      font-family: "Clash Display", sans-serif;
+      font-weight: 700;
+      font-size: 40px;
+      color: #e63329;
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+    [data-v="broadsheet"] .bs-num strong {
+      display: block;
+      font-family: "Clash Display", sans-serif;
+      font-weight: 600;
+      font-size: 20px;
+      letter-spacing: -0.005em;
+      line-height: 1.15;
+    }
+    [data-v="broadsheet"] .bs-num em {
+      display: block;
+      margin-top: 5px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(10, 10, 10, 0.55);
+      font-style: normal;
+    }
+    [data-v="broadsheet"] .bs-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    [data-v="broadsheet"] .bs-list li {
+      display: grid;
+      grid-template-columns: 14px 1fr auto;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(10, 10, 10, 0.12);
+      align-items: center;
+    }
+    [data-v="broadsheet"] .bs-list li::before {
+      content: "";
+      width: 12px;
+      height: 12px;
+      background: #e63329;
+    }
+    [data-v="broadsheet"] .bs-list b {
+      font-family: "Clash Display", sans-serif;
+      font-weight: 600;
+      font-size: 16px;
+      letter-spacing: -0.005em;
+    }
+    [data-v="broadsheet"] .bs-list span {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(10, 10, 10, 0.55);
+    }
+
+    [data-v="broadsheet"] .bs-today {
+      margin: 8px 24px 24px;
+      padding: 22px 22px 24px;
+      background: #e63329;
+      color: #fafaf7;
+      position: relative;
+    }
+    [data-v="broadsheet"] .bs-today-when {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      margin-bottom: 12px;
+      opacity: 0.92;
+    }
+    [data-v="broadsheet"] .bs-today h2 {
+      font-family: "Clash Display", sans-serif;
+      font-weight: 600;
+      font-size: 28px;
+      line-height: 1.02;
+      letter-spacing: -0.022em;
+      margin: 0 0 12px;
+      text-transform: uppercase;
+    }
+    [data-v="broadsheet"] .bs-today p {
+      font-family: "Archivo", sans-serif;
+      font-size: 14px;
+      line-height: 1.55;
+      margin: 0 0 18px;
+      color: rgba(250, 250, 247, 0.92);
+    }
+    [data-v="broadsheet"] .bs-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 14px;
+      background: #0a0a0a;
+      color: #fafaf7;
+      font-family: "Clash Display", sans-serif;
+      font-weight: 600;
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      text-decoration: none;
+    }
+    [data-v="broadsheet"] .bs-cta::after {
+      content: "→";
+      font-family: "JetBrains Mono", monospace;
+      font-weight: 500;
+    }
+    [data-v="broadsheet"] .bs-foot {
+      padding: 18px 24px 30px;
+      display: flex;
+      justify-content: space-between;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(10, 10, 10, 0.45);
+      border-top: 1px solid rgba(10, 10, 10, 0.12);
+    }
+    /* Broadsheet · sub-screen pieces */
+    [data-v="broadsheet"] .bs-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: transparent;
+      border: 0;
+      cursor: pointer;
+      font-family: "Clash Display", sans-serif;
+      font-weight: 600;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #e63329;
+      padding: 0;
+    }
+    [data-v="broadsheet"] .bs-back::before {
+      content: "←";
+      font-size: 16px;
+      line-height: 1;
+    }
+    [data-v="broadsheet"] .bs-clickable { cursor: pointer; }
+    [data-v="broadsheet"] .bs-roster {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    [data-v="broadsheet"] .bs-roster li {
+      display: grid;
+      grid-template-columns: 56px 1fr auto;
+      gap: 14px;
+      padding: 16px 24px;
+      border-bottom: 1px solid rgba(10, 10, 10, 0.12);
+      align-items: center;
+      cursor: pointer;
+      transition: background 160ms ease;
+    }
+    [data-v="broadsheet"] .bs-roster li:hover { background: rgba(230, 51, 41, 0.06); }
+    [data-v="broadsheet"] .bs-roster .bs-r-n {
+      font-family: "Clash Display", sans-serif;
+      font-weight: 700;
+      font-size: 28px;
+      color: #e63329;
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+    [data-v="broadsheet"] .bs-roster strong {
+      display: block;
+      font-family: "Clash Display", sans-serif;
+      font-weight: 600;
+      font-size: 17px;
+      letter-spacing: -0.005em;
+      text-transform: uppercase;
+    }
+    [data-v="broadsheet"] .bs-roster em {
+      display: block;
+      font-style: normal;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(10, 10, 10, 0.55);
+      margin-top: 3px;
+    }
+    [data-v="broadsheet"] .bs-roster .bs-r-tag {
+      font-family: "Clash Display", sans-serif;
+      font-weight: 600;
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      padding: 5px 8px;
+      background: #0a0a0a;
+      color: #fafaf7;
+      white-space: nowrap;
+    }
+    [data-v="broadsheet"] .bs-roster .bs-r-tag.due { background: #e63329; }
+    [data-v="broadsheet"] .bs-roster .bs-r-tag.new {
+      background: transparent;
+      color: #0a0a0a;
+      border: 1px solid #0a0a0a;
+    }
+    [data-v="broadsheet"] .bs-plan {
+      list-style: none;
+      padding: 0;
+      margin: 0 24px;
+      counter-reset: plan;
+    }
+    [data-v="broadsheet"] .bs-plan li {
+      counter-increment: plan;
+      display: grid;
+      grid-template-columns: 36px 1fr;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(10, 10, 10, 0.12);
+    }
+    [data-v="broadsheet"] .bs-plan li::before {
+      content: counter(plan, decimal-leading-zero);
+      font-family: "Clash Display", sans-serif;
+      font-weight: 700;
+      font-size: 18px;
+      color: #e63329;
+      letter-spacing: -0.01em;
+    }
+    [data-v="broadsheet"] .bs-plan strong {
+      display: block;
+      font-family: "Clash Display", sans-serif;
+      font-weight: 600;
+      font-size: 17px;
+      letter-spacing: -0.005em;
+      text-transform: uppercase;
+    }
+    [data-v="broadsheet"] .bs-plan small {
+      display: block;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(10, 10, 10, 0.55);
+      margin-top: 4px;
+    }
+
+    /* ========================================================================
+       VERSION 3 · COMMAND DECK
+       ======================================================================== */
+    [data-v="command"] {
+      background: #0b0d0e;
+      color: #d8dde0;
+      font-family: "Funnel Display", "Helvetica Neue", sans-serif;
+      min-height: 100%;
+      position: relative;
+    }
+    [data-v="command"]::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(800px 400px at 100% 0%, rgba(127, 243, 168, 0.06), transparent 60%),
+        radial-gradient(600px 600px at 0% 100%, rgba(127, 243, 168, 0.03), transparent 60%);
+    }
+    [data-v="command"] .cd-bar {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      backdrop-filter: blur(10px);
+      background: rgba(11, 13, 14, 0.85);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 14px 18px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 14px;
+      align-items: center;
+    }
+    [data-v="command"] .cd-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #fff;
+    }
+    [data-v="command"] .cd-logo .ring {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #7ff3a8, #2e8c52);
+      box-shadow: 0 0 12px rgba(127, 243, 168, 0.7);
+    }
+    [data-v="command"] .cd-clock {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      color: rgba(255, 255, 255, 0.5);
+      text-align: center;
+    }
+    [data-v="command"] .cd-clock b {
+      color: #d8dde0;
+      font-weight: 500;
+    }
+    [data-v="command"] .cd-bar .badges {
+      display: flex;
+      gap: 6px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    [data-v="command"] .cd-bar .badges b {
+      color: #7ff3a8;
+      font-weight: 500;
+    }
+    [data-v="command"] .cd-hero {
+      padding: 20px 18px 8px;
+    }
+    [data-v="command"] .cd-eyebrow {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.45);
+      margin-bottom: 8px;
+    }
+    [data-v="command"] .cd-h1 {
+      font-family: "Funnel Display", sans-serif;
+      font-weight: 500;
+      font-size: 30px;
+      line-height: 1.08;
+      letter-spacing: -0.012em;
+      margin: 0 0 6px;
+    }
+    [data-v="command"] .cd-h1 em {
+      font-style: normal;
+      color: #7ff3a8;
+    }
+    [data-v="command"] .cd-h1::after {
+      content: "_";
+      color: #7ff3a8;
+      animation: cd-blink 1.1s steps(1) infinite;
+    }
+    @keyframes cd-blink {
+      50% { opacity: 0; }
+    }
+    [data-v="command"] .cd-sub {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.55);
+      letter-spacing: 0.04em;
+    }
+    [data-v="command"] .cd-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      padding: 14px 18px 0;
+    }
+    [data-v="command"] .cd-stat {
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 12px 14px;
+      background: rgba(255, 255, 255, 0.02);
+    }
+    [data-v="command"] .cd-stat .l {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.45);
+    }
+    [data-v="command"] .cd-stat .v {
+      font-family: "Funnel Display", sans-serif;
+      font-weight: 500;
+      font-size: 26px;
+      letter-spacing: -0.012em;
+      margin-top: 4px;
+    }
+    [data-v="command"] .cd-stat .v small {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.5);
+      margin-left: 4px;
+      letter-spacing: 0;
+    }
+    [data-v="command"] .cd-stat .trend {
+      margin-top: 6px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      letter-spacing: 0.06em;
+      color: #7ff3a8;
+    }
+    [data-v="command"] .cd-table {
+      margin: 14px 18px 0;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    [data-v="command"] .cd-table .hdr,
+    [data-v="command"] .cd-row {
+      display: grid;
+      grid-template-columns: 1fr 70px 56px;
+      gap: 10px;
+      padding: 10px 12px;
+      align-items: center;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+    }
+    [data-v="command"] .cd-table .hdr {
+      background: rgba(255, 255, 255, 0.03);
+      color: rgba(255, 255, 255, 0.5);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-size: 9px;
+    }
+    [data-v="command"] .cd-row {
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    [data-v="command"] .cd-row:hover {
+      background: rgba(127, 243, 168, 0.04);
+    }
+    [data-v="command"] .cd-row .nm {
+      font-family: "Funnel Display", sans-serif;
+      font-weight: 500;
+      font-size: 14px;
+      color: #f1f3f4;
+      letter-spacing: -0.005em;
+    }
+    [data-v="command"] .cd-row .nm small {
+      display: block;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      color: rgba(255, 255, 255, 0.4);
+      margin-top: 1px;
+    }
+    [data-v="command"] .cd-row .spark {
+      height: 18px;
+      width: 100%;
+    }
+    [data-v="command"] .cd-row .spark path {
+      fill: none;
+      stroke: #7ff3a8;
+      stroke-width: 1.4;
+    }
+    [data-v="command"] .cd-row .since {
+      color: rgba(255, 255, 255, 0.5);
+      text-align: right;
+    }
+    [data-v="command"] .cd-queue {
+      margin: 14px 18px 0;
+    }
+    [data-v="command"] .cd-queue h3 {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.5);
+      margin: 0 0 8px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    [data-v="command"] .cd-queue h3 b {
+      color: #ffce4d;
+      font-weight: 500;
+    }
+    [data-v="command"] .cd-q-item {
+      padding: 10px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      margin-bottom: 6px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.02);
+    }
+    [data-v="command"] .cd-q-item .who {
+      font-family: "Funnel Display", sans-serif;
+      font-weight: 500;
+      font-size: 13px;
+    }
+    [data-v="command"] .cd-q-item .what {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.55);
+      margin-top: 2px;
+      letter-spacing: 0.02em;
+    }
+    [data-v="command"] .cd-q-item .due {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      color: #ffce4d;
+      letter-spacing: 0.06em;
+    }
+    [data-v="command"] .cd-q-item button {
+      appearance: none;
+      background: transparent;
+      border: 1px solid rgba(127, 243, 168, 0.4);
+      color: #7ff3a8;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 160ms ease, color 160ms ease;
+    }
+    [data-v="command"] .cd-q-item button:hover {
+      background: rgba(127, 243, 168, 0.15);
+    }
+    [data-v="command"] .cd-foot {
+      padding: 16px 18px 24px;
+      display: flex;
+      justify-content: space-between;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.35);
+    }
+    /* Command Deck · sub-screen pieces */
+    [data-v="command"] .cd-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: transparent;
+      border: 0;
+      cursor: pointer;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #7ff3a8;
+      padding: 0;
+    }
+    [data-v="command"] .cd-back::before { content: "←"; }
+    [data-v="command"] .cd-row { cursor: pointer; }
+    [data-v="command"] .cd-trace {
+      margin: 14px 18px 0;
+      padding: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.02);
+    }
+    [data-v="command"] .cd-trace h4 {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.5);
+      margin: 0 0 12px;
+    }
+    [data-v="command"] .cd-trace .row {
+      display: grid;
+      grid-template-columns: 90px 1fr 50px;
+      gap: 10px;
+      align-items: center;
+      padding: 8px 0;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+    }
+    [data-v="command"] .cd-trace .row + .row { border-top: 1px solid rgba(255, 255, 255, 0.05); }
+    [data-v="command"] .cd-trace .row .label {
+      color: #d8dde0;
+      letter-spacing: 0.04em;
+    }
+    [data-v="command"] .cd-trace .row svg { height: 18px; width: 100%; }
+    [data-v="command"] .cd-trace .row svg path { fill: none; stroke: #7ff3a8; stroke-width: 1.4; }
+    [data-v="command"] .cd-trace .row .val { text-align: right; color: #7ff3a8; }
+    [data-v="command"] .cd-action {
+      display: flex;
+      gap: 8px;
+      padding: 14px 18px 0;
+      flex-wrap: wrap;
+    }
+    [data-v="command"] .cd-action button {
+      appearance: none;
+      border: 1px solid rgba(127, 243, 168, 0.4);
+      background: rgba(127, 243, 168, 0.06);
+      color: #7ff3a8;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding: 9px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 160ms ease;
+    }
+    [data-v="command"] .cd-action button:hover { background: rgba(127, 243, 168, 0.18); }
+    [data-v="command"] .cd-action button.ghost {
+      background: transparent;
+      border-color: rgba(255, 255, 255, 0.12);
+      color: rgba(255, 255, 255, 0.65);
+    }
+    [data-v="command"] .cd-action button.ghost:hover { background: rgba(255, 255, 255, 0.04); }
+    [data-v="command"] .cd-checklist {
+      list-style: none;
+      padding: 0;
+      margin: 14px 18px 0;
+    }
+    [data-v="command"] .cd-checklist li {
+      display: grid;
+      grid-template-columns: 18px 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      color: #d8dde0;
+    }
+    [data-v="command"] .cd-checklist li::before {
+      content: "";
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    [data-v="command"] .cd-checklist li.ok {
+      color: rgba(255, 255, 255, 0.5);
+    }
+    [data-v="command"] .cd-checklist li.ok::before {
+      background: #7ff3a8;
+      border-color: #7ff3a8;
+    }
+    [data-v="command"] .cd-checklist li .ts {
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 10px;
+    }
+
+    /* ========================================================================
+       VERSION 4 · LOCKER ROOM
+       ======================================================================== */
+    [data-v="locker"] {
+      background: #fdf9ef;
+      color: #0d0d10;
+      font-family: "Outfit", system-ui, sans-serif;
+      min-height: 100%;
+      position: relative;
+    }
+    [data-v="locker"] .lk-bar {
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    [data-v="locker"] .lk-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: "Bebas Neue", sans-serif;
+      font-size: 18px;
+      letter-spacing: 0.06em;
+    }
+    [data-v="locker"] .lk-brand .ball {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 32% 32%, #ff5b2e, #c0290b);
+      box-shadow: 0 2px 6px rgba(192, 41, 11, 0.4);
+    }
+    [data-v="locker"] .lk-bar .streak {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #0d0d10;
+      color: #fdf9ef;
+      padding: 6px 10px 6px 8px;
+      border-radius: 999px;
+      font-family: "Outfit", sans-serif;
+      font-weight: 600;
+      font-size: 12px;
+      letter-spacing: 0.04em;
+    }
+    [data-v="locker"] .lk-bar .streak .flame {
+      width: 14px;
+      height: 14px;
+      stroke: #ff5b2e;
+      fill: #ff5b2e;
+    }
+    [data-v="locker"] .lk-hero {
+      position: relative;
+      margin: 8px 16px 14px;
+      padding: 22px;
+      border-radius: 24px;
+      background: linear-gradient(155deg, #ff5b2e 0%, #ff3e1f 45%, #c52512 100%);
+      color: #fdf9ef;
+      overflow: hidden;
+      box-shadow: 0 18px 40px -18px rgba(255, 62, 31, 0.55);
+    }
+    [data-v="locker"] .lk-hero::before {
+      content: "";
+      position: absolute;
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      top: -90px;
+      right: -60px;
+      filter: blur(2px);
+    }
+    [data-v="locker"] .lk-hero::after {
+      content: "";
+      position: absolute;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: rgba(13, 13, 16, 0.18);
+      bottom: -50px;
+      left: -30px;
+    }
+    [data-v="locker"] .lk-hero .when {
+      position: relative;
+      font-family: "Outfit", sans-serif;
+      font-weight: 600;
+      font-size: 12px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      opacity: 0.85;
+      margin-bottom: 8px;
+    }
+    [data-v="locker"] .lk-hero h2 {
+      position: relative;
+      font-family: "Bebas Neue", sans-serif;
+      font-weight: 400;
+      font-size: clamp(56px, 16vw, 78px);
+      line-height: 0.88;
+      letter-spacing: 0.005em;
+      margin: 0 0 4px;
+    }
+    [data-v="locker"] .lk-hero h2 small {
+      display: block;
+      font-family: "Outfit", sans-serif;
+      font-weight: 500;
+      font-size: 13px;
+      letter-spacing: 0.16em;
+      opacity: 0.75;
+      margin-top: 8px;
+      text-transform: uppercase;
+    }
+    [data-v="locker"] .lk-hero .focus {
+      position: relative;
+      margin-top: 18px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.25);
+      font-size: 15px;
+      line-height: 1.4;
+      max-width: 30ch;
+    }
+    [data-v="locker"] .lk-hero .focus b {
+      display: block;
+      font-family: "Outfit", sans-serif;
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      opacity: 0.8;
+    }
+    [data-v="locker"] .lk-hero .go {
+      position: absolute;
+      bottom: 22px;
+      right: 22px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: #fdf9ef;
+      color: #c52512;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.18);
+      transition: transform 160ms ease;
+    }
+    [data-v="locker"] .lk-hero .go:hover { transform: rotate(-15deg) scale(1.05); }
+    [data-v="locker"] .lk-hero .go svg {
+      width: 22px;
+      height: 22px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2.4;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    [data-v="locker"] .lk-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      padding: 0 16px 14px;
+    }
+    [data-v="locker"] .lk-stat {
+      background: #0d0d10;
+      color: #fdf9ef;
+      border-radius: 16px;
+      padding: 14px 12px 12px;
+      position: relative;
+      overflow: hidden;
+    }
+    [data-v="locker"] .lk-stat.alt {
+      background: #fdf9ef;
+      color: #0d0d10;
+      border: 2px solid #0d0d10;
+    }
+    [data-v="locker"] .lk-stat.accent {
+      background: #0066ff;
+    }
+    [data-v="locker"] .lk-stat .v {
+      font-family: "Bebas Neue", sans-serif;
+      font-size: 38px;
+      line-height: 1;
+      letter-spacing: 0.005em;
+    }
+    [data-v="locker"] .lk-stat .l {
+      font-family: "Outfit", sans-serif;
+      font-weight: 600;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-top: 8px;
+      opacity: 0.78;
+    }
+    [data-v="locker"] .lk-roster {
+      padding: 0 16px 16px;
+    }
+    [data-v="locker"] .lk-roster h3 {
+      font-family: "Bebas Neue", sans-serif;
+      font-weight: 400;
+      font-size: 22px;
+      letter-spacing: 0.04em;
+      margin: 8px 0 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    [data-v="locker"] .lk-roster h3 a {
+      font-family: "Outfit", sans-serif;
+      font-weight: 600;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #0066ff;
+      text-decoration: none;
+    }
+    [data-v="locker"] .lk-card {
+      display: grid;
+      grid-template-columns: 50px 1fr auto;
+      gap: 14px;
+      align-items: center;
+      padding: 12px;
+      border-radius: 16px;
+      background: #fff;
+      border: 2px solid #0d0d10;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: transform 140ms ease, box-shadow 140ms ease;
+    }
+    [data-v="locker"] .lk-card:hover {
+      transform: translate(-2px, -2px);
+      box-shadow: 4px 4px 0 #0d0d10;
+    }
+    [data-v="locker"] .lk-card .av {
+      width: 50px;
+      height: 50px;
+      border-radius: 14px;
+      background: #ffd633;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "Bebas Neue", sans-serif;
+      font-size: 22px;
+      letter-spacing: 0.02em;
+      color: #0d0d10;
+    }
+    [data-v="locker"] .lk-card.b1 .av { background: #ff5b2e; color: #fdf9ef; }
+    [data-v="locker"] .lk-card.b2 .av { background: #0066ff; color: #fdf9ef; }
+    [data-v="locker"] .lk-card.b3 .av { background: #ffd633; color: #0d0d10; }
+    [data-v="locker"] .lk-card.b4 .av { background: #0d0d10; color: #fdf9ef; }
+    [data-v="locker"] .lk-card .nm {
+      font-family: "Outfit", sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      line-height: 1.1;
+    }
+    [data-v="locker"] .lk-card .meta {
+      font-family: "Outfit", sans-serif;
+      font-weight: 500;
+      font-size: 11px;
+      color: rgba(13, 13, 16, 0.6);
+      letter-spacing: 0.02em;
+      margin-top: 3px;
+    }
+    [data-v="locker"] .lk-card .badge {
+      font-family: "Outfit", sans-serif;
+      font-weight: 700;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #0d0d10;
+      color: #fdf9ef;
+    }
+    [data-v="locker"] .lk-card .badge.due { background: #ff5b2e; }
+    [data-v="locker"] .lk-card .badge.next { background: #0066ff; }
+    [data-v="locker"] .lk-card .badge.ok { background: transparent; color: #0d0d10; border: 1px solid #0d0d10; }
+    [data-v="locker"] .lk-nav {
+      position: sticky;
+      bottom: 0;
+      padding: 8px 16px 14px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+      background: linear-gradient(0deg, #fdf9ef 60%, rgba(253, 249, 239, 0));
+    }
+    [data-v="locker"] .lk-nav a {
+      text-align: center;
+      padding: 10px 4px;
+      font-family: "Outfit", sans-serif;
+      font-weight: 600;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(13, 13, 16, 0.5);
+      text-decoration: none;
+      border-radius: 10px;
+    }
+    [data-v="locker"] .lk-nav a.on {
+      color: #0d0d10;
+      background: #ffd633;
+    }
+    /* Locker Room · sub-screen pieces */
+    [data-v="locker"] .lk-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: transparent;
+      border: 0;
+      cursor: pointer;
+      font-family: "Outfit", sans-serif;
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #0d0d10;
+      padding: 0;
+    }
+    [data-v="locker"] .lk-back::before {
+      content: "←";
+      font-family: "Bebas Neue", sans-serif;
+      font-size: 22px;
+      line-height: 1;
+      color: #ff3e1f;
+    }
+    [data-v="locker"] .lk-vision {
+      margin: 8px 16px 14px;
+      padding: 22px;
+      border-radius: 24px;
+      background: #0d0d10;
+      color: #fdf9ef;
+      position: relative;
+      overflow: hidden;
+    }
+    [data-v="locker"] .lk-vision::before {
+      content: "";
+      position: absolute;
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      background: rgba(255, 91, 46, 0.18);
+      top: -90px;
+      right: -60px;
+      filter: blur(20px);
+    }
+    [data-v="locker"] .lk-vision .label {
+      position: relative;
+      font-family: "Outfit", sans-serif;
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      opacity: 0.7;
+      margin-bottom: 10px;
+    }
+    [data-v="locker"] .lk-vision p {
+      position: relative;
+      margin: 0;
+      font-family: "Bebas Neue", sans-serif;
+      font-size: clamp(28px, 7vw, 36px);
+      line-height: 1.02;
+      letter-spacing: 0.005em;
+    }
+    [data-v="locker"] .lk-vision cite {
+      position: relative;
+      display: block;
+      margin-top: 14px;
+      font-family: "Outfit", sans-serif;
+      font-style: normal;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      opacity: 0.65;
+    }
+    [data-v="locker"] .lk-goals {
+      list-style: none;
+      padding: 0 16px 14px;
+      margin: 0;
+    }
+    [data-v="locker"] .lk-goals li {
+      display: grid;
+      grid-template-columns: 42px 1fr auto;
+      gap: 14px;
+      align-items: center;
+      padding: 12px 14px;
+      border: 2px solid #0d0d10;
+      border-radius: 16px;
+      background: #fff;
+      margin-bottom: 8px;
+    }
+    [data-v="locker"] .lk-goals .lk-num {
+      font-family: "Bebas Neue", sans-serif;
+      font-size: 26px;
+      line-height: 1;
+      color: #ff3e1f;
+      letter-spacing: 0.005em;
+    }
+    [data-v="locker"] .lk-goals .b {
+      font-family: "Outfit", sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      line-height: 1.2;
+    }
+    [data-v="locker"] .lk-goals .m {
+      font-family: "Outfit", sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      color: rgba(13, 13, 16, 0.55);
+      margin-top: 2px;
+    }
+    [data-v="locker"] .lk-goals .pct {
+      font-family: "Bebas Neue", sans-serif;
+      font-size: 18px;
+      color: #0066ff;
+      letter-spacing: 0.02em;
+    }
+    [data-v="locker"] .lk-plan {
+      list-style: none;
+      padding: 0 16px;
+      margin: 0 0 14px;
+    }
+    [data-v="locker"] .lk-plan li {
+      display: grid;
+      grid-template-columns: 50px 1fr;
+      gap: 14px;
+      align-items: center;
+      padding: 14px 12px;
+      border: 2px solid #0d0d10;
+      border-radius: 16px;
+      background: #ffd633;
+      margin-bottom: 8px;
+    }
+    [data-v="locker"] .lk-plan li:nth-child(2) { background: #fdf9ef; }
+    [data-v="locker"] .lk-plan li:nth-child(3) { background: #0066ff; color: #fdf9ef; }
+    [data-v="locker"] .lk-plan .num {
+      font-family: "Bebas Neue", sans-serif;
+      font-size: 32px;
+      line-height: 1;
+      letter-spacing: 0.005em;
+    }
+    [data-v="locker"] .lk-plan .b {
+      font-family: "Outfit", sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      line-height: 1.15;
+    }
+    [data-v="locker"] .lk-plan .m {
+      font-family: "Outfit", sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      opacity: 0.75;
+      margin-top: 2px;
+    }
+    [data-v="locker"] .lk-bigbtn {
+      display: block;
+      width: calc(100% - 32px);
+      margin: 6px 16px 14px;
+      padding: 18px;
+      background: #ff3e1f;
+      color: #fdf9ef;
+      border: 0;
+      border-radius: 20px;
+      font-family: "Bebas Neue", sans-serif;
+      font-size: 24px;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: transform 140ms ease, box-shadow 140ms ease;
+      box-shadow: 4px 4px 0 #0d0d10;
+    }
+    [data-v="locker"] .lk-bigbtn:hover {
+      transform: translate(-2px, -2px);
+      box-shadow: 6px 6px 0 #0d0d10;
+    }
+    [data-v="locker"] .lk-bigbtn:active { transform: translate(0, 0); box-shadow: 2px 2px 0 #0d0d10; }
+    [data-v="locker"] .lk-bigbtn small {
+      display: block;
+      font-family: "Outfit", sans-serif;
+      font-weight: 600;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      opacity: 0.75;
+      margin-top: 4px;
+    }
+
+    /* ========================================================================
+       VERSION 5 · LOGBOOK
+       Day-as-fixture-list. Black / white / red sport schedule.
+       Premise: opening the app today shows you today — bold date numeral, a
+       chronological stack of fixtures, urgent items pinned in red, outstanding
+       follow-ups at the bottom. Different from Court-Side's single imminent
+       moment and Command Deck's full-roster data view.
+       ======================================================================== */
+    [data-v="logbook"] {
+      background: #0a0a0a;
+      color: #f1ede4;
+      font-family: "Archivo", system-ui, sans-serif;
+      min-height: 100%;
+      position: relative;
+    }
+    [data-v="logbook"] .lg-top {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 20px;
+      background: rgba(10, 10, 10, 0.94);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(241, 237, 228, 0.08);
+    }
+    [data-v="logbook"] .lg-mark {
+      font-family: "Clash Display", sans-serif;
+      font-weight: 600;
+      font-size: 13px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+    }
+    [data-v="logbook"] .lg-mark em {
+      color: #e63329;
+      font-style: normal;
+      margin: 0 4px;
+    }
+    [data-v="logbook"] .lg-clock {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      color: rgba(241, 237, 228, 0.5);
+    }
+
+    [data-v="logbook"] .lg-week {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      padding: 14px 16px 6px;
+    }
+    [data-v="logbook"] .lg-week .d {
+      text-align: center;
+      padding: 10px 4px 8px;
+      border: 1px solid rgba(241, 237, 228, 0.1);
+      border-radius: 4px;
+      font-family: "Clash Display", sans-serif;
+      font-weight: 500;
+      font-size: 13px;
+      color: rgba(241, 237, 228, 0.45);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      align-items: center;
+      letter-spacing: 0.04em;
+    }
+    [data-v="logbook"] .lg-week .d small {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      font-weight: 400;
+      opacity: 0.7;
+    }
+    [data-v="logbook"] .lg-week .d.on {
+      background: #e63329;
+      color: #fafaf7;
+      border-color: #e63329;
+    }
+    [data-v="logbook"] .lg-week .d.on small { opacity: 1; }
+    [data-v="logbook"] .lg-week .d.past {
+      color: rgba(241, 237, 228, 0.3);
+    }
+
+    [data-v="logbook"] .lg-hero {
+      padding: 18px 20px 4px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+    [data-v="logbook"] .lg-hero-num {
+      font-family: "Clash Display", sans-serif;
+      font-weight: 700;
+      font-size: clamp(140px, 42vw, 180px);
+      line-height: 0.78;
+      letter-spacing: -0.045em;
+      color: #fafaf7;
+    }
+    [data-v="logbook"] .lg-hero-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding-top: 10px;
+    }
+    [data-v="logbook"] .lg-month {
+      font-family: "Clash Display", sans-serif;
+      font-weight: 700;
+      font-size: 28px;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      color: #e63329;
+      line-height: 1;
+    }
+    [data-v="logbook"] .lg-day {
+      font-family: "Clash Display", sans-serif;
+      font-weight: 500;
+      font-size: 14px;
+      letter-spacing: 0.2em;
+      color: rgba(241, 237, 228, 0.55);
+      text-transform: uppercase;
+    }
+
+    [data-v="logbook"] .lg-summary {
+      padding: 4px 20px 18px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+    [data-v="logbook"] .lg-live {
+      background: #e63329;
+      color: #fafaf7;
+      padding: 5px 9px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: "Clash Display", sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+    }
+    [data-v="logbook"] .lg-stat {
+      color: rgba(241, 237, 228, 0.55);
+    }
+
+    [data-v="logbook"] .lg-fixtures {
+      list-style: none;
+      padding: 0 16px;
+      margin: 0;
+    }
+    [data-v="logbook"] .lg-fix {
+      display: grid;
+      grid-template-columns: 80px 1fr auto;
+      gap: 14px;
+      align-items: center;
+      padding: 18px 14px;
+      border-top: 1px solid rgba(241, 237, 228, 0.1);
+      position: relative;
+      cursor: pointer;
+      transition: background 160ms ease;
+    }
+    [data-v="logbook"] .lg-fix:last-child {
+      border-bottom: 1px solid rgba(241, 237, 228, 0.1);
+    }
+    [data-v="logbook"] .lg-fix:hover {
+      background: rgba(241, 237, 228, 0.03);
+    }
+    [data-v="logbook"] .lg-fix.next {
+      background: rgba(230, 51, 41, 0.1);
+      border-top-color: #e63329;
+    }
+    [data-v="logbook"] .lg-fix.next + .lg-fix {
+      border-top-color: #e63329;
+    }
+    [data-v="logbook"] .lg-fix.next:hover {
+      background: rgba(230, 51, 41, 0.15);
+    }
+    [data-v="logbook"] .lg-fix-time {
+      font-family: "Clash Display", sans-serif;
+      font-weight: 600;
+      font-size: 24px;
+      letter-spacing: -0.015em;
+      line-height: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    [data-v="logbook"] .lg-fix-time small {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      color: rgba(241, 237, 228, 0.45);
+    }
+    [data-v="logbook"] .lg-fix.next .lg-fix-time {
+      color: #e63329;
+    }
+    [data-v="logbook"] .lg-fix-body h4 {
+      font-family: "Clash Display", sans-serif;
+      font-weight: 600;
+      font-size: 19px;
+      letter-spacing: -0.012em;
+      margin: 0 0 3px;
+      text-transform: uppercase;
+    }
+    [data-v="logbook"] .lg-fix-body p {
+      margin: 0;
+      font-family: "Archivo", sans-serif;
+      font-size: 12px;
+      line-height: 1.4;
+      color: rgba(241, 237, 228, 0.6);
+    }
+    [data-v="logbook"] .lg-fix-tag {
+      font-family: "Clash Display", sans-serif;
+      font-weight: 600;
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      padding: 5px 8px;
+      background: rgba(241, 237, 228, 0.1);
+      color: rgba(241, 237, 228, 0.75);
+      white-space: nowrap;
+    }
+    [data-v="logbook"] .lg-fix-tag.clinic { background: #fafaf7; color: #0a0a0a; }
+    [data-v="logbook"] .lg-fix-tag.new { background: transparent; color: #fafaf7; border: 1px solid #fafaf7; padding: 4px 7px; }
+    [data-v="logbook"] .lg-fix.next .lg-fix-tag {
+      background: #e63329;
+      color: #fafaf7;
+    }
+
+    [data-v="logbook"] .lg-out {
+      padding: 28px 20px 28px;
+    }
+    [data-v="logbook"] .lg-out h3 {
+      font-family: "Clash Display", sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      margin: 0 0 14px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #e63329;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    [data-v="logbook"] .lg-out h3 em {
+      color: #e63329;
+      font-style: normal;
+    }
+    [data-v="logbook"] .lg-out-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    [data-v="logbook"] .lg-out-list li {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(241, 237, 228, 0.08);
+    }
+    [data-v="logbook"] .lg-out-list li:last-child { border-bottom: 0; }
+    [data-v="logbook"] .lg-out-list b {
+      font-family: "Clash Display", sans-serif;
+      font-weight: 600;
+      font-size: 16px;
+      letter-spacing: -0.005em;
+      display: block;
+    }
+    [data-v="logbook"] .lg-out-list .what {
+      display: block;
+      font-family: "Archivo", sans-serif;
+      font-size: 12px;
+      color: rgba(241, 237, 228, 0.55);
+      margin-top: 3px;
+    }
+    [data-v="logbook"] .lg-due {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      color: #e63329;
+      font-weight: 600;
+    }
+    [data-v="logbook"] .lg-out-list button {
+      appearance: none;
+      background: transparent;
+      border: 1px solid #fafaf7;
+      color: #fafaf7;
+      font-family: "Clash Display", sans-serif;
+      font-weight: 600;
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      padding: 7px 12px;
+      cursor: pointer;
+      transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+    }
+    [data-v="logbook"] .lg-out-list button:hover {
+      background: #e63329;
+      border-color: #e63329;
+      color: #fafaf7;
+    }
+    /* Logbook · sub-screen pieces */
+    [data-v="logbook"] .lg-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: transparent;
+      border: 0;
+      cursor: pointer;
+      font-family: "Clash Display", sans-serif;
+      font-weight: 600;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #e63329;
+      padding: 0;
+    }
+    [data-v="logbook"] .lg-back::before { content: "←"; font-size: 14px; line-height: 1; }
+    [data-v="logbook"] .lg-fix { cursor: pointer; }
+    [data-v="logbook"] .lg-brief {
+      padding: 0 20px;
+    }
+    [data-v="logbook"] .lg-brief h2 {
+      font-family: "Clash Display", sans-serif;
+      font-weight: 700;
+      font-size: clamp(38px, 11vw, 50px);
+      line-height: 0.9;
+      letter-spacing: -0.025em;
+      margin: 8px 0 12px;
+      text-transform: uppercase;
+    }
+    [data-v="logbook"] .lg-brief h2 em {
+      font-style: normal;
+      color: #e63329;
+    }
+    [data-v="logbook"] .lg-brief .who {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(241, 237, 228, 0.55);
+      margin-bottom: 4px;
+    }
+    [data-v="logbook"] .lg-cue {
+      margin: 18px 20px;
+      padding: 18px;
+      background: #e63329;
+      color: #fafaf7;
+      border-radius: 0;
+      position: relative;
+    }
+    [data-v="logbook"] .lg-cue .l {
+      font-family: "Clash Display", sans-serif;
+      font-weight: 600;
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      opacity: 0.85;
+    }
+    [data-v="logbook"] .lg-cue p {
+      margin: 0;
+      font-family: "Clash Display", sans-serif;
+      font-weight: 500;
+      font-size: 20px;
+      line-height: 1.18;
+      letter-spacing: -0.015em;
+    }
+    [data-v="logbook"] .lg-plan {
+      list-style: none;
+      padding: 0 20px;
+      margin: 0 0 22px;
+      counter-reset: lgp;
+    }
+    [data-v="logbook"] .lg-plan li {
+      counter-increment: lgp;
+      display: grid;
+      grid-template-columns: 44px 1fr 58px;
+      gap: 14px;
+      align-items: baseline;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(241, 237, 228, 0.1);
+    }
+    [data-v="logbook"] .lg-plan li::before {
+      content: counter(lgp, decimal-leading-zero);
+      font-family: "Clash Display", sans-serif;
+      font-weight: 700;
+      font-size: 28px;
+      color: #e63329;
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+    [data-v="logbook"] .lg-plan .b {
+      font-family: "Clash Display", sans-serif;
+      font-weight: 600;
+      font-size: 16px;
+      letter-spacing: -0.005em;
+      text-transform: uppercase;
+    }
+    [data-v="logbook"] .lg-plan .m {
+      font-family: "Archivo", sans-serif;
+      font-size: 12px;
+      color: rgba(241, 237, 228, 0.55);
+      margin-top: 3px;
+    }
+    [data-v="logbook"] .lg-plan .dur {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(241, 237, 228, 0.7);
+      text-align: right;
+    }
+    [data-v="logbook"] .lg-cta {
+      display: block;
+      width: calc(100% - 40px);
+      margin: 6px 20px 22px;
+      padding: 18px;
+      background: #fafaf7;
+      color: #0a0a0a;
+      border: 0;
+      font-family: "Clash Display", sans-serif;
+      font-weight: 700;
+      font-size: 18px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 160ms ease;
+    }
+    [data-v="logbook"] .lg-cta:hover { background: #e63329; color: #fafaf7; }
+    [data-v="logbook"] .lg-cta small {
+      display: block;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.16em;
+      margin-top: 4px;
+      opacity: 0.7;
+    }
+    [data-v="logbook"] .lg-recent {
+      padding: 14px 20px 0;
+    }
+    [data-v="logbook"] .lg-recent h3 {
+      font-family: "Clash Display", sans-serif;
+      font-weight: 600;
+      font-size: 12px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      margin: 0 0 12px;
+      color: rgba(241, 237, 228, 0.6);
+    }
+    [data-v="logbook"] .lg-recent .note {
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(241, 237, 228, 0.08);
+      display: grid;
+      grid-template-columns: 56px 1fr;
+      gap: 14px;
+    }
+    [data-v="logbook"] .lg-recent .note .date {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      color: #e63329;
+      text-transform: uppercase;
+    }
+    [data-v="logbook"] .lg-recent .note p {
+      margin: 0;
+      font-family: "Archivo", sans-serif;
+      font-size: 13px;
+      line-height: 1.45;
+      color: rgba(241, 237, 228, 0.78);
+    }
+  </style>
+</head>
+<body>
+  <div class="meta-stack">
+    <div class="meta-tag" id="metaTag">PROTOTYPE · v01 · Court-Side</div>
+    <div class="persona-switch" id="personaSwitch" role="tablist" aria-label="Persona">
+      <button type="button" data-persona="coach" class="is-active">Coach</button>
+      <button type="button" data-persona="athlete">Athlete</button>
+      <button type="button" data-persona="parent">Parent</button>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       VERSION 1 · COURT-SIDE
+       ============================================================ -->
+  <section class="stage version active" data-v="courtside" aria-label="Court-Side">
+    <div class="cs-grain"></div>
+
+    <!-- COACH · HOME -->
+    <div class="screen active" data-screen="home" data-persona="coach">
+      <div class="cs-top">
+        <div class="cs-clock" id="csClock">14:47 · MON</div>
+        <div class="cs-outstanding cs-clickable" data-go="outstanding">
+          <span class="dot"></span>
+          3 outstanding
+        </div>
+      </div>
+
+      <div class="cs-eyebrow">NEXT UP · IN 13 MIN</div>
+
+      <div class="cs-hero cs-clickable" data-go="athlete">
+        <div class="cs-time">15:00 – 15:45 · COURT 2</div>
+        <h1 class="cs-name">
+          Diego<br />Elias
+          <span class="small">Private · 14yr · L2 squad · tap to open ›</span>
+        </h1>
+      </div>
+
+      <div class="cs-focus">
+        <div class="cs-focus-text">Backhand wrist stability under pace</div>
+        <div class="cs-focus-tags">
+          <span>Technical</span>
+          <span>Process Goal 02</span>
+          <span>Week 3 of 6</span>
+        </div>
+      </div>
+
+      <div class="cs-context">
+        <h4>Last 3 sessions · in his words</h4>
+        <p><span class="src">04 May</span> Felt loose on rear court, breaking on counter drops.</p>
+        <p><span class="src">28 Apr</span> Big win — held shape into the back corners under length pressure.</p>
+        <p><span class="src">22 Apr</span> Forearm tight, watch volume next week.</p>
+      </div>
+
+      <div class="cs-thumb">
+        <button class="big" type="button" data-go="session">
+          Start session
+          <span><small>tap when on court</small></span>
+        </button>
+        <button class="sec dictate" type="button" data-go="session">
+          <span class="mic-wave"><span></span><span></span><span></span><span></span><span></span></span>
+          Voice note
+        </button>
+        <button class="sec" type="button" data-go="outstanding">
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v9l5 3" /><circle cx="12" cy="12" r="9" /></svg>
+          Nudge 3
+        </button>
+      </div>
+    </div>
+
+    <!-- COACH / ATHLETE / PARENT · ATHLETE DETAIL -->
+    <div class="screen" data-screen="athlete">
+      <div class="cs-top">
+        <button class="cs-back" type="button" data-go="home">Back</button>
+        <div class="cs-outstanding"><span class="dot"></span>profile</div>
+      </div>
+      <div class="cs-eyebrow">ATHLETE · L2 SQUAD · 14YR</div>
+      <div class="cs-hero">
+        <h1 class="cs-name">
+          Diego<br />Elias
+          <span class="small">Coach · Ahad · since Sep 2025</span>
+        </h1>
+      </div>
+      <div class="cs-focus">
+        <div class="cs-focus-text">"World champion. Willing to lose every easy point to win one that costs me."</div>
+        <div class="cs-focus-tags">
+          <span>Vision · reviewed 04 May</span>
+        </div>
+      </div>
+      <div class="cs-context">
+        <h4>Process goals · this cycle</h4>
+        <p><span class="src">01</span> Backhand wrist stability under pace · wk 3 of 6</p>
+        <p><span class="src">02</span> Length under pressure · wk 2 of 8</p>
+        <p><span class="src">03</span> Recovery after counter-drop · wk 5 of 6</p>
+      </div>
+      <ul class="cs-list">
+        <li>
+          <div class="ln">Today · 15:00<small>Backhand wrist stability · Court 2</small></div>
+          <div class="due">Next</div>
+        </li>
+        <li>
+          <div class="ln">04 May<small>Counter-drop drill · loose on rear</small></div>
+          <div class="due">+1</div>
+        </li>
+        <li>
+          <div class="ln">28 Apr<small>Length pressure · big win</small></div>
+          <div class="due">+1</div>
+        </li>
+      </ul>
+      <div class="cs-thumb">
+        <button class="big" type="button" data-go="session">
+          Start session
+          <span><small>15:00 · in 13 min</small></span>
+        </button>
+        <button class="sec" type="button" data-go="home">
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12H3M9 6l-6 6 6 6"/></svg>
+          Back home
+        </button>
+        <button class="sec" type="button">
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5l3 2"/></svg>
+          Reschedule
+        </button>
+      </div>
+    </div>
+
+    <!-- COACH · SESSION (live) -->
+    <div class="screen" data-screen="session">
+      <div class="cs-top">
+        <button class="cs-back" type="button" data-go="home">End & save</button>
+        <div class="cs-rec">Rec · 02:14</div>
+      </div>
+      <div class="cs-eyebrow">LIVE · DIEGO ELIAS · COURT 2</div>
+      <div class="cs-hero">
+        <div class="cs-time">FOCUS · BH WRIST STABILITY</div>
+        <h1 class="cs-name">02:14<span class="small">elapsed · started 15:00</span></h1>
+      </div>
+      <div class="cs-focus">
+        <div class="cs-focus-text">Square the racquet face through contact when pulled wide.</div>
+        <div class="cs-focus-tags">
+          <span>Cue 1 · "stay tall"</span>
+          <span>Cue 2 · "wait the ball"</span>
+        </div>
+      </div>
+      <div class="cs-note">
+        <span class="tag">Auto-captured · 14:48</span>
+        First two boasts — wrist still breaking. Tighter on third when I cued him to wait. Going to add a 2-min ghost drill before conditioned game.
+      </div>
+      <div class="cs-thumb">
+        <button class="big" type="button" data-go="home">
+          End & save
+          <span><small>note will send to Diego</small></span>
+        </button>
+        <button class="sec dictate" type="button">
+          <span class="mic-wave"><span></span><span></span><span></span><span></span><span></span></span>
+          Capture
+        </button>
+        <button class="sec" type="button">
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5v14"/></svg>
+          Quick tag
+        </button>
+      </div>
+    </div>
+
+    <!-- COACH · OUTSTANDING -->
+    <div class="screen" data-screen="outstanding">
+      <div class="cs-top">
+        <button class="cs-back" type="button" data-go="home">Back</button>
+        <div class="cs-outstanding"><span class="dot"></span>3 to nudge</div>
+      </div>
+      <div class="cs-eyebrow">FOLLOW-UPS · PAST DUE</div>
+      <div class="cs-hero">
+        <h1 class="cs-name">Nudge<br/>queue<span class="small">3 items · oldest 2 days late</span></h1>
+      </div>
+      <ul class="cs-list">
+        <li>
+          <div class="ln">Cal Whitten<small>BH video clip · baseline</small></div>
+          <div class="due">2d late</div>
+        </li>
+        <li>
+          <div class="ln">Nour Sayed<small>Reflection · tournament</small></div>
+          <div class="due">Today</div>
+        </li>
+        <li>
+          <div class="ln">Marco Ramirez<small>Self-awareness questionnaire</small></div>
+          <div class="due">Tmrw</div>
+        </li>
+      </ul>
+      <div class="cs-thumb">
+        <button class="big" type="button" data-go="home">
+          Nudge all 3
+          <span><small>sends in-app + push</small></span>
+        </button>
+        <button class="sec" type="button" data-go="home">
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>
+          Snooze 1d
+        </button>
+        <button class="sec" type="button" data-go="home">
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h18"/></svg>
+          Back
+        </button>
+      </div>
+    </div>
+
+    <!-- ATHLETE · HOME -->
+    <div class="screen" data-screen="home" data-persona="athlete">
+      <div class="cs-top">
+        <div class="cs-clock">DIEGO · 14:47</div>
+        <div class="cs-outstanding"><span class="dot"></span>1 due today</div>
+      </div>
+      <div class="cs-eyebrow">YOU'RE UP · IN 13 MIN</div>
+      <div class="cs-hero">
+        <div class="cs-time">15:00 · COURT 2 · WITH AHAD</div>
+        <h1 class="cs-name">Today's<br />work<span class="small">Backhand wrist stability ›</span></h1>
+      </div>
+      <div class="cs-focus cs-clickable" data-go="session-brief">
+        <div class="cs-focus-text">Square the racquet face through contact when pulled wide</div>
+        <div class="cs-focus-tags">
+          <span>Cue · "stay tall"</span>
+          <span>Cue · "wait the ball"</span>
+          <span>~45 min</span>
+        </div>
+      </div>
+      <div class="cs-context">
+        <h4>Open from Ahad</h4>
+        <p><span class="src">DUE</span> Send a backhand video clip — anytime before Friday.</p>
+        <p><span class="src">DONE</span> Reflection on Tuesday's match — saved 06 May.</p>
+      </div>
+      <div class="cs-thumb">
+        <button class="big" type="button" data-go="session-brief">
+          I'm here
+          <span><small>tells Ahad you arrived</small></span>
+        </button>
+        <button class="sec dictate" type="button">
+          <span class="mic-wave"><span></span><span></span><span></span><span></span><span></span></span>
+          Voice reflect
+        </button>
+        <button class="sec" type="button">
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5-5 5 5M12 5v12"/></svg>
+          Upload clip
+        </button>
+      </div>
+    </div>
+
+    <!-- ATHLETE · SESSION BRIEF -->
+    <div class="screen" data-screen="session-brief">
+      <div class="cs-top">
+        <button class="cs-back" type="button" data-go="home">Back</button>
+        <div class="cs-outstanding"><span class="dot"></span>brief</div>
+      </div>
+      <div class="cs-eyebrow">TODAY · 15:00 — 15:45 · COURT 2</div>
+      <div class="cs-hero">
+        <h1 class="cs-name">Backhand<br/>wrist<span class="small">Process goal 02 · wk 3 of 6</span></h1>
+      </div>
+      <div class="cs-focus">
+        <div class="cs-focus-text">Square the racquet face through contact when pulled wide.</div>
+        <div class="cs-focus-tags">
+          <span>~10 min warm-up</span>
+          <span>20 min boast / drive</span>
+          <span>15 min conditioned game</span>
+        </div>
+      </div>
+      <div class="cs-note">
+        <span class="tag">Coach note · 09 May</span>
+        Don't worry about pace today — let the wrist hold the shape first. Pace comes back next week.
+      </div>
+      <div class="cs-thumb">
+        <button class="big" type="button" data-go="home">
+          Got it
+          <span><small>back to home</small></span>
+        </button>
+        <button class="sec" type="button">
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8v8M8 12h8"/><circle cx="12" cy="12" r="9"/></svg>
+          Add question
+        </button>
+        <button class="sec dictate" type="button">
+          <span class="mic-wave"><span></span><span></span><span></span><span></span><span></span></span>
+          Pre-note
+        </button>
+      </div>
+    </div>
+
+    <!-- PARENT · HOME -->
+    <div class="screen" data-screen="home" data-persona="parent">
+      <div class="cs-top">
+        <div class="cs-clock">DIEGO'S DAY · 14:47</div>
+        <div class="cs-outstanding"><span class="dot"></span>1 new note</div>
+      </div>
+      <div class="cs-eyebrow">YOUR CHILD · ON COURT IN 13 MIN</div>
+      <div class="cs-hero cs-clickable" data-go="athlete">
+        <div class="cs-time">15:00 – 15:45 · COURT 2</div>
+        <h1 class="cs-name">Diego<br />Elias<span class="small">Private with Ahad · tap to open ›</span></h1>
+      </div>
+      <div class="cs-focus">
+        <div class="cs-focus-text">Today's focus · backhand wrist stability under pace</div>
+        <div class="cs-focus-tags">
+          <span>Wk 3 of 6</span>
+          <span>Process Goal 02</span>
+        </div>
+      </div>
+      <div class="cs-note">
+        <span class="tag">From Ahad · 04 May</span>
+        Big improvement holding the back corners under length pressure. Working through the wrist piece for the next 3 weeks. Long-game progress is real.
+      </div>
+      <div class="cs-context">
+        <h4>This week</h4>
+        <p><span class="src">MON</span> Private · 15:00 with Ahad</p>
+        <p><span class="src">WED</span> Group clinic · 18:00 with Junior squad</p>
+        <p><span class="src">SAT</span> Friendly match · State qualifier</p>
+      </div>
+      <div class="cs-thumb">
+        <button class="big" type="button" data-go="progress">
+          See progress
+          <span><small>last 6 weeks</small></span>
+        </button>
+        <button class="sec" type="button" data-go="athlete">
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 22a8 8 0 0 1 16 0"/></svg>
+          Diego's plan
+        </button>
+        <button class="sec" type="button">
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8l9 6 9-6"/><rect x="3" y="5" width="18" height="14" rx="2"/></svg>
+          Message Ahad
+        </button>
+      </div>
+    </div>
+
+    <!-- PARENT · PROGRESS -->
+    <div class="screen" data-screen="progress">
+      <div class="cs-top">
+        <button class="cs-back" type="button" data-go="home">Back</button>
+        <div class="cs-outstanding"><span class="dot"></span>progress</div>
+      </div>
+      <div class="cs-eyebrow">LAST 6 WEEKS · DIEGO</div>
+      <div class="cs-hero">
+        <h1 class="cs-name">+12<br/>level<span class="small">vs. baseline · 22 Mar</span></h1>
+      </div>
+      <div class="cs-focus">
+        <div class="cs-focus-text">Three process goals on track · one ahead of plan</div>
+        <div class="cs-focus-tags">
+          <span>BH wrist · on track</span>
+          <span>Length · ahead</span>
+          <span>Recovery · on track</span>
+        </div>
+      </div>
+      <div class="cs-context">
+        <h4>Recent benchmarks</h4>
+        <p><span class="src">+18</span> Length under pressure · 04 May vs baseline</p>
+        <p><span class="src">+11</span> Backhand consistency · 28 Apr</p>
+        <p><span class="src">+8</span> Recovery off counter · 22 Apr</p>
+      </div>
+      <div class="cs-thumb">
+        <button class="big" type="button" data-go="home">
+          Back
+          <span><small>parent home</small></span>
+        </button>
+        <button class="sec" type="button">
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+          Share
+        </button>
+        <button class="sec" type="button">
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5l3 2"/></svg>
+          History
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       VERSION 2 · BROADSHEET
+       ============================================================ -->
+  <section class="stage version" data-v="broadsheet" aria-label="Broadsheet">
+    <!-- COACH · HOME (Diego feature spread) -->
+    <div class="screen active" data-screen="home" data-persona="coach">
+      <header class="bs-mast">
+        <span class="bs-mast-mark">SQUAD<em>/</em>FEATURE</span>
+        <span class="bs-mast-meta">ISS 18 · MAY 26</span>
+      </header>
+      <div class="bs-eyebrow">
+        <span class="rule"></span>
+        Vol. 02 · No. 03 · Athlete in residence
+      </div>
+      <h1 class="bs-name bs-clickable" data-go="roster">
+        <span class="bs-drop">D</span>iego<br />Elias
+      </h1>
+      <p class="bs-sub">Fourteen. <em>Sees the world champion he wants to be.</em></p>
+      <div class="bs-coverstats">
+        <div class="bs-cs"><small>Age</small><b>14</b></div>
+        <div class="bs-cs alt"><small>Squad</small><b>L2</b></div>
+        <div class="bs-cs"><small>Cycle</small><b>3<em>/6</em></b></div>
+      </div>
+      <figure class="bs-quote">
+        <p>World champion. Willing to lose every easy point to win one that costs me.</p>
+        <figcaption>Diego · vision, reviewed 04 May</figcaption>
+      </figure>
+      <section class="bs-feat">
+        <h3>Outcome goals</h3>
+        <ol class="bs-num">
+          <li><span class="bs-n">01</span><div><strong>State champion U17</strong><em>by summer 2026</em></div></li>
+          <li><span class="bs-n">02</span><div><strong>Top eight national U17</strong><em>by summer 2027</em></div></li>
+        </ol>
+      </section>
+      <section class="bs-feat">
+        <h3>Process goals · this cycle</h3>
+        <ul class="bs-list">
+          <li><b>Backhand wrist stability under pace</b><span>wk 3/6</span></li>
+          <li><b>Length under pressure</b><span>wk 2/8</span></li>
+          <li><b>Recovery after counter-drop</b><span>wk 5/6</span></li>
+        </ul>
+      </section>
+      <aside class="bs-today bs-clickable" data-go="session">
+        <div class="bs-today-when">TODAY · 15:00 · COURT 2</div>
+        <h2>Backhand wrist stability under pace</h2>
+        <p>Picking up from Tuesday — length under counter held, but the body collapsed off the wall on the third volley.</p>
+        <a class="bs-cta" href="#" data-go="session">Open session brief</a>
+      </aside>
+      <footer class="bs-foot">
+        <span>Edited · A. Raza</span>
+        <span><button class="bs-back" type="button" data-go="roster">View roster</button></span>
+      </footer>
+    </div>
+
+    <!-- COACH · ROSTER -->
+    <div class="screen" data-screen="roster">
+      <header class="bs-mast">
+        <span class="bs-mast-mark">SQUAD<em>/</em>ROSTER</span>
+        <span class="bs-mast-meta">14 ATHLETES · MAY 26</span>
+      </header>
+      <div class="bs-eyebrow">
+        <span class="rule"></span>
+        Index · this cycle
+      </div>
+      <h1 class="bs-name">All<br/>athletes</h1>
+      <p class="bs-sub">14 in your roster. <em>3 with outstanding follow-ups.</em></p>
+      <div style="margin: 24px 0 0;">
+        <ul class="bs-roster">
+          <li data-go="home">
+            <span class="bs-r-n">01</span>
+            <div><strong>Diego Elias</strong><em>BH wrist · wk 3/6 · last 04 May</em></div>
+            <span class="bs-r-tag">Today</span>
+          </li>
+          <li>
+            <span class="bs-r-n">02</span>
+            <div><strong>Nour Sayed</strong><em>Volley depth · wk 1/4 · reflection due</em></div>
+            <span class="bs-r-tag due">Due</span>
+          </li>
+          <li>
+            <span class="bs-r-n">03</span>
+            <div><strong>Cal Whitten</strong><em>Onboarding · no baseline yet</em></div>
+            <span class="bs-r-tag new">New</span>
+          </li>
+          <li>
+            <span class="bs-r-n">04</span>
+            <div><strong>Aiza Khan</strong><em>Recovery · wk 5/6 · on track</em></div>
+            <span class="bs-r-tag" style="background:transparent;color:#0a0a0a;border:1px solid #0a0a0a">Ok</span>
+          </li>
+          <li>
+            <span class="bs-r-n">05</span>
+            <div><strong>Marco Ramirez</strong><em>Length · wk 2/8 · questionnaire pending</em></div>
+            <span class="bs-r-tag due">Due</span>
+          </li>
+        </ul>
+      </div>
+      <footer class="bs-foot">
+        <button class="bs-back" type="button" data-go="home">Back to feature</button>
+        <span>14 · SHOWING 5</span>
+      </footer>
+    </div>
+
+    <!-- ALL · SESSION BRIEF -->
+    <div class="screen" data-screen="session">
+      <header class="bs-mast">
+        <span class="bs-mast-mark">SQUAD<em>/</em>BRIEF</span>
+        <span class="bs-mast-meta">15:00 · 10 MAY 26</span>
+      </header>
+      <div class="bs-eyebrow">
+        <span class="rule"></span>
+        Today's session · Court 2
+      </div>
+      <h1 class="bs-name" style="font-size: clamp(48px, 14vw, 70px)">Backhand<br/>wrist<br/>stability</h1>
+      <p class="bs-sub">With Diego Elias. <em>Process goal 02 of 03 · wk 3 of 6.</em></p>
+      <div class="bs-coverstats">
+        <div class="bs-cs"><small>Length</small><b>45<em>m</em></b></div>
+        <div class="bs-cs alt"><small>Court</small><b>2</b></div>
+        <div class="bs-cs"><small>Cue</small><b>Tall</b></div>
+      </div>
+      <figure class="bs-quote">
+        <p>Square the racquet face through contact when pulled wide. Don't chase pace — let the wrist hold shape first.</p>
+        <figcaption>Cue · pinned 09 May</figcaption>
+      </figure>
+      <section class="bs-feat">
+        <h3>Plan</h3>
+        <ol class="bs-plan">
+          <li><strong>Warm-up · solo length</strong><small>10 min · both sides</small></li>
+          <li><strong>Boast / drive · backhand only</strong><small>20 min · feed first, live after 5</small></li>
+          <li><strong>Conditioned game · backhand bound</strong><small>15 min · point starts on coach's serve</small></li>
+        </ol>
+      </section>
+      <aside class="bs-today">
+        <div class="bs-today-when">READY TO START</div>
+        <h2>Tap when you're on court</h2>
+        <p>Notes auto-save under Diego. Voice dictation runs in the background once you start.</p>
+        <a class="bs-cta" href="#" data-go="home">Begin session</a>
+      </aside>
+      <footer class="bs-foot">
+        <button class="bs-back" type="button" data-go="home">Back</button>
+        <span>Saved 14:32</span>
+      </footer>
+    </div>
+
+    <!-- ATHLETE · HOME (Diego's own profile) -->
+    <div class="screen" data-screen="home" data-persona="athlete">
+      <header class="bs-mast">
+        <span class="bs-mast-mark">SQUAD<em>/</em>MY FILE</span>
+        <span class="bs-mast-meta">DIEGO · MAY 26</span>
+      </header>
+      <div class="bs-eyebrow">
+        <span class="rule"></span>
+        My working file · cycle 03
+      </div>
+      <h1 class="bs-name">My<br />vision</h1>
+      <p class="bs-sub">Fourteen. <em>Becoming the player I see in my head.</em></p>
+      <div class="bs-coverstats">
+        <div class="bs-cs"><small>Streak</small><b>14<em>d</em></b></div>
+        <div class="bs-cs alt"><small>Cycle</small><b>3<em>/6</em></b></div>
+        <div class="bs-cs"><small>Open</small><b>1</b></div>
+      </div>
+      <figure class="bs-quote">
+        <p>World champion. Willing to lose every easy point to win one that costs me.</p>
+        <figcaption>Reviewed 04 May · pinned</figcaption>
+      </figure>
+      <section class="bs-feat">
+        <h3>My outcome goals</h3>
+        <ol class="bs-num">
+          <li><span class="bs-n">01</span><div><strong>State champion U17</strong><em>by summer 2026</em></div></li>
+          <li><span class="bs-n">02</span><div><strong>Top eight national U17</strong><em>by summer 2027</em></div></li>
+        </ol>
+      </section>
+      <section class="bs-feat">
+        <h3>This cycle · 3 things</h3>
+        <ul class="bs-list">
+          <li><b>Backhand wrist stability under pace</b><span>wk 3/6</span></li>
+          <li><b>Length under pressure</b><span>wk 2/8</span></li>
+          <li><b>Recovery after counter-drop</b><span>wk 5/6</span></li>
+        </ul>
+      </section>
+      <aside class="bs-today bs-clickable" data-go="session">
+        <div class="bs-today-when">YOU'RE UP · IN 13 MIN</div>
+        <h2>Backhand wrist stability</h2>
+        <p>Ahad: "Don't worry about pace today — let the wrist hold the shape first."</p>
+        <a class="bs-cta" href="#" data-go="session">Open the brief</a>
+      </aside>
+      <footer class="bs-foot">
+        <span>Coach · A. Raza</span>
+        <span>Saved 14:32</span>
+      </footer>
+    </div>
+
+    <!-- PARENT · HOME (Diego, parent's view) -->
+    <div class="screen" data-screen="home" data-persona="parent">
+      <header class="bs-mast">
+        <span class="bs-mast-mark">SQUAD<em>/</em>FAMILY</span>
+        <span class="bs-mast-meta">DIEGO · WK 19 · MAY 26</span>
+      </header>
+      <div class="bs-eyebrow">
+        <span class="rule"></span>
+        This week · your child
+      </div>
+      <h1 class="bs-name">
+        <span class="bs-drop">D</span>iego<br />this week
+      </h1>
+      <p class="bs-sub">What he's working on. <em>By his coach.</em></p>
+      <div class="bs-coverstats">
+        <div class="bs-cs"><small>Sessions</small><b>3</b></div>
+        <div class="bs-cs alt"><small>Cycle</small><b>3<em>/6</em></b></div>
+        <div class="bs-cs"><small>Progress</small><b>+12</b></div>
+      </div>
+      <figure class="bs-quote">
+        <p>Big improvement holding the back corners under length pressure. Long-game progress is real.</p>
+        <figcaption>Note from Ahad · 04 May</figcaption>
+      </figure>
+      <section class="bs-feat">
+        <h3>This week's schedule</h3>
+        <ul class="bs-list">
+          <li><b>Mon · Private with Ahad</b><span>15:00</span></li>
+          <li><b>Wed · Junior squad clinic</b><span>18:00</span></li>
+          <li><b>Sat · State qualifier (match)</b><span>09:00</span></li>
+        </ul>
+      </section>
+      <aside class="bs-today bs-clickable" data-go="session">
+        <div class="bs-today-when">TODAY · 15:00 · COURT 2</div>
+        <h2>Backhand wrist stability</h2>
+        <p>What Diego will work on with Ahad. Notes from the session arrive after they finish.</p>
+        <a class="bs-cta" href="#" data-go="session">See plan</a>
+      </aside>
+      <footer class="bs-foot">
+        <span>Coach · A. Raza</span>
+        <span>Updated 14:32</span>
+      </footer>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       VERSION 3 · COMMAND DECK
+       ============================================================ -->
+  <section class="stage version" data-v="command" aria-label="Command Deck">
+    <!-- COACH · HOME (roster + queue) -->
+    <div class="screen active" data-screen="home" data-persona="coach">
+      <div class="cd-bar">
+        <div class="cd-logo"><span class="ring"></span> SQUAD/01</div>
+        <div class="cd-clock"><b id="cdClock">14:47:03</b> · MON 10 MAY 26</div>
+        <div class="badges"><b>● LIVE</b></div>
+      </div>
+      <div class="cd-hero">
+        <div class="cd-eyebrow">Sunday plan · week of 11 May</div>
+        <h1 class="cd-h1">14 athletes <em>need attention</em></h1>
+        <div class="cd-sub">9 scheduled · 3 outstanding nudges · 2 unscored assessments</div>
+      </div>
+      <div class="cd-grid">
+        <div class="cd-stat"><div class="l">Sessions / week</div><div class="v">23 <small>vs 19 prev</small></div><div class="trend">+21% capture rate</div></div>
+        <div class="cd-stat"><div class="l">Notes captured</div><div class="v">19 <small>/ 23</small></div><div class="trend">82% within 1 hr</div></div>
+        <div class="cd-stat"><div class="l">Outstanding</div><div class="v">3 <small>tasks</small></div><div class="trend" style="color:#ffce4d">2 past due</div></div>
+        <div class="cd-stat"><div class="l">Avg streak</div><div class="v">11 <small>days</small></div><div class="trend">↗ trending</div></div>
+      </div>
+      <div class="cd-table">
+        <div class="hdr"><span>Athlete · focus</span><span>30d trend</span><span>Last</span></div>
+        <div class="cd-row" data-go="athlete">
+          <div class="nm">Diego Elias<small>BH WRIST · WK 3/6</small></div>
+          <svg class="spark" viewBox="0 0 100 24" preserveAspectRatio="none"><path d="M0,18 L10,15 L20,16 L30,12 L40,13 L50,9 L60,11 L70,7 L80,8 L90,5 L100,4" /></svg>
+          <div class="since">2d</div>
+        </div>
+        <div class="cd-row" data-go="athlete">
+          <div class="nm">Nour Sayed<small>VOLLEY DEPTH · WK 1/4</small></div>
+          <svg class="spark" viewBox="0 0 100 24" preserveAspectRatio="none"><path d="M0,12 L12,14 L24,11 L36,13 L48,10 L60,12 L72,9 L84,11 L100,9" /></svg>
+          <div class="since">5d</div>
+        </div>
+        <div class="cd-row" data-go="athlete">
+          <div class="nm">Cal Whitten<small>NEEDS ONBOARDING</small></div>
+          <svg class="spark" viewBox="0 0 100 24" preserveAspectRatio="none"><path d="M70,12 L82,11 L92,9 L100,8" stroke-dasharray="2 2" /></svg>
+          <div class="since" style="color:#ffce4d">new</div>
+        </div>
+        <div class="cd-row" data-go="athlete">
+          <div class="nm">Aiza Khan<small>RECOVERY · WK 5/6</small></div>
+          <svg class="spark" viewBox="0 0 100 24" preserveAspectRatio="none"><path d="M0,16 L12,14 L24,12 L36,13 L48,10 L60,8 L72,9 L84,7 L100,6" /></svg>
+          <div class="since">1d</div>
+        </div>
+        <div class="cd-row" data-go="athlete">
+          <div class="nm">Marco Ramirez<small>LENGTH · WK 2/8</small></div>
+          <svg class="spark" viewBox="0 0 100 24" preserveAspectRatio="none"><path d="M0,9 L12,11 L24,8 L36,10 L48,7 L60,9 L72,6 L84,8 L100,5" /></svg>
+          <div class="since">3d</div>
+        </div>
+      </div>
+      <div class="cd-queue">
+        <h3>QUEUE <b>· 3 PAST DUE</b></h3>
+        <div class="cd-q-item">
+          <div><div class="who">Cal Whitten</div><div class="what">video clip · backhand swing baseline</div></div>
+          <div class="due">2D LATE</div>
+        </div>
+        <div class="cd-q-item">
+          <div><div class="who">Nour Sayed</div><div class="what">reflection · what felt easy in tournament</div></div>
+          <button data-go="home">Nudge</button>
+        </div>
+        <div class="cd-q-item">
+          <div><div class="who">Marco Ramirez</div><div class="what">self-awareness questionnaire · mental block</div></div>
+          <button data-go="home">Nudge</button>
+        </div>
+      </div>
+      <div class="cd-foot">
+        <span>· OFFLINE READY</span>
+        <span>BUILD 0.0.1 ·</span>
+      </div>
+    </div>
+
+    <!-- ATHLETE DECK -->
+    <div class="screen" data-screen="athlete">
+      <div class="cd-bar">
+        <button class="cd-back" type="button" data-go="home">Roster</button>
+        <div class="cd-clock"><b>DIEGO ELIAS</b> · L2 · 14YR</div>
+        <div class="badges"><b>ACTIVE</b></div>
+      </div>
+      <div class="cd-hero">
+        <div class="cd-eyebrow">Athlete deck · cycle 03 · wk 3/6</div>
+        <h1 class="cd-h1">3 process goals <em>tracked</em></h1>
+        <div class="cd-sub">14 sessions · 12 captured · streak 14d</div>
+      </div>
+      <div class="cd-grid">
+        <div class="cd-stat"><div class="l">Sessions · cycle</div><div class="v">14 <small>/ 18 planned</small></div><div class="trend">on track</div></div>
+        <div class="cd-stat"><div class="l">Capture rate</div><div class="v">86% <small>notes</small></div><div class="trend">+12% vs cycle 02</div></div>
+        <div class="cd-stat"><div class="l">Streak</div><div class="v">14 <small>days</small></div><div class="trend">personal best</div></div>
+        <div class="cd-stat"><div class="l">Open tasks</div><div class="v">0 <small>none due</small></div><div class="trend">clean queue</div></div>
+      </div>
+      <div class="cd-trace">
+        <h4>Process goals · last 30 days</h4>
+        <div class="row">
+          <span class="label">BH wrist</span>
+          <svg viewBox="0 0 100 24" preserveAspectRatio="none"><path d="M0,18 L20,16 L40,13 L60,10 L80,8 L100,5"/></svg>
+          <span class="val">+8</span>
+        </div>
+        <div class="row">
+          <span class="label">Length</span>
+          <svg viewBox="0 0 100 24" preserveAspectRatio="none"><path d="M0,14 L20,13 L40,11 L60,8 L80,6 L100,4"/></svg>
+          <span class="val">+18</span>
+        </div>
+        <div class="row">
+          <span class="label">Recovery</span>
+          <svg viewBox="0 0 100 24" preserveAspectRatio="none"><path d="M0,16 L20,15 L40,12 L60,11 L80,9 L100,8"/></svg>
+          <span class="val">+6</span>
+        </div>
+      </div>
+      <div class="cd-action">
+        <button data-go="session">Start session</button>
+        <button class="ghost">Nudge</button>
+        <button class="ghost">New assessment</button>
+        <button class="ghost" data-go="home">Back</button>
+      </div>
+      <div class="cd-foot">
+        <span>· LAST 04 MAY</span>
+        <span>NEXT TODAY 15:00 ·</span>
+      </div>
+    </div>
+
+    <!-- SESSION PREP -->
+    <div class="screen" data-screen="session">
+      <div class="cd-bar">
+        <button class="cd-back" type="button" data-go="athlete">Athlete</button>
+        <div class="cd-clock"><b>SESSION · 15:00</b> · STARTS IN 13M</div>
+        <div class="badges"><b>● ARMED</b></div>
+      </div>
+      <div class="cd-hero">
+        <div class="cd-eyebrow">Pre-session · backhand wrist stability</div>
+        <h1 class="cd-h1">Plan locked <em>·</em> ready</h1>
+        <div class="cd-sub">Diego Elias · Court 2 · 45 min · 1 cue pinned</div>
+      </div>
+      <ul class="cd-checklist">
+        <li class="ok">Brief sent to Diego · 14:31<span class="ts">8m ago</span></li>
+        <li class="ok">Court 2 confirmed · 15:00<span class="ts">2m ago</span></li>
+        <li class="ok">Previous notes pinned (04 May)<span class="ts">auto</span></li>
+        <li>Coach to be on court<span class="ts">— 13m</span></li>
+        <li>Voice capture armed<span class="ts">— 0m</span></li>
+      </ul>
+      <div class="cd-trace">
+        <h4>Plan · 45 min</h4>
+        <div class="row"><span class="label">Warm-up</span><svg viewBox="0 0 100 24"><path d="M0,14 L100,14" stroke-dasharray="2 2"/></svg><span class="val">10m</span></div>
+        <div class="row"><span class="label">BH boast / drive</span><svg viewBox="0 0 100 24"><path d="M0,14 L100,14"/></svg><span class="val">20m</span></div>
+        <div class="row"><span class="label">Conditioned game</span><svg viewBox="0 0 100 24"><path d="M0,14 L100,14"/></svg><span class="val">15m</span></div>
+      </div>
+      <div class="cd-action">
+        <button data-go="home">Start session</button>
+        <button class="ghost">Edit plan</button>
+        <button class="ghost" data-go="athlete">Back</button>
+      </div>
+      <div class="cd-foot">
+        <span>· VOICE READY</span>
+        <span>OFFLINE OK ·</span>
+      </div>
+    </div>
+
+    <!-- ATHLETE · HOME -->
+    <div class="screen" data-screen="home" data-persona="athlete">
+      <div class="cd-bar">
+        <div class="cd-logo"><span class="ring"></span> SQUAD/ME</div>
+        <div class="cd-clock"><b>DIEGO E.</b> · L2 · 14YR</div>
+        <div class="badges"><b>STREAK 14</b></div>
+      </div>
+      <div class="cd-hero">
+        <div class="cd-eyebrow">Today · session 14 of cycle 03</div>
+        <h1 class="cd-h1">You're up <em>in 13 min</em></h1>
+        <div class="cd-sub">Backhand wrist stability · with Ahad · Court 2</div>
+      </div>
+      <div class="cd-grid">
+        <div class="cd-stat"><div class="l">Sessions · cycle</div><div class="v">14 <small>/ 18</small></div><div class="trend">on track</div></div>
+        <div class="cd-stat"><div class="l">My streak</div><div class="v">14 <small>days</small></div><div class="trend">PB</div></div>
+        <div class="cd-stat"><div class="l">Open tasks</div><div class="v">1 <small>due fri</small></div><div class="trend">video clip</div></div>
+        <div class="cd-stat"><div class="l">Cycle progress</div><div class="v">+12 <small>lvl</small></div><div class="trend">vs baseline</div></div>
+      </div>
+      <div class="cd-trace">
+        <h4>My process goals</h4>
+        <div class="row"><span class="label">BH wrist</span><svg viewBox="0 0 100 24"><path d="M0,18 L20,16 L40,13 L60,10 L80,8 L100,5"/></svg><span class="val">+8</span></div>
+        <div class="row"><span class="label">Length</span><svg viewBox="0 0 100 24"><path d="M0,14 L20,13 L40,11 L60,8 L80,6 L100,4"/></svg><span class="val">+18</span></div>
+        <div class="row"><span class="label">Recovery</span><svg viewBox="0 0 100 24"><path d="M0,16 L20,15 L40,12 L60,11 L80,9 L100,8"/></svg><span class="val">+6</span></div>
+      </div>
+      <div class="cd-action">
+        <button data-go="session">Open brief</button>
+        <button class="ghost">Voice reflect</button>
+        <button class="ghost">Upload clip</button>
+      </div>
+      <div class="cd-foot">
+        <span>· COACH AHAD</span>
+        <span>NEXT 15:00 ·</span>
+      </div>
+    </div>
+
+    <!-- PARENT · HOME -->
+    <div class="screen" data-screen="home" data-persona="parent">
+      <div class="cd-bar">
+        <div class="cd-logo"><span class="ring"></span> SQUAD/FAMILY</div>
+        <div class="cd-clock"><b>DIEGO</b> · WK 19 · MAY 26</div>
+        <div class="badges"><b>● ACTIVE</b></div>
+      </div>
+      <div class="cd-hero">
+        <div class="cd-eyebrow">Your child this week</div>
+        <h1 class="cd-h1">3 sessions <em>·</em> +12 lvl</h1>
+        <div class="cd-sub">On track across 3 process goals · 1 ahead of plan</div>
+      </div>
+      <div class="cd-grid">
+        <div class="cd-stat"><div class="l">This week</div><div class="v">3 <small>sessions</small></div><div class="trend">Sat match</div></div>
+        <div class="cd-stat"><div class="l">Last 6 wk</div><div class="v">+12 <small>lvl</small></div><div class="trend">↗ trending</div></div>
+        <div class="cd-stat"><div class="l">Coach notes</div><div class="v">11 <small>captured</small></div><div class="trend">5 new this wk</div></div>
+        <div class="cd-stat"><div class="l">Streak</div><div class="v">14 <small>days</small></div><div class="trend">PB</div></div>
+      </div>
+      <div class="cd-trace">
+        <h4>Recent coach notes</h4>
+        <div class="row"><span class="label">04 May</span><span style="font-family: 'Funnel Display'; font-size: 12px; color: #d8dde0">"Big improvement holding back corners under length pressure."</span><span class="val">+</span></div>
+        <div class="row"><span class="label">28 Apr</span><span style="font-family: 'Funnel Display'; font-size: 12px; color: #d8dde0">"Forearm tight — watching volume next week."</span><span class="val">~</span></div>
+      </div>
+      <div class="cd-action">
+        <button data-go="session">Today's plan</button>
+        <button class="ghost" data-go="athlete">Diego's deck</button>
+        <button class="ghost">Message Ahad</button>
+      </div>
+      <div class="cd-foot">
+        <span>· COACH AHAD</span>
+        <span>TODAY 15:00 ·</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       VERSION 4 · LOCKER ROOM
+       ============================================================ -->
+  <section class="stage version" data-v="locker" aria-label="Locker Room">
+    <!-- COACH · HOME -->
+    <div class="screen active" data-screen="home" data-persona="coach">
+      <div class="lk-bar">
+        <div class="lk-brand"><span class="ball"></span> SQUAD</div>
+        <div class="streak">
+          <svg class="flame" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 2c1 4-3 6-3 10a3 3 0 0 0 6 0c0-1-1-2-2-3 3 0 5 3 5 6a6 6 0 0 1-12 0c0-5 4-7 6-13z" />
+          </svg>
+          14-day streak
+        </div>
+      </div>
+      <div class="lk-hero">
+        <div class="when">Today · 15:00 · Court 2</div>
+        <h2>Diego<br />Elias<small>Private · 13 min away</small></h2>
+        <div class="focus">
+          <b>Today's focus</b>
+          Backhand wrist stability under pace · process goal 02 of 03
+        </div>
+        <div class="go" title="Start session" data-go="session">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 6 15 12 9 18" /></svg>
+        </div>
+      </div>
+      <div class="lk-stats">
+        <div class="lk-stat"><div class="v">23</div><div class="l">Sessions · wk</div></div>
+        <div class="lk-stat alt"><div class="v">19</div><div class="l">Notes captured</div></div>
+        <div class="lk-stat accent" style="color:#fdf9ef"><div class="v">8</div><div class="l">Active athletes</div></div>
+      </div>
+      <div class="lk-roster">
+        <h3>Roster <a href="#" data-go="athlete">View all 14 →</a></h3>
+        <div class="lk-card b1" data-go="athlete">
+          <div class="av">DE</div>
+          <div><div class="nm">Diego Elias</div><div class="meta">Last: 04 May · BH wrist stability</div></div>
+          <span class="badge next">Next 15:00</span>
+        </div>
+        <div class="lk-card b2" data-go="athlete">
+          <div class="av">NS</div>
+          <div><div class="nm">Nour Sayed</div><div class="meta">Reflection due 2d · tournament</div></div>
+          <span class="badge due">Due</span>
+        </div>
+        <div class="lk-card b3" data-go="athlete">
+          <div class="av">CW</div>
+          <div><div class="nm">Cal Whitten</div><div class="meta">New · onboarding pending</div></div>
+          <span class="badge">New</span>
+        </div>
+        <div class="lk-card b4" data-go="athlete">
+          <div class="av">AK</div>
+          <div><div class="nm">Aiza Khan</div><div class="meta">On track · recovery wk 5/6</div></div>
+          <span class="badge ok">Steady</span>
+        </div>
+      </div>
+      <nav class="lk-nav">
+        <a href="#" class="on">Today</a>
+        <a href="#" data-go="athlete">Roster</a>
+        <a href="#" data-go="session">Sessions</a>
+        <a href="#">Me</a>
+      </nav>
+    </div>
+
+    <!-- ATHLETE DETAIL -->
+    <div class="screen" data-screen="athlete">
+      <div class="lk-bar">
+        <button class="lk-back" type="button" data-go="home">Back</button>
+        <div class="streak">L2 · 14yr · since Sep</div>
+      </div>
+      <div class="lk-hero">
+        <div class="when">Profile · Diego Elias</div>
+        <h2>Diego<br />Elias<small>3 process goals · cycle 03 · wk 3/6</small></h2>
+        <div class="focus">
+          <b>Today's session · 15:00</b>
+          Backhand wrist stability under pace · Court 2
+        </div>
+        <div class="go" title="Start session" data-go="session">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 6 15 12 9 18" /></svg>
+        </div>
+      </div>
+      <div class="lk-vision">
+        <div class="label">Vision · pinned</div>
+        <p>World champion. Willing to lose every easy point to win one that costs me.</p>
+        <cite>Reviewed 04 May</cite>
+      </div>
+      <h3 style="font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:0.04em; margin:8px 16px 12px;">Process goals</h3>
+      <ul class="lk-goals">
+        <li>
+          <span class="lk-num">01</span>
+          <div><div class="b">Backhand wrist stability under pace</div><div class="m">Wk 3 of 6 · this cycle</div></div>
+          <span class="pct">+8</span>
+        </li>
+        <li>
+          <span class="lk-num">02</span>
+          <div><div class="b">Length under pressure</div><div class="m">Wk 2 of 8 · ahead of plan</div></div>
+          <span class="pct">+18</span>
+        </li>
+        <li>
+          <span class="lk-num">03</span>
+          <div><div class="b">Recovery after counter-drop</div><div class="m">Wk 5 of 6</div></div>
+          <span class="pct">+6</span>
+        </li>
+      </ul>
+      <button class="lk-bigbtn" type="button" data-go="session">
+        Start session
+        <small>15:00 · Court 2 · in 13 min</small>
+      </button>
+      <nav class="lk-nav">
+        <a href="#" data-go="home">Today</a>
+        <a href="#" class="on">Roster</a>
+        <a href="#" data-go="session">Sessions</a>
+        <a href="#">Me</a>
+      </nav>
+    </div>
+
+    <!-- SESSION BRIEF -->
+    <div class="screen" data-screen="session">
+      <div class="lk-bar">
+        <button class="lk-back" type="button" data-go="home">Back</button>
+        <div class="streak">Session · Diego · 15:00</div>
+      </div>
+      <div class="lk-hero">
+        <div class="when">Today · 15:00 — 15:45 · Court 2</div>
+        <h2>Backhand<br />wrist<small>Process goal 02 · wk 3 of 6</small></h2>
+        <div class="focus">
+          <b>Cue · pinned</b>
+          Square the racquet face through contact when pulled wide. Don't chase pace — let the wrist hold shape first.
+        </div>
+      </div>
+      <h3 style="font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:0.04em; margin:8px 16px 12px;">The plan</h3>
+      <ol class="lk-plan">
+        <li><span class="num">01</span><div><div class="b">Warm-up · solo length</div><div class="m">10 min · both sides</div></div></li>
+        <li><span class="num">02</span><div><div class="b">Boast / drive · backhand only</div><div class="m">20 min · feed first, live after 5</div></div></li>
+        <li><span class="num">03</span><div><div class="b">Conditioned game · BH bound</div><div class="m">15 min · point starts on coach serve</div></div></li>
+      </ol>
+      <button class="lk-bigbtn" type="button" data-go="home">
+        I'm on court
+        <small>starts recording · notes save to Diego</small>
+      </button>
+      <nav class="lk-nav">
+        <a href="#" data-go="home">Today</a>
+        <a href="#" data-go="athlete">Roster</a>
+        <a href="#" class="on">Sessions</a>
+        <a href="#">Me</a>
+      </nav>
+    </div>
+
+    <!-- ATHLETE · HOME -->
+    <div class="screen" data-screen="home" data-persona="athlete">
+      <div class="lk-bar">
+        <div class="lk-brand"><span class="ball"></span> ME</div>
+        <div class="streak">
+          <svg class="flame" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4-3 6-3 10a3 3 0 0 0 6 0c0-1-1-2-2-3 3 0 5 3 5 6a6 6 0 0 1-12 0c0-5 4-7 6-13z" /></svg>
+          14-day streak
+        </div>
+      </div>
+      <div class="lk-hero" style="background:linear-gradient(155deg,#0066ff 0%,#0048b8 100%); box-shadow:0 18px 40px -18px rgba(0,102,255,0.55);">
+        <div class="when">You're up · 13 min</div>
+        <h2>Today's<br />work<small>BH wrist stability · with Ahad</small></h2>
+        <div class="focus">
+          <b>Cue · stay tall</b>
+          Wait the ball. Let the wrist hold shape first — don't chase pace.
+        </div>
+        <div class="go" title="See brief" data-go="session">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 6 15 12 9 18" /></svg>
+        </div>
+      </div>
+      <div class="lk-stats">
+        <div class="lk-stat"><div class="v">14</div><div class="l">Streak · days</div></div>
+        <div class="lk-stat alt"><div class="v">+12</div><div class="l">Cycle lvl</div></div>
+        <div class="lk-stat accent" style="color:#fdf9ef"><div class="v">1</div><div class="l">Open · due fri</div></div>
+      </div>
+      <div class="lk-roster">
+        <h3>My missions <a href="#" data-go="athlete">All 3 →</a></h3>
+        <div class="lk-card b1" data-go="athlete">
+          <div class="av">01</div>
+          <div><div class="nm">BH wrist stability</div><div class="meta">Wk 3/6 · today's focus</div></div>
+          <span class="badge next">+8</span>
+        </div>
+        <div class="lk-card b2" data-go="athlete">
+          <div class="av">02</div>
+          <div><div class="nm">Length under pressure</div><div class="meta">Wk 2/8 · ahead of plan</div></div>
+          <span class="badge next">+18</span>
+        </div>
+        <div class="lk-card b3" data-go="athlete">
+          <div class="av">03</div>
+          <div><div class="nm">Recovery after counter</div><div class="meta">Wk 5/6 · on track</div></div>
+          <span class="badge ok">+6</span>
+        </div>
+      </div>
+      <nav class="lk-nav">
+        <a href="#" class="on">Today</a>
+        <a href="#" data-go="athlete">Missions</a>
+        <a href="#" data-go="session">Brief</a>
+        <a href="#">Me</a>
+      </nav>
+    </div>
+
+    <!-- PARENT · HOME -->
+    <div class="screen" data-screen="home" data-persona="parent">
+      <div class="lk-bar">
+        <div class="lk-brand"><span class="ball"></span> FAMILY</div>
+        <div class="streak">Diego · 14d streak</div>
+      </div>
+      <div class="lk-hero" style="background:linear-gradient(155deg,#0d0d10 0%,#1a1a20 100%); box-shadow:0 18px 40px -18px rgba(0,0,0,0.55);">
+        <div class="when">Diego today · 13 min</div>
+        <h2>15:00<br />Court 2<small>Private with Ahad · BH wrist stability</small></h2>
+        <div class="focus">
+          <b>From Ahad · 04 May</b>
+          Big improvement holding the back corners under length pressure. Long-game progress is real.
+        </div>
+        <div class="go" title="See plan" data-go="session" style="color:#0d0d10">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 6 15 12 9 18" /></svg>
+        </div>
+      </div>
+      <div class="lk-stats">
+        <div class="lk-stat"><div class="v">3</div><div class="l">Sessions · wk</div></div>
+        <div class="lk-stat alt"><div class="v">+12</div><div class="l">Last 6 wk</div></div>
+        <div class="lk-stat accent" style="color:#fdf9ef"><div class="v">5</div><div class="l">Coach notes</div></div>
+      </div>
+      <div class="lk-roster">
+        <h3>This week <a href="#" data-go="session">Plan →</a></h3>
+        <div class="lk-card b1" data-go="session">
+          <div class="av">MO</div>
+          <div><div class="nm">Private · with Ahad</div><div class="meta">15:00 · BH wrist stability</div></div>
+          <span class="badge next">Today</span>
+        </div>
+        <div class="lk-card b3">
+          <div class="av">WE</div>
+          <div><div class="nm">Junior squad clinic</div><div class="meta">18:00 · Length</div></div>
+          <span class="badge">Clinic</span>
+        </div>
+        <div class="lk-card b4">
+          <div class="av">SA</div>
+          <div><div class="nm">State qualifier (match)</div><div class="meta">09:00 · Saturday</div></div>
+          <span class="badge due">Match</span>
+        </div>
+      </div>
+      <nav class="lk-nav">
+        <a href="#" class="on">Today</a>
+        <a href="#" data-go="session">Plan</a>
+        <a href="#" data-go="athlete">Diego</a>
+        <a href="#">Me</a>
+      </nav>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       VERSION 5 · LOGBOOK
+       ============================================================ -->
+  <section class="stage version" data-v="logbook" aria-label="Logbook">
+    <!-- COACH · HOME -->
+    <div class="screen active" data-screen="home" data-persona="coach">
+      <header class="lg-top">
+        <span class="lg-mark">LOGBOOK<em>·</em>D130</span>
+        <span class="lg-clock" id="lgClock">14:47:03</span>
+      </header>
+      <div class="lg-week">
+        <span class="d past">S</span>
+        <span class="d past">S</span>
+        <span class="d on">M<small>10</small></span>
+        <span class="d">T<small>11</small></span>
+        <span class="d">W<small>12</small></span>
+        <span class="d">T<small>13</small></span>
+        <span class="d">F<small>14</small></span>
+      </div>
+      <div class="lg-hero">
+        <div class="lg-hero-num">10</div>
+        <div class="lg-hero-meta">
+          <span class="lg-month">May</span>
+          <span class="lg-day">Monday</span>
+        </div>
+      </div>
+      <div class="lg-summary">
+        <span class="lg-live">● Live in 13′</span>
+        <span class="lg-stat">4 sessions · 3 follow-ups</span>
+      </div>
+      <ol class="lg-fixtures">
+        <li class="lg-fix next" data-go="session">
+          <span class="lg-fix-time">15:00<small>— 15:45</small></span>
+          <div class="lg-fix-body"><h4>Diego Elias</h4><p>Backhand wrist stability under pace · Court 2</p></div>
+          <span class="lg-fix-tag">Next</span>
+        </li>
+        <li class="lg-fix" data-go="session">
+          <span class="lg-fix-time">16:30<small>— 17:15</small></span>
+          <div class="lg-fix-body"><h4>Nour Sayed</h4><p>Volley depth + tournament reflection · Court 1</p></div>
+          <span class="lg-fix-tag">Private</span>
+        </li>
+        <li class="lg-fix" data-go="session">
+          <span class="lg-fix-time">18:00<small>— 19:30</small></span>
+          <div class="lg-fix-body"><h4>Junior squad clinic</h4><p>6 athletes · Length under pressure · Courts 1+2</p></div>
+          <span class="lg-fix-tag clinic">Group</span>
+        </li>
+        <li class="lg-fix" data-go="session">
+          <span class="lg-fix-time">20:00<small>— 20:45</small></span>
+          <div class="lg-fix-body"><h4>Cal Whitten</h4><p>Onboarding · skill + fitness assessment baseline</p></div>
+          <span class="lg-fix-tag new">New</span>
+        </li>
+      </ol>
+      <section class="lg-out">
+        <h3>Outstanding <em>·</em> 3</h3>
+        <ul class="lg-out-list">
+          <li><div><b>Cal Whitten</b><span class="what">BH video clip · baseline</span></div><span class="lg-due">2D late</span></li>
+          <li><div><b>Nour Sayed</b><span class="what">Reflection · tournament</span></div><button type="button" data-go="home">Nudge</button></li>
+          <li><div><b>Marco Ramirez</b><span class="what">Self-awareness questionnaire</span></div><button type="button" data-go="home">Nudge</button></li>
+        </ul>
+      </section>
+    </div>
+
+    <!-- SESSION DETAIL -->
+    <div class="screen" data-screen="session">
+      <header class="lg-top">
+        <button class="lg-back" type="button" data-go="home">Today</button>
+        <span class="lg-clock">15:00 · COURT 2</span>
+      </header>
+      <div class="lg-brief">
+        <div class="who">Diego Elias · Private · 14 yr</div>
+        <h2>Backhand <em>wrist</em><br/>stability</h2>
+      </div>
+      <div class="lg-cue">
+        <div class="l">Cue · pinned 09 May</div>
+        <p>Square the racquet face through contact when pulled wide. Don't chase pace — let the wrist hold shape first.</p>
+      </div>
+      <h3 style="font-family:'Clash Display',sans-serif; font-weight:600; font-size:13px; letter-spacing:0.22em; text-transform:uppercase; color:rgba(241,237,228,0.6); margin:0 20px 8px;">The plan · 45 min</h3>
+      <ol class="lg-plan">
+        <li>
+          <div><div class="b">Warm-up · solo length</div><div class="m">Both sides · steady pace</div></div>
+          <div class="dur">10 min</div>
+        </li>
+        <li>
+          <div><div class="b">Boast / drive · backhand</div><div class="m">Feed first · live after 5 reps</div></div>
+          <div class="dur">20 min</div>
+        </li>
+        <li>
+          <div><div class="b">Conditioned game · BH bound</div><div class="m">Point starts on coach serve</div></div>
+          <div class="dur">15 min</div>
+        </li>
+      </ol>
+      <button class="lg-cta" type="button" data-go="home">
+        Start session
+        <small>in 13 min · auto-saves to Diego</small>
+      </button>
+      <div class="lg-recent">
+        <h3>Recent · Diego</h3>
+        <div class="note"><span class="date">04 May</span><p>Felt loose on rear court, breaking on counter drops. Forearm tight by end of session.</p></div>
+        <div class="note"><span class="date">28 Apr</span><p>Big win — held shape into back corners under length pressure for full 40 min.</p></div>
+      </div>
+    </div>
+
+    <!-- ATHLETE · HOME -->
+    <div class="screen" data-screen="home" data-persona="athlete">
+      <header class="lg-top">
+        <span class="lg-mark">DIEGO<em>·</em>LOG</span>
+        <span class="lg-clock">14:47:03</span>
+      </header>
+      <div class="lg-week">
+        <span class="d past">S</span>
+        <span class="d past">S</span>
+        <span class="d on">M<small>10</small></span>
+        <span class="d">T<small>11</small></span>
+        <span class="d">W<small>12</small></span>
+        <span class="d">T<small>13</small></span>
+        <span class="d">F<small>14</small></span>
+      </div>
+      <div class="lg-hero">
+        <div class="lg-hero-num">10</div>
+        <div class="lg-hero-meta">
+          <span class="lg-month">My day</span>
+          <span class="lg-day">Monday</span>
+        </div>
+      </div>
+      <div class="lg-summary">
+        <span class="lg-live">● You're up · 13′</span>
+        <span class="lg-stat">1 open · due fri</span>
+      </div>
+      <ol class="lg-fixtures">
+        <li class="lg-fix next" data-go="session">
+          <span class="lg-fix-time">15:00<small>— 15:45</small></span>
+          <div class="lg-fix-body"><h4>With Ahad</h4><p>Backhand wrist stability under pace · Court 2</p></div>
+          <span class="lg-fix-tag">Next</span>
+        </li>
+        <li class="lg-fix">
+          <span class="lg-fix-time">18:00<small>WED</small></span>
+          <div class="lg-fix-body"><h4>Junior squad clinic</h4><p>6 athletes · Length under pressure</p></div>
+          <span class="lg-fix-tag clinic">Group</span>
+        </li>
+        <li class="lg-fix">
+          <span class="lg-fix-time">09:00<small>SAT</small></span>
+          <div class="lg-fix-body"><h4>State qualifier</h4><p>First match · best of 5</p></div>
+          <span class="lg-fix-tag new">Match</span>
+        </li>
+      </ol>
+      <section class="lg-out">
+        <h3>From Ahad <em>·</em> open</h3>
+        <ul class="lg-out-list">
+          <li><div><b>Send a backhand video clip</b><span class="what">10–15 sec · any rally</span></div><span class="lg-due">Fri</span></li>
+          <li><div><b>Tuesday match reflection</b><span class="what">3 things that felt easy</span></div><span class="lg-due">Done</span></li>
+        </ul>
+      </section>
+    </div>
+
+    <!-- PARENT · HOME -->
+    <div class="screen" data-screen="home" data-persona="parent">
+      <header class="lg-top">
+        <span class="lg-mark">DIEGO<em>·</em>WEEK</span>
+        <span class="lg-clock">14:47:03</span>
+      </header>
+      <div class="lg-week">
+        <span class="d past">S</span>
+        <span class="d past">S</span>
+        <span class="d on">M<small>10</small></span>
+        <span class="d">T<small>11</small></span>
+        <span class="d">W<small>12</small></span>
+        <span class="d">T<small>13</small></span>
+        <span class="d">F<small>14</small></span>
+      </div>
+      <div class="lg-hero">
+        <div class="lg-hero-num">10</div>
+        <div class="lg-hero-meta">
+          <span class="lg-month">Diego</span>
+          <span class="lg-day">This week</span>
+        </div>
+      </div>
+      <div class="lg-summary">
+        <span class="lg-live">● On court · 13′</span>
+        <span class="lg-stat">3 sessions · 1 match</span>
+      </div>
+      <ol class="lg-fixtures">
+        <li class="lg-fix next" data-go="session">
+          <span class="lg-fix-time">15:00<small>TODAY</small></span>
+          <div class="lg-fix-body"><h4>Private · with Ahad</h4><p>BH wrist stability under pace · Court 2</p></div>
+          <span class="lg-fix-tag">Today</span>
+        </li>
+        <li class="lg-fix">
+          <span class="lg-fix-time">18:00<small>WED</small></span>
+          <div class="lg-fix-body"><h4>Junior squad clinic</h4><p>Length under pressure · with Ahad</p></div>
+          <span class="lg-fix-tag clinic">Group</span>
+        </li>
+        <li class="lg-fix">
+          <span class="lg-fix-time">09:00<small>SAT</small></span>
+          <div class="lg-fix-body"><h4>State qualifier</h4><p>First round match · best of 5</p></div>
+          <span class="lg-fix-tag new">Match</span>
+        </li>
+      </ol>
+      <div class="lg-recent">
+        <h3>Notes from Ahad</h3>
+        <div class="note"><span class="date">04 May</span><p>Big improvement holding the back corners under length pressure. Long-game progress is real.</p></div>
+        <div class="note"><span class="date">28 Apr</span><p>Watching volume next week — forearm getting tight by end of session.</p></div>
+      </div>
+      <section class="lg-out">
+        <h3>Progress <em>·</em> 6 wk</h3>
+        <ul class="lg-out-list">
+          <li><div><b>BH wrist · process 02</b><span class="what">Wk 3 of 6 · on track</span></div><span class="lg-due">+8</span></li>
+          <li><div><b>Length · process 01</b><span class="what">Wk 2 of 8 · ahead</span></div><span class="lg-due">+18</span></li>
+          <li><div><b>Recovery · process 03</b><span class="what">Wk 5 of 6 · on track</span></div><span class="lg-due">+6</span></li>
+        </ul>
+      </section>
+    </div>
+  </section>
+
+  <!-- Version selector dock -->
+  <nav class="dock" role="tablist" aria-label="Prototype version">
+    <button type="button" data-target="courtside" class="is-active"><span class="n">01</span>Court-Side</button>
+    <button type="button" data-target="broadsheet"><span class="n">02</span>Broadsheet</button>
+    <button type="button" data-target="command"><span class="n">03</span>Command Deck</button>
+    <button type="button" data-target="locker"><span class="n">04</span>Locker Room</button>
+    <button type="button" data-target="logbook"><span class="n">05</span>Logbook</button>
+  </nav>
+
+  <script>
+    (function () {
+      const versions = ["courtside", "broadsheet", "command", "locker", "logbook"];
+      const personas = ["coach", "athlete", "parent"];
+      const labels = {
+        courtside: "PROTOTYPE · v01 · Court-Side",
+        broadsheet: "PROTOTYPE · v02 · Broadsheet",
+        command: "PROTOTYPE · v03 · Command Deck",
+        locker: "PROTOTYPE · v04 · Locker Room",
+        logbook: "PROTOTYPE · v05 · Logbook",
+      };
+
+      const state = {
+        version: "courtside",
+        persona: "coach",
+        // per-version current screen name (sub-screen). home is the default.
+        screen: { courtside: "home", broadsheet: "home", command: "home", locker: "home", logbook: "home" },
+      };
+
+      const versionButtons = document.querySelectorAll(".dock button");
+      const personaButtons = document.querySelectorAll(".persona-switch button");
+      const sections = document.querySelectorAll(".version");
+      const metaTag = document.getElementById("metaTag");
+
+      function render() {
+        sections.forEach((s) => s.classList.toggle("active", s.dataset.v === state.version));
+        versionButtons.forEach((b) => b.classList.toggle("is-active", b.dataset.target === state.version));
+        personaButtons.forEach((b) => b.classList.toggle("is-active", b.dataset.persona === state.persona));
+        if (metaTag) metaTag.textContent = labels[state.version];
+
+        const activeVersion = document.querySelector('.version[data-v="' + state.version + '"]');
+        if (activeVersion) {
+          const wantScreen = state.screen[state.version] || "home";
+          const screens = activeVersion.querySelectorAll(".screen");
+          // first pass: find best match (screen name match + persona match if specified)
+          let target = null;
+          screens.forEach((s) => {
+            const nameOk = s.dataset.screen === wantScreen;
+            const personaOk = !s.dataset.persona || s.dataset.persona === state.persona;
+            if (nameOk && personaOk && !target) target = s;
+          });
+          // fallback: any screen matching the name
+          if (!target) {
+            screens.forEach((s) => { if (!target && s.dataset.screen === wantScreen) target = s; });
+          }
+          // fallback to home of current persona, then any home
+          if (!target) {
+            screens.forEach((s) => {
+              if (!target && s.dataset.screen === "home" && (!s.dataset.persona || s.dataset.persona === state.persona)) target = s;
+            });
+          }
+          screens.forEach((s) => s.classList.toggle("active", s === target));
+          // scroll active stage / target into view
+          activeVersion.scrollTop = 0;
+        }
+        window.scrollTo({ top: 0 });
+        try { history.replaceState(null, "", "#" + state.version + "/" + state.persona); } catch (e) {}
+      }
+
+      function goVersion(v) {
+        if (!versions.includes(v)) return;
+        state.version = v;
+        render();
+      }
+      function goPersona(p) {
+        if (!personas.includes(p)) return;
+        state.persona = p;
+        // reset to home when persona changes
+        state.screen[state.version] = "home";
+        render();
+      }
+      function goScreen(name) {
+        if (!name) return;
+        state.screen[state.version] = name;
+        render();
+      }
+
+      versionButtons.forEach((b) => b.addEventListener("click", () => goVersion(b.dataset.target)));
+      personaButtons.forEach((b) => b.addEventListener("click", () => goPersona(b.dataset.persona)));
+
+      // delegated screen navigation: any element with data-go="screen-name"
+      document.body.addEventListener("click", (e) => {
+        const t = e.target.closest("[data-go]");
+        if (!t) return;
+        e.preventDefault();
+        goScreen(t.dataset.go);
+      });
+
+      window.addEventListener("keydown", (e) => {
+        if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+        if (document.activeElement && /^(input|textarea|select)$/i.test(document.activeElement.tagName)) return;
+        const cur = versions.indexOf(state.version);
+        const next = e.key === "ArrowRight" ? (cur + 1) % versions.length : (cur - 1 + versions.length) % versions.length;
+        goVersion(versions[next]);
+      });
+
+      // hash deep link: #version or #version/persona
+      const hash = (location.hash || "").replace("#", "");
+      if (hash) {
+        const [v, p] = hash.split("/");
+        if (versions.includes(v)) state.version = v;
+        if (personas.includes(p)) state.persona = p;
+      }
+      render();
+
+      function fmt(d) {
+        const p = (n) => String(n).padStart(2, "0");
+        return p(d.getHours()) + ":" + p(d.getMinutes());
+      }
+      function fmtSec(d) {
+        const p = (n) => String(n).padStart(2, "0");
+        return p(d.getHours()) + ":" + p(d.getMinutes()) + ":" + p(d.getSeconds());
+      }
+      const csClock = document.getElementById("csClock");
+      const cdClock = document.getElementById("cdClock");
+      const lgClock = document.getElementById("lgClock");
+      setInterval(() => {
+        const d = new Date();
+        if (csClock)
+          csClock.textContent =
+            fmt(d) +
+            " · " +
+            d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
+        if (cdClock) cdClock.textContent = fmtSec(d);
+        if (lgClock) lgClock.textContent = fmtSec(d);
+      }, 1000);
+    })();
+  </script>
+</body>
+</html>
