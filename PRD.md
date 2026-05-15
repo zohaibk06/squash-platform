@@ -8,8 +8,9 @@
 Sources: kickoff transcript with Ahad Raza (2026-05-10), four FigJam boards
 ("Athlete workflows", "Coaching workflows", assessment sub-flow,
 "Parent/Guardian flows") on the SquashIQ Workflows board, a prototype-review
-transcript with Ahad (2026-05-10 evening — see §11), and `BRAND.md` (the
-ARProformance design system, shared 2026-05-15).
+transcript with Ahad (2026-05-10 evening — see §11), `BRAND.md` (the
+ARProformance design system, shared 2026-05-15), and a recorded walkthrough
+of Stuti's clickable prototype (2026-05-15 — see §12).
 
 UX framing draws on Cooper, *About Face* (4e) and Tidwell, *Designing
 Interfaces* (2e/3e). Specific references are inline.
@@ -104,11 +105,15 @@ who we're optimizing for.
 
 ## 5. Key user journeys
 
-Mapped from the four FigJam boards.
+User stories drawn from the four FigJam boards (kickoff) and the Stuti
+prototype walkthrough (§12). "I" = the coach unless otherwise noted.
 
 ### 5.1 Coach: onboard a new athlete
+**As a coach, I want to onboard a new athlete so I have a baseline + goals
+to plan against.**
 
-1. Add athlete to repository
+1. Add athlete to repository (name, age, type — private vs squad, guardian
+   email if minor)
 2. Optionally schedule a skill assessment
 3. Pick assessment type(s) (multi-select): skill + fitness, self-awareness
    questionnaire, video match analysis
@@ -122,71 +127,161 @@ Alternate ordering: goals first → prompted to conduct assessment.
 Pattern (Tidwell Ch 2): **Wizard** with an **Escape Hatch** (Ch 3) — assessment
 realistically spans multiple sittings, so the flow must resume cleanly.
 
-### 5.2 Coach: plan + deliver a private lesson
+### 5.2 Coach: schedule a session (entry wizard)
+**As a coach, I want to start scheduling a session by picking the date/time
+first, then choosing whether it's private or group, then who, then what.**
 
-1. Athletes → pick athlete → "Create new session"
-2. Session builder shows a context rail: top outcome goals, top process goals
-   (max 3, per the FigJam sticky), recent notes from the last few sessions
-   (coach + athlete)
-3. Coach picks an **intended focus** for the session
-4. Optional: apply or save a template structured around drills / exercises
-5. Save or Start
-6. During / after session: add notes (typed or voice-dictated)
-7. Session logs to athlete timeline
+Per the Stuti walkthrough, the canonical entry is a modal wizard:
+1. **Date + time** — date picker + time picker
+2. **Lesson type** — *Private lesson* (1 player) or *Group lesson* (2+ players)
+3. **Players / cohort**
+   - Private: search a single player + select
+   - Group: multi-select players (≥2 required to proceed); can pick a saved
+     **cohort** from a dropdown (which shows name, description, member count)
+     instead of hand-picking; can also save the current ad-hoc selection as a
+     new cohort
+4. **Build session** (§5.3) — opens full-page session builder
 
-Pattern (Tidwell Ch 5): context rail is a **Two-Panel Selector** or **List
-Inlay**. The context rail is the highest-leverage piece of UX in the whole
-product — it's what replaces the Gmail draft scroll-back.
+### 5.3 Coach: build the session
+**As a coach, I want to plan a session quickly by either copying my last one,
+applying a template, or starting from scratch — and have the athlete's goals
+and recent notes right there so I don't have to remember why.**
 
-### 5.3 Coach: plan + deliver a group clinic
+1. Pick a starting point:
+   - **Create my own session** (blank — define focus, drills optional)
+   - **Start from →** dropdown:
+     - **Previous sessions** (list of my own past sessions, reusable across
+       any of my athletes) — *primary* reuse path
+     - **Predefined templates** (named templates — *Progressive Pressure*,
+       *Movement Foundations*, *Volley Game*, *Match Simulation*) — secondary
+2. Full-page builder opens:
+   - Confirmation strip: athlete name, date, time, session length (auto-sum)
+   - Primary CTA: *Save session* (Cancel beside it)
+   - **Left context rail**:
+     - *Top goals* for the selected athlete (outcome + process)
+     - *Action items from notes* (carried in from prior sessions)
+     - Each row has a `+` to **pin as a priority** for this session
+   - **Main column**:
+     - *Session focus* — short text input ("one thing the session should
+       land", e.g. "tighten straight rails under pressure")
+     - *Pinned priorities* — multi, drawn from the rail
+     - *Sections / blocks* — each block has an editable title, duration
+       (minutes), drill input, coach-notes input (cues / targets /
+       progressions). Blocks are drag-and-drop reorderable and individually
+       deletable. *Add section* button at bottom. **Total session time at top
+       updates as blocks are added.**
+3. Save / Start
 
-1. Schedule → "Group lesson"
-2. Pick the players in the clinic
-3. Pick or build a session (same builder as private lesson)
-4. Edit
-5. "Start the group clinic now" or "Save session" for later
-6. During clinic:
-   - List of all enrolled players (regardless of attendance — coach marks
-     attendance live)
-   - Per-player notes (text or voice dictation)
-   - Optional: assign players to specific courts (later-phase)
-7. End → send each player their own notes
+Pattern (Tidwell Ch 5): context rail is a **Two-Panel Selector** / **List
+Inlay**. The context rail + pin affordance is the highest-leverage piece of
+UX in the whole product — it's what replaces the Gmail draft scroll-back.
 
-### 5.4 Coach: follow up on outstanding work
+### 5.4 Coach: deliver a group clinic
+**As a coach running a clinic, I want one screen that has everyone enrolled,
+where I can mark attendance, capture a quick per-player note, and send the
+clinic notes to everyone at the end (absentees included).**
 
-- Home / per-athlete view surfaces "outstanding" items past due
-- Per-task **Nudge** action sends a notification to the athlete
-- Once submitted, item leaves the outstanding queue
+1. From schedule wizard (§5.2) with *Group lesson* selected, OR from a
+   cohort page directly
+2. Build (§5.3) or pick a session from previous / templates
+3. *Start the group clinic now* or *Save session* for later
+4. During the clinic:
+   - All enrolled players listed regardless of attendance — coach marks
+     attendance live
+   - Per-player note (text or voice dictation)
+   - Optional: assign players to specific courts (later phase)
+5. End → notes go to **every enrolled player, including absentees**
+
+### 5.5 Coach: follow up on outstanding work
+**As a coach, I want the system to remember what I asked each athlete to do
+so I can nudge the ones who haven't done it without scrolling through chat.**
+
+- Home and per-athlete profile surface "outstanding" items past due
+- Per-task **Nudge** sends a notification to the athlete (also reachable
+  from the athlete's profile when their outstanding count is non-zero)
+- Once the athlete submits, the item leaves the outstanding queue
 
 Tidwell Ch 1 — **Prospective Memory**: the system becomes the coach's
 external memory for "I asked X to send a video by Tuesday." This is what
 makes the platform *more* than a notes app.
 
-### 5.5 Athlete: day-of
+### 5.6 Coach: assign work (homework / reflection / match analysis)
+**As a coach, I want to assign one of three kinds of work — generic homework,
+a post-session reflection, or a structured post-match analysis — and have
+the athlete fill it in inside the app.**
+
+From the athlete's profile → *New assignment* opens a modal. Three tabs
+(per §6.6):
+1. **Homework** — title, instructions, due date, resource (PDF / image / link)
+2. **Post-session reflection** — title, instructions, due date, resource
+3. **Post-match analysis** — title, *match context* card (opponent name,
+   score, match date), *game plan template* (8 inputs incl. opponent style
+   [attacker / runner / tricky / powerful], what they do best, where they're
+   less strong, …), one key reminder, due date, resource. Coach can pre-fill
+   what they know; the rest is left for the athlete to fill out.
+
+### 5.7 Coach: run an assessment + record results
+**As a coach, I want to build an assessment from a recommended drill
+library (or my own custom drills), and either record results live or assign
+it to the athlete to complete on their own time.**
+
+1. From athlete profile → *Create new assessment*
+2. *Build assessment* modal — two tabs: **Recommended** / **Custom**
+3. Recommended sub-tabs: **Skill** (groups: forehand, backhand, combination)
+   and **Fitness** (strength-based, time-based, distance-based, core
+   endurance + stability). Each group has a top-level *select all* checkbox
+   plus per-drill checkboxes.
+4. Continue → save assessment, then either:
+   - **Record results now** — per-drill input (reps / time / distance) +
+     overall session notes → saved to player database
+   - **Assign to athlete** to complete on their own time — set a due date
+     and optional instructions
+5. Older assessment results show **per-drill values and a trend line** (e.g.
+   "consecutive rally drive — 14 reps · ▲ improving")
+
+### 5.8 Coach: message anyone (inbox)
+**As a coach, I want one centralized thread view of every conversation —
+inbound and outbound — with athletes, cohorts, and guardians.**
+
+- Inbox lists threads with sender name, role badge (athlete / cohort /
+  guardian), preview, age
+- Filters: All (default), Unread, Athletes, Cohorts, Guardians
+- *New message* modal — pick a category (Athlete / Cohort / Guardian) →
+  search + select recipient (single-select for athlete and guardian) →
+  type and send
+
+### 5.9 Athlete: day-of
+**As an athlete, I want to open the app and immediately see what I'm doing
+today, what I owe, and what I just received from my coach.**
 
 1. Open home → today's session + intended focus
-2. Check outstanding (homework due, reflections pending)
-3. Complete what's quick now (write reflection, upload clip)
+2. Check outstanding (homework due, reflections pending, match-analysis
+   templates to fill in)
+3. Complete what's quick now (write reflection, upload clip, fill in the
+   game plan)
 4. Post-session: receive coach notes via push + in-app
 
-### 5.6 Athlete: long-term
+### 5.10 Athlete: long-term
+- **Plan** — my vision, my outcome goals, current process focus, pinned
+  mission (week N of M)
+- **Progress** — per-drill assessment trend lines, qualitative coach
+  feedback, reward / streak signals for timely task completion
 
-- "Plan" tab: my vision, my outcome goals, current process focus
-- "Progress" tab: assessment benchmarks over time, qualitative coach feedback,
-  reward / streak signals for timely task completion
-
-### 5.7 Parent / Guardian
-
+### 5.11 Guardian
 - Home: child's upcoming schedule, recent items
 - "What's being planned": read view of session plans
+- **Message the coach** — direct thread (the coach sees it in the §5.8 inbox)
 - "Progress": benchmarks + qualitative feedback + line chart over time
 
 ## 6. Functional requirements
 
 ### 6.1 Athlete repository (coach)
-Add, edit, archive athletes. Per athlete: contact info, parent/guardian link
-(if minor), assessment history, vision, goals (outcome + process), session
-history, attachments, notes (shared + private — see §10).
+Add, edit, archive athletes. Per athlete: contact info, guardian link
+(if minor), **status** (e.g. Active), **Club Locker rating** (NA squash
+rating, if available), assessment history, vision, goals (outcome + process),
+session history, attachments, notes (shared + private — see §10),
+**outstanding-assignment count** (with a *Nudge* affordance on the profile),
+and a *Schedule session* shortcut from the profile.
 
 ### 6.2 Vision & goals (ARProformance framework)
 - Vision: free-text, athlete's big-picture ambition
@@ -204,15 +299,73 @@ history, attachments, notes (shared + private — see §10).
   per-skill improvement (transcript 20:48). Trend lines are per-drill.
 - Results stored on athlete profile; feed progress chart
 
+**Build assessment (per Stuti walkthrough §12):**
+- Modal with two top-level tabs: **Recommended** and **Custom**
+- *Recommended* has two sub-tabs:
+  - **Skill** — groups: *Forehand* (~11 drills), *Backhand* (~11 drills),
+    *Combination* (~4 drills). Drills are rep-based (e.g. "consecutive rally
+    drive", "attacking drive in 2 minutes", "drive + straight kill in 2
+    minutes").
+  - **Fitness** — groups: *Strength-based* (~9 items, e.g. quarter/half
+    squat, kettlebell/trap-bar split squat — right leg / left leg),
+    *Time-based* (e.g. "time to 100 two-footed hops", "time to 30 lunge
+    switches"), *Distance-based* (e.g. vertical jump, broad jump — cm/inches),
+    *Core endurance + stability* (e.g. elbow plank, right-side elbow plank).
+- Each group has a top-level *select-all* checkbox plus per-drill checkboxes;
+  default is *all selected*, coach deselects what they don't want.
+- *Custom* tab lets the coach add their own drills.
+
+**Save assessment** → choose one of:
+- **Record results now** — per-drill input (reps / time / distance, unit
+  per drill type) + overall session notes → saved to athlete database
+- **Assign to athlete** — set due date + optional instructions → goes to
+  the athlete's assignments queue
+
+**Results view:**
+- Per-drill value with a small *▲ ▼ —* trend indicator and a sparkline
+- Older assessments listed chronologically for the same drill so the trend
+  is visible across check-ins
+
 ### 6.4 Session planning
-- A coach's **own previous sessions are the primary reuse mechanism** (reusable
-  across any of their students); named templates are a secondary option behind
-  a dropdown. Session-level only — no multi-week program templates, since
-  squash skill work is too varied for a generic plan (transcript 20:51)
-- Auto-populated context rail: top outcome/process goals + recent notes
-- Pick an intended focus (single vs multi — open question §10)
-- Group clinic variant: draws on the cohort roster (§6.10); court assignments
-  (later)
+**Schedule entry wizard** (§5.2 — Stuti walkthrough):
+1. Date + time
+2. Lesson type (private = 1 player; group = 2+)
+3. Players (single-select for private; multi-select for group, with optional
+   *pick a cohort* dropdown and *save selection as cohort*)
+4. → Session builder
+
+**Session builder** (full page — §5.3):
+- Confirmation strip at top: athlete name, date+time, **total session length
+  that auto-aggregates from the section blocks**
+- Primary CTA: *Save session* (Cancel beside it)
+- **Starting points** (presented before the builder opens, or as a dropdown
+  inside it):
+  - *Create my own session* — blank
+  - *Start from → Previous sessions* — **primary** reuse path; lists the
+    coach's own past sessions (reusable across any of their students)
+  - *Start from → Predefined templates* — secondary; named templates such as
+    *Progressive Pressure*, *Movement Foundations*, *Volley Game*, *Match
+    Simulation*. Templates ship pre-filled with sections.
+  - Session-level only — no multi-week program templates (transcript 20:51)
+- **Left context rail**:
+  - Top goals for the athlete (outcome + process)
+  - Action items from prior session notes
+  - Each row carries a `+` affordance to **pin as a priority** for *this*
+    session — multiple pins allowed
+- **Main column**:
+  - *Session focus* — short text input ("the one thing the session should
+    land")
+  - *Pinned priorities* — list, drawn from the rail
+  - *Sections / blocks* — each block has:
+    - Editable title (e.g. *Warm-up*, *Game 1*, *Debrief + Game 2*)
+    - Editable duration in minutes
+    - Drill input (e.g. *solo + pair hitting*, *ghosting*)
+    - Coach-notes input (cues / targets / progressions)
+    - Drag handle (reorder) + delete
+  - *Add section* button at the bottom
+  - The total at the top updates as blocks are added (e.g. 55 → 75 min)
+- Group-clinic variant: draws on the cohort roster (§6.10); court
+  assignments (later)
 
 ### 6.5 Session logging
 - Per-athlete notes: text + voice dictation → transcription
@@ -224,11 +377,41 @@ history, attachments, notes (shared + private — see §10).
   players, even absentees** (transcript 21:17), and drills / court assignments
   can be **pre-published** so players know the focus before arriving
 
-### 6.6 Assignments / homework
-- Coach assigns a task with a due date
-- Types: written reflection, video clip upload, drill checklist
-- Athlete completes in-app
+### 6.6 Assignments
+Coach opens *New assignment* from the athlete profile. The modal has three
+type tabs (per Stuti walkthrough §12):
+
+**Homework**
+- Title
+- Instructions
+- Due date
+- Resource (PDF / image / link)
+
+**Post-session reflection**
+- Title
+- Instructions
+- Due date
+- Resource
+
+**Post-match analysis** (more structured)
+- Title
+- **Match context** card: opponent name, score, match date
+- **Game plan template** — 8 inputs that the coach can pre-fill and the
+  athlete completes the rest of. The walkthrough enumerated:
+  1. *Opponent style* — attacker / runner / tricky / powerful
+  2. *What they do best*
+  3. *Where they're less strong*
+  4–8. (five more inputs — exact wording TBD from Stuti's prototype)
+- One *key reminder*
+- Due date
+- Resource
+
+**Lifecycle:**
+- Assignment lands in the athlete's *Open tasks* / assignments queue
+- Athlete completes in-app; submission goes back to the coach
 - Coach reviews; reviewed items leave the outstanding queue
+- A separate *Assignments* tab on the schedule lists assignments due,
+  scoped by recipient and date
 
 ### 6.7 Notifications
 - In-app + push (mobile)
@@ -256,12 +439,40 @@ history, attachments, notes (shared + private — see §10).
 ### 6.10 Cohorts / groups
 - Coach **creates a cohort once** (e.g. per term / 3-month block) rather than
   re-picking players for every group session (transcript 21:27)
-- Cohort has its own page: roster, per-member performance trends, **group
-  messaging**
-- Group-clinic scheduling (§5.3) draws on the cohort roster
+- A cohort has:
+  - **Name** (e.g. *Tuesday Elite Squad*, *Cool Squash Open*)
+  - **Description** with placeholder copy: "when this cohort meets, who's
+    in it, any context to remember" (per Stuti walkthrough §12)
+  - **Members** (multi-select on creation; editable later)
+  - **Upcoming sessions** for that cohort surfaced on the cohort card
+- Two creation paths:
+  1. *New cohort* from the Cohorts page → modal (name / description /
+     members) → *Create cohort*
+  2. **Save the current ad-hoc selection as a cohort** from inside the
+     group-lesson scheduling step
+- Cohort page: roster, per-member performance trends, **group messaging**
+- Group-clinic scheduling (§5.4) draws on the cohort roster
 - Later-phase gamification rides on the cohort: within-cohort leaderboard,
   team-vs-team skill-assessment challenges (e.g. "4C vs River Grove"),
   player-vs-player "throw down" challenges (transcript 21:23–21:27)
+
+### 6.11 Messaging / Inbox
+Per Stuti walkthrough §12 — quote: *"centralized thread view of every
+conversation inbound and outbound with athletes, cohorts, and guardians."*
+
+**Inbox list**
+- Each row: sender name + role badge (athlete / cohort / guardian), message
+  preview, age
+- Filters: **All** (default), **Unread**, **Athletes**, **Cohorts**,
+  **Guardians**
+- Open a row → full threaded view with reply composer
+
+**New message** modal
+- Recipient category: *Athlete* / *Cohort* / *Guardian*
+- Athlete: single-select (radio) — search + pick
+- Cohort: search + pick a cohort
+- Guardian: search + pick a guardian
+- Compose + send
 
 ## 7. UX principles
 
@@ -296,27 +507,45 @@ These are the lenses every screen review uses.
 
 ## 8. Information architecture (working sketch)
 
-**Coach (mobile bottom nav)**
+There are now **two coach IA explorations** in play. They overlap heavily;
+the differences are open for V1.
+
+**Coach IA (this PRD / our prototype — mobile bottom nav)**
 - **Today** — sessions today, outstanding follow-ups, quick "start session"
 - **Athletes** — roster → athlete profile (Two-Panel Selector inspired)
 - **Cohorts** — groups → cohort page (roster, per-member trends, group messaging)
-- **Sessions** — calendar / list of past + upcoming
-- **Inbox** — unsent notes, voice dictations awaiting filing, athlete uploads
-  awaiting review
-- **Profile / settings**
+- **Schedule** — calendar / list of past + upcoming
+- **Inbox** — threads with athletes, cohorts, guardians (§6.11)
+
+**Coach IA (Stuti prototype — full destination list)**
+- **Home** (currently blank)
+- **Schedule** — two tabs: *Sessions* (day-broken list) and *Assignments*
+  (assignments due across the roster). Top-right *Schedule session* button
+  opens the §5.2 wizard.
+- **Players** (Stuti's term for what this PRD calls "Athletes")
+- **Cohorts**
+- **Inbox** — filters: All / Unread / Athletes / Cohorts / Guardians
+- **Visions & Goals** — referenced as a top-level destination, not built
+- **Library** — referenced, not built
+- **Settings** — referenced, not built
+
+Open question: do we keep "Athletes" or rename to "Players" for the coach
+surface (athletes-the-persona vs. players-the-roster). The persona §4 stays
+"Athlete"; the coach-facing label is the variable.
 
 **Athlete (mobile bottom nav)**
 - **Today** — next session + intended focus, outstanding items
 - **Plan** — vision, goals, current process focus
 - **Sessions** — past sessions with coach notes
-- **Progress** — charts, milestones, streaks
+- **Progress** — per-drill trends, milestones, streaks
 - **Profile**
 
-**Parent (mobile)**
-- **Schedule**, **Plans**, **Progress** — all read-only
+**Guardian (mobile)**
+- **Schedule**, **Plans**, **Progress** — read-only
+- **Inbox / message coach** — single-thread to the coach (§6.11)
 
 Tidwell Ch 2 app shape: closest to **Dashboard** with embedded **Wizards** for
-onboarding and assessment.
+onboarding, scheduling, assessment, and new-assignment.
 
 ## 9. Phasing
 
@@ -558,9 +787,130 @@ Laura Massaro — all positive. Potential testimonial value.
   wizard, a coaching-workflows workspace, a goals-panel A/B) at
   https://sitemap-generator--squash-iq-prototypes.netlify.app/
 
+## 12. Review round 3 — Stuti prototype walkthrough (2026-05-15)
+
+Source: recorded walkthrough of Stuti's clickable prototype. The walkthrough
+exposed flows in concrete detail that the kickoff stickies only sketched. The
+new specifics have been folded into §5 (journeys) and §6 (requirements). This
+section captures the *flows themselves* end-to-end so the prototype can be
+verified against them, plus the new concepts that surfaced.
+
+### 12.1 Coach navigation in Stuti's prototype
+*Home* (blank), *Schedule*, *Players*, *Cohorts*, *Inbox*, *Visions & Goals*
+(referenced, not built), *Library* (referenced, not built), *Settings*
+(referenced, not built). The IA differences vs. our prototype are tracked
+in §8.
+
+### 12.2 Schedule
+- Two tabs: **Sessions** and **Assignments**
+  - *Sessions* — broken down by day; each row is a scheduled session
+    (player + time)
+  - *Assignments* — a list of assignments due across the roster (example:
+    *Nour El Sherbini — 5-drill fitness-only assessment, complete after
+    Monday's session*)
+- Top-right *Schedule session* CTA opens the §5.2 wizard
+
+### 12.3 Schedule-session wizard (modal)
+**Step 1 · Date + time** → continue
+**Step 2 · Lesson type** → *Private* (1 player) | *Group* (2+)
+**Step 3 · Players / cohort**
+- Private: search and select one player
+- Group: multi-select players (min 2 to continue); cohort dropdown shows
+  name + description + member-count badge for *Tuesday Elite Squad*, *Cool
+  Squash Open*, etc.; secondary CTA *Save this selection as a cohort*
+  opens a tiny form (name, description) to create the cohort inline
+**Step 4 · Build session** → opens full-page builder (§5.3) with the
+*Create my own session* / *Start from previous* / *Start from template*
+choices.
+
+### 12.4 Session builder (full page)
+- Top: athlete name, date+time, **session length that auto-aggregates from
+  the section blocks** (the walkthrough watched 55 min → 75 min as blocks
+  were added)
+- *Cancel* / *Save session* (primary) at the top
+- Left rail: top goals (outcome + process) and action items from notes;
+  each row has a `+` to **pin as a priority** for *this* session
+- Main: *Session focus* short text, *Pinned priorities* list, *Sections*
+  with editable title, duration, drill, coach-notes, drag-handle, delete
+- *Add section* button at the bottom
+- Three entry variants share the same builder shape:
+  - *Previous sessions* — list of the coach's own past sessions
+    (re-usable across any student)
+  - *Predefined templates* — *Progressive Pressure*, *Movement Foundations*,
+    *Volley Game*, *Match Simulation* (each ships pre-filled, e.g. *Match
+    Simulation* opens with Warm-up 10 min / Game 1 20 min / Debrief + Game 2
+    25 min)
+  - *Create my own session* — same shape with an empty state
+
+### 12.5 Players → Player profile
+- List → tap a player → profile
+- Profile blocks (in order):
+  - Status (*Active*) + Club Locker rating
+  - **Outstanding assignments** count + *Nudge* button
+  - *Schedule session* shortcut
+  - **Vision & goals** — Diego shows 4 goals: 2 outcome (e.g. "top 5 PSA
+    ranking by year-end") + 2 process (e.g. "backhand drop accuracy at
+    80%"). Note: the 2+2 shape is what Stuti's prototype shows; §10 still
+    has *cap at top 3 process goals* open.
+  - **Assignments** — current homework + due dates; *New assignment* CTA
+  - **Assessments** — scheduled assessments (e.g. *Pre-tournament check-in*,
+    6 drills), *View results*, *Create new assessment*
+  - **Recent notes** (collapsed)
+
+### 12.6 New assignment (modal — 3 tabs)
+*Homework*, *Post-session reflection*, *Post-match analysis* — full schema
+in §6.6. The match-analysis form is the most structured: opponent name /
+score / match date + an 8-input game-plan template + key reminder.
+
+### 12.7 Build assessment (modal)
+*Recommended* / *Custom* tabs; *Recommended* has *Skill* (forehand,
+backhand, combination) and *Fitness* (strength-based, time-based,
+distance-based, core endurance + stability) sub-tabs. Drill counts seen:
+forehand 11, backhand 11, combination 4, strength 9, plus several
+time/distance/core items. Top-level select-all per group. Full schema in
+§6.3.
+
+**Save assessment** → choose *Record results now* (per-drill input + notes,
+save to player DB) or *Assign to athlete* (due date + optional instructions
+→ goes to athlete's queue).
+
+### 12.8 Cohorts
+- Page lists cohorts (name, member avatars, member count, upcoming sessions)
+- *New cohort* modal: name + description (placeholder *"when this cohort
+  meets, who's in it, any context to remember"*) + member multi-select →
+  *Create cohort*. Same shape is reachable from inside the group-lesson
+  wizard as *Save selection as cohort*.
+
+### 12.9 Inbox
+- Threaded view (athletes + cohorts + guardians)
+- Filters: All / Unread / Athletes / Cohorts / Guardians
+- Rows show sender + role badge (e.g. *Maria Elias · Guardian*), preview,
+  age
+- *New message* modal: pick category (Athlete / Cohort / Guardian) → search
+  + select → type + send. Athlete and Guardian are single-select.
+
+### 12.10 New concepts surfaced (vs. earlier drafts)
+- **Cohort description** with a specific placeholder
+- **Save ad-hoc selection as cohort** from inside the scheduling wizard
+- **Pinned priorities** affordance on context-rail rows
+- **Section/block** session structure with auto-summed total time
+- Named **session templates** (the four above) — concrete list
+- **Three assignment types** (homework / reflection / match analysis) and
+  the **game plan template** schema for match analysis
+- **Schedule → Assignments tab** as a roster-wide assignments queue
+- **Guardian** as an explicit role/badge in messaging
+- Top-level **Visions & Goals**, **Library**, **Settings** destinations
+  (referenced, not built)
+
+### 12.11 Not yet built in Stuti's prototype (flagged)
+- Home, Visions & Goals, Library, Settings pages have no content yet
+- The 5 remaining game-plan-template questions (3 are enumerated; 5 more
+  exist in the prototype but were not read out)
+
 ---
 
-*Status: Draft 2 — incorporates the 2026-05-10 evening prototype-review session
-(§11) and the ARProformance brand system (`BRAND.md`). Next: build the
-comprehensive coach + athlete end-to-end prototype (2–3 visual directions, one
-on the ARProformance brand), lock V0 scope, and start on data model + auth.*
+*Status: Draft 3 — incorporates Stuti's prototype walkthrough (§12). Next:
+mirror the §12 flows into `prototype.html` (scheduling wizard, section-block
+builder, three-type assignment modal, inbox filters + new-message,
+recommended/custom assessment builder), lock V0 scope, and start on data
+model + auth.*

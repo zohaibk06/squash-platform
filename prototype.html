@@ -662,6 +662,107 @@ textarea.field{resize:none;min-height:96px;line-height:1.5;}
 [data-persona="athlete"] .coach-only{display:none!important;}
 
 /* ============================================================
+   SESSION BUILDER — editable section blocks + pin-priorities rail
+   ============================================================ */
+.block{
+  background:var(--card-bg);border:var(--card-border);
+  border-radius:var(--r-card);padding:14px;box-shadow:var(--shadow-card);
+  position:relative;
+}
+.block + .block{margin-top:10px;}
+[data-theme="arpro"] .block,[data-theme="logbook"] .block{border-left:3px solid var(--accent);}
+.block .b-row{display:flex;align-items:center;gap:8px;}
+.block .grip-h{width:16px;height:16px;color:var(--text-faint);flex:0 0 auto;cursor:grab;}
+.block .b-title{flex:1;min-width:0;padding:9px 12px;font-size:13.5px;font-weight:600;}
+.block .b-dur{width:54px;text-align:center;padding:9px 6px;font-size:13.5px;font-weight:600;}
+.block .b-del{
+  width:30px;height:30px;flex:0 0 auto;
+  border-radius:var(--r-btn);border:1px solid var(--hairline);
+  background:transparent;color:var(--text-faint);
+  display:grid;place-items:center;cursor:pointer;
+  transition:color var(--t) var(--ease),border-color var(--t) var(--ease);
+}
+.block .b-del:hover{color:var(--accent);border-color:var(--accent);}
+.block .b-del svg{width:13px;height:13px;}
+.block textarea.field{min-height:54px;}
+.block-add{
+  width:100%;padding:14px;
+  border:1.5px dashed var(--border);background:transparent;
+  color:var(--text-muted);border-radius:var(--r-card);cursor:pointer;
+  font-family:var(--font-body);font-weight:600;font-size:13px;
+  letter-spacing:.005em;
+  transition:color var(--t) var(--ease),border-color var(--t) var(--ease);
+}
+.block-add:hover{color:var(--accent);border-color:var(--accent);}
+[data-theme="arpro"] .block-add,[data-theme="logbook"] .block-add{
+  text-transform:uppercase;letter-spacing:.12em;font-size:11px;
+}
+
+.total-chip{
+  display:inline-flex;align-items:center;gap:6px;
+  font-family:var(--font-display);font-weight:var(--disp-weight);
+  letter-spacing:var(--disp-tracking);font-size:18px;
+  color:var(--accent);
+}
+
+/* context-rail pinable items */
+.rail-item{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 0;border-bottom:1px solid var(--hairline);
+}
+.rail-item:last-child{border-bottom:0;}
+.rail-item .pin-lbl{flex:1;font-size:12.5px;line-height:1.3;}
+.rail-item.pinned .pin-lbl{color:var(--accent);font-weight:600;}
+.rail-item .pin-btn{
+  width:26px;height:26px;flex:0 0 auto;border-radius:999px;
+  border:1px solid var(--hairline);background:transparent;color:var(--text-faint);
+  display:grid;place-items:center;cursor:pointer;
+  transition:all var(--t) var(--ease);
+}
+.rail-item .pin-btn:hover{color:var(--accent);border-color:var(--accent);}
+.rail-item.pinned .pin-btn{background:var(--accent);color:var(--on-accent);border-color:var(--accent);}
+.rail-item .pin-btn svg{width:13px;height:13px;}
+
+.pin-bay{
+  display:flex;flex-wrap:wrap;gap:6px;
+  padding:12px;border:1.5px dashed var(--border);
+  border-radius:var(--r-card);min-height:54px;align-items:center;
+}
+.pin-bay:empty::before{
+  content:"Tap + on a goal or note in the rail to pin it";
+  font-size:11.5px;color:var(--text-faint);
+}
+
+/* tab panes (assignment modal, inbox new-message, schedule sub-tabs) */
+.tabpane[hidden]{display:none;}
+
+/* assignments-due card in schedule */
+.adue{
+  display:flex;align-items:center;gap:13px;
+  padding:13px 14px;border-radius:var(--r-card);
+  background:var(--card-bg);border:var(--card-border);box-shadow:var(--shadow-card);
+}
+.adue .typ{
+  font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--accent);
+}
+[data-theme="logbook"] .adue .typ{font-family:var(--font-mono);}
+
+/* inbox filter chips */
+.filterbar{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;}
+.filterbar::-webkit-scrollbar{display:none;}
+.filterbar button{
+  flex:0 0 auto;border:1px solid var(--hairline);background:transparent;
+  color:var(--text-muted);font-family:var(--font-body);
+  font-size:11.5px;font-weight:600;letter-spacing:.01em;
+  padding:7px 12px;border-radius:999px;cursor:pointer;
+  transition:all var(--t) var(--ease);
+}
+.filterbar button.on{background:var(--accent);color:var(--on-accent);border-color:var(--accent);}
+[data-theme="arpro"] .filterbar button{text-transform:uppercase;letter-spacing:.1em;font-size:10.5px;}
+[data-theme="logbook"] .filterbar button{font-family:var(--font-mono);letter-spacing:.14em;font-size:10.5px;border-radius:0;}
+
+/* ============================================================
    THEME SIGNATURES — logbook + pulse-specific overrides
    ============================================================ */
 
@@ -1046,7 +1147,7 @@ textarea.field{resize:none;min-height:96px;line-height:1.5;}
       </div>
     </div>
 
-    <button class="btn ghost" data-nav="c-builder"><svg><use href="#i-plus"/></svg>Plan a session</button>
+    <button class="btn ghost" data-nav="c-sched-new"><svg><use href="#i-plus"/></svg>Schedule a new session</button>
 
   </div>
 </section>
@@ -1125,8 +1226,14 @@ textarea.field{resize:none;min-height:96px;line-height:1.5;}
       <span class="avatar lg">DE</span>
       <div class="grow">
         <div class="disp" style="font-size:26px">Diego Elias</div>
-        <div class="muted tiny">14 yr · L2 squad · Club Locker 4.12 ▲</div>
+        <div class="row gap6 mt4"><span class="chip dot">Active</span><span class="muted tiny">14 yr · L2 squad · Club Locker 4.12 ▲</span></div>
       </div>
+    </div>
+
+    <div class="lrow">
+      <span class="iconbtn" style="background:var(--accent);color:var(--on-accent);border-color:transparent"><svg><use href="#i-bell"/></svg></span>
+      <div class="grow"><b style="font-size:13.5px">2 outstanding assignments</b><div class="faint tiny">Match reflection · ghosting clip</div></div>
+      <button class="btn ghost sm" data-toast="Nudge sent to Diego">Nudge</button>
     </div>
 
     <div class="focus rule">
@@ -1148,6 +1255,48 @@ textarea.field{resize:none;min-height:96px;line-height:1.5;}
         <div class="card rule"><b style="font-size:13.5px">01 · Movement — hold shape into the back corners</b><div class="pbar mt8"><span style="width:62%"></span></div></div>
         <div class="card rule"><b style="font-size:13.5px">02 · Backhand wrist stability under pace</b><div class="pbar mt8"><span style="width:45%"></span></div></div>
         <div class="card rule"><b style="font-size:13.5px">03 · Counter-drop discipline on the rear court</b><div class="pbar mt8"><span style="width:30%"></span></div></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="row between">
+        <div class="eyebrow">Assignments</div>
+        <button class="btn ghost sm" data-nav="c-assignment"><svg width="13" height="13"><use href="#i-plus"/></svg>New assignment</button>
+      </div>
+      <div class="stack mt8">
+        <div class="adue">
+          <div class="grow">
+            <div class="typ">Match analysis</div>
+            <b style="font-size:13.5px">vs. Omar — semifinal</b>
+            <div class="faint tiny"><span class="due late">Reflection 2 days late</span></div>
+          </div>
+          <button class="btn ghost sm" data-toast="Nudge sent">Nudge</button>
+        </div>
+        <div class="adue">
+          <div class="grow">
+            <div class="typ">Homework</div>
+            <b style="font-size:13.5px">3× counter-drop clip</b>
+            <div class="faint tiny">Due Fri</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="row between">
+        <div class="eyebrow">Assessments</div>
+        <button class="btn ghost sm" data-toast="Opening build-assessment modal"><svg width="13" height="13"><use href="#i-plus"/></svg>New</button>
+      </div>
+      <div class="stack mt8">
+        <div class="card">
+          <div class="row between">
+            <div><b style="font-size:13.5px">Pre-tournament check-in</b><div class="faint tiny">Scheduled · 6 drills</div></div>
+            <button class="btn ghost sm" data-toast="Record results — per drill">Record</button>
+          </div>
+        </div>
+        <div class="card tap" data-toast="Opening assessment history">
+          <div class="row between"><b style="font-size:13.5px">Forehand · 30 Apr</b><span class="chip" style="color:var(--accent);border-color:var(--accent)">▲ +9%</span></div>
+        </div>
       </div>
     </div>
 
@@ -1348,47 +1497,109 @@ textarea.field{resize:none;min-height:96px;line-height:1.5;}
 <section class="screen" data-screen="c-builder" data-flow="builder">
   <header class="s-head">
     <button class="iconbtn" data-back aria-label="Cancel"><svg><use href="#i-x"/></svg></button>
-    <div class="ttl">Build session</div>
+    <div class="col grow"><div class="eyebrow">Diego Elias · Mon 18 May · 15:00</div><div class="ttl">Build session</div></div>
+    <span class="total-chip"><span id="totalMins">35</span>m</span>
   </header>
   <div class="s-body stack-lg">
     <div class="steps"><i class="on" data-bi="1"></i><i data-bi="2"></i><i data-bi="3"></i></div>
 
-    <!-- session context rail -->
-    <div class="card rule">
+    <!-- pinable context rail -->
+    <div class="card rule" id="builderRail">
       <div class="eyebrow">For · Diego Elias</div>
-      <div class="row wrap gap6 mt8">
-        <span class="chip">Outcome: State champ U16</span>
-        <span class="chip">Process 02: wrist stability</span>
+      <div class="muted tiny mt4">Tap + on a goal or note to pin it as a priority for this session.</div>
+      <div class="stack mt8" style="--stack-step:0">
+        <div class="rail-item"><span class="pin-lbl"><b>Outcome</b> · State champion U16</span><button class="pin-btn" data-pin-toggle aria-label="Pin"><svg><use href="#i-plus"/></svg></button></div>
+        <div class="rail-item pinned"><span class="pin-lbl"><b>Process 02</b> · Backhand wrist stability under pace</span><button class="pin-btn" data-pin-toggle aria-label="Unpin"><svg><use href="#i-check"/></svg></button></div>
+        <div class="rail-item"><span class="pin-lbl"><b>Note · 04 May</b> · “Breaking on the counter-drops.”</span><button class="pin-btn" data-pin-toggle aria-label="Pin"><svg><use href="#i-plus"/></svg></button></div>
       </div>
-      <div class="qline mt8" style="border:0;padding-bottom:0"><span class="qd">04 May</span><span class="tiny">“Breaking on the counter-drops.”</span></div>
     </div>
 
-    <!-- step 1 : source -->
+    <!-- step 1 : start from -->
     <div class="bstep" data-step="1">
       <div class="eyebrow">Step 1 · Start from</div>
-      <div class="muted tiny mt4">Your own previous sessions are the fastest start — templates are there if you want them.</div>
-      <div class="stack mt12">
+      <div class="muted tiny mt4">Your own previous sessions are the fastest start — named templates are there if you want them.</div>
+
+      <div class="eyebrow mt20">Previous sessions</div>
+      <div class="stack mt8">
         <label class="opt on"><span class="box"><svg><use href="#i-check"/></svg></span>
-          <div><b style="font-size:13.5px">Previous session · 04 May</b><div class="faint tiny">Rear-court counter-drop progression — reusable for any athlete</div></div></label>
+          <div><b style="font-size:13.5px">Match Simulation · with Diego</b><div class="faint tiny">Wed 06 May · 3 sections · 55 min</div></div></label>
         <label class="opt"><span class="box"><svg><use href="#i-check"/></svg></span>
-          <div><b style="font-size:13.5px">Template · Backhand under pace</b><div class="faint tiny">Your saved skill-development template</div></div></label>
-        <label class="opt"><span class="box"><svg><use href="#i-check"/></svg></span>
-          <div><b style="font-size:13.5px">Blank session</b><div class="faint tiny">Build it from scratch</div></div></label>
+          <div><b style="font-size:13.5px">Rear-court counter-drop progression</b><div class="faint tiny">Mon 04 May · reusable for any athlete</div></div></label>
       </div>
+
+      <div class="eyebrow mt20">Predefined templates</div>
+      <div class="stack mt8">
+        <label class="opt"><span class="box"><svg><use href="#i-check"/></svg></span>
+          <div><b style="font-size:13.5px">Progressive Pressure</b><div class="faint tiny">Pre-filled · 4 sections</div></div></label>
+        <label class="opt"><span class="box"><svg><use href="#i-check"/></svg></span>
+          <div><b style="font-size:13.5px">Movement Foundations</b><div class="faint tiny">Pre-filled · ghosting + lunge-and-recover</div></div></label>
+        <label class="opt"><span class="box"><svg><use href="#i-check"/></svg></span>
+          <div><b style="font-size:13.5px">Volley Game</b><div class="faint tiny">Pre-filled · 3 sections</div></div></label>
+        <label class="opt"><span class="box"><svg><use href="#i-check"/></svg></span>
+          <div><b style="font-size:13.5px">Match Simulation</b><div class="faint tiny">Pre-filled · warm-up / game 1 / debrief + game 2</div></div></label>
+      </div>
+
+      <div class="eyebrow mt20">From scratch</div>
+      <div class="stack mt8">
+        <label class="opt"><span class="box"><svg><use href="#i-check"/></svg></span>
+          <div><b style="font-size:13.5px">Create my own session</b><div class="faint tiny">Empty state — define focus, drills optional</div></div></label>
+      </div>
+
       <button class="btn mt20" data-step-go="2">Continue<svg><use href="#i-arrow"/></svg></button>
     </div>
 
-    <!-- step 2 : focus + drills -->
+    <!-- step 2 : build sections -->
     <div class="bstep" data-step="2" hidden>
-      <div class="eyebrow">Step 2 · Focus &amp; drills</div>
+      <div class="eyebrow">Step 2 · Build sections</div>
+      <div class="muted tiny mt4">Total time updates as you add blocks (top right).</div>
+
       <div class="stack mt12">
-        <div><label class="flabel">Intended focus — one per session</label>
-          <input class="field" value="Backhand wrist stability under pace" /></div>
-        <div class="card"><div class="row between"><div><b style="font-size:13px">Warm-up · solo length</b><div class="faint tiny">8 min</div></div><svg width="16" height="16" style="color:var(--text-faint)"><use href="#i-grip"/></svg></div></div>
-        <div class="card"><div class="row between"><div><b style="font-size:13px">Backhand drive — both walls</b><div class="faint tiny">12 min · wrist cue</div></div><svg width="16" height="16" style="color:var(--text-faint)"><use href="#i-grip"/></svg></div></div>
-        <div class="card"><div class="row between"><div><b style="font-size:13px">Conditioned game — backhand boast</b><div class="faint tiny">15 min</div></div><svg width="16" height="16" style="color:var(--text-faint)"><use href="#i-grip"/></svg></div></div>
-        <button class="btn ghost sm" data-toast="Add a drill">+ Add drill</button>
+        <div><label class="flabel">Session focus</label>
+          <input class="field" value="Tighten straight rails under pressure" placeholder="The one thing this session should land" /></div>
+
+        <div><label class="flabel">Pinned priorities</label>
+          <div class="pin-bay" id="pinBay"></div></div>
+
+        <div><label class="flabel">Sections</label>
+          <div id="blocks">
+            <div class="block">
+              <div class="b-row">
+                <svg class="grip-h"><use href="#i-grip"/></svg>
+                <input class="field b-title" value="Warm-up" />
+                <input class="field b-dur" value="10" inputmode="numeric" />
+                <span class="faint tiny">min</span>
+                <button class="b-del" aria-label="Delete"><svg><use href="#i-x"/></svg></button>
+              </div>
+              <input class="field mt8" value="Solo length + pair hitting" placeholder="Drill" />
+              <textarea class="field mt8" placeholder="Cues / targets / progressions">Wrist quiet, racket up early off the T.</textarea>
+            </div>
+            <div class="block">
+              <div class="b-row">
+                <svg class="grip-h"><use href="#i-grip"/></svg>
+                <input class="field b-title" value="Game 1" />
+                <input class="field b-dur" value="20" inputmode="numeric" />
+                <span class="faint tiny">min</span>
+                <button class="b-del" aria-label="Delete"><svg><use href="#i-x"/></svg></button>
+              </div>
+              <input class="field mt8" placeholder="Drill" />
+              <textarea class="field mt8" placeholder="Cues / targets / progressions"></textarea>
+            </div>
+            <div class="block">
+              <div class="b-row">
+                <svg class="grip-h"><use href="#i-grip"/></svg>
+                <input class="field b-title" value="Debrief + Game 2" />
+                <input class="field b-dur" value="25" inputmode="numeric" />
+                <span class="faint tiny">min</span>
+                <button class="b-del" aria-label="Delete"><svg><use href="#i-x"/></svg></button>
+              </div>
+              <input class="field mt8" placeholder="Drill" />
+              <textarea class="field mt8" placeholder="Cues / targets / progressions"></textarea>
+            </div>
+          </div>
+          <button class="block-add mt12" id="addBlock"><svg width="14" height="14" style="vertical-align:-2px"><use href="#i-plus"/></svg> Add section</button>
+        </div>
       </div>
+
       <div class="btnrow mt20">
         <button class="btn ghost" data-step-go="1">Back</button>
         <button class="btn" data-step-go="3">Review</button>
@@ -1400,16 +1611,180 @@ textarea.field{resize:none;min-height:96px;line-height:1.5;}
       <div class="eyebrow">Step 3 · Review</div>
       <div class="disp mt8" style="font-size:22px">Ready for <span class="em">Diego</span></div>
       <div class="card rule mt12">
-        <b style="font-size:13.5px">Backhand wrist stability under pace</b>
-        <div class="faint tiny mt4">3 drills · 35 min · private</div>
+        <b style="font-size:13.5px">Tighten straight rails under pressure</b>
+        <div class="faint tiny mt4"><span id="totalMins2">55</span> min · 3 sections · private</div>
         <div class="hr"></div>
         <div class="muted tiny">Athlete sees the focus &amp; drill queue the moment you save.</div>
       </div>
       <div class="btnrow mt20">
         <button class="btn ghost" data-back data-toast="Saved for later">Save for later</button>
-        <button class="btn" data-nav="c-session"><svg><use href="#i-bolt"/></svg>Start now</button>
+        <button class="btn" data-nav="c-session" data-toast="Session saved · ready to start"><svg><use href="#i-bolt"/></svg>Start now</button>
       </div>
     </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     COACH · SCHEDULE-SESSION WIZARD (modal flow)
+     ============================================================ -->
+<section class="screen" data-screen="c-sched-new" data-flow="schedule">
+  <header class="s-head">
+    <button class="iconbtn" data-back aria-label="Cancel"><svg><use href="#i-x"/></svg></button>
+    <div class="ttl">Schedule session</div>
+  </header>
+  <div class="s-body stack-lg">
+    <div class="steps">
+      <i class="on" data-ssi="1"></i><i data-ssi="2"></i><i data-ssi="3"></i>
+    </div>
+
+    <!-- step 1 : date + time -->
+    <div class="sstep" data-step="1">
+      <div class="eyebrow">Step 1 of 3 · When</div>
+      <div class="disp mt8" style="font-size:24px">Pick a <span class="em">date &amp; time</span></div>
+      <div class="stack mt20">
+        <div><label class="flabel">Date</label><input class="field" type="date" value="2026-05-18" /></div>
+        <div class="row gap8">
+          <div class="grow"><label class="flabel">Start time</label><input class="field" type="time" value="15:00" /></div>
+          <div class="grow"><label class="flabel">Length</label>
+            <div class="seg"><button>30m</button><button class="on">45m</button><button>60m</button><button>90m</button></div>
+          </div>
+        </div>
+      </div>
+      <button class="btn mt20" data-step-go="2">Continue<svg><use href="#i-arrow"/></svg></button>
+    </div>
+
+    <!-- step 2 : lesson type -->
+    <div class="sstep" data-step="2" hidden>
+      <div class="eyebrow">Step 2 of 3 · Lesson type</div>
+      <div class="disp mt8" style="font-size:24px">Private or <span class="em">group?</span></div>
+      <div class="stack mt20">
+        <label class="opt on" data-lesson-type="private"><span class="box"><svg><use href="#i-check"/></svg></span>
+          <div><b style="font-size:14px">Private lesson</b><div class="faint tiny">One athlete, focused work</div></div></label>
+        <label class="opt" data-lesson-type="group"><span class="box"><svg><use href="#i-check"/></svg></span>
+          <div><b style="font-size:14px">Group lesson</b><div class="faint tiny">2+ athletes — pick a cohort or hand-pick</div></div></label>
+      </div>
+      <div class="btnrow mt20">
+        <button class="btn ghost" data-step-go="1">Back</button>
+        <button class="btn" data-step-go="3">Continue</button>
+      </div>
+    </div>
+
+    <!-- step 3 : players / cohort -->
+    <div class="sstep" data-step="3" hidden>
+      <div class="eyebrow">Step 3 of 3 · Who</div>
+      <div class="disp mt8" style="font-size:22px">Pick the <span class="em">athlete(s)</span></div>
+      <div class="muted tiny mt8 private-hint">Private lesson — pick one athlete to continue.</div>
+      <div class="muted tiny mt8 group-hint" hidden>Group lesson — multi-select 2+ athletes, or pick a saved cohort.</div>
+
+      <!-- group-only : saved cohorts -->
+      <div class="card mt12 group-only" hidden>
+        <div class="eyebrow">Pick a cohort</div>
+        <div class="stack mt8">
+          <label class="opt"><span class="box"><svg><use href="#i-check"/></svg></span>
+            <div><b style="font-size:13px">Tuesday Elite Squad</b><span class="chip" style="margin-left:6px">2</span><div class="faint tiny">Tue 17:30 · invitational squad</div></div></label>
+          <label class="opt"><span class="box"><svg><use href="#i-check"/></svg></span>
+            <div><b style="font-size:13px">Cool Squash Open</b><span class="chip" style="margin-left:6px">4</span><div class="faint tiny">Rolling drop-in · open level</div></div></label>
+        </div>
+      </div>
+
+      <input class="field mt12" placeholder="Search athletes…" />
+      <div class="stack mt12">
+        <label class="opt on"><span class="box"><svg><use href="#i-check"/></svg></span>
+          <div><b style="font-size:13.5px">Diego Elias</b><div class="faint tiny">14 yr · Private · L2 squad</div></div></label>
+        <label class="opt"><span class="box"><svg><use href="#i-check"/></svg></span>
+          <div><b style="font-size:13.5px">Nour El Sherbini</b><div class="faint tiny">Private · top junior</div></div></label>
+        <label class="opt"><span class="box"><svg><use href="#i-check"/></svg></span>
+          <div><b style="font-size:13.5px">Olivia Weaver</b><div class="faint tiny">Private · Squad</div></div></label>
+        <label class="opt"><span class="box"><svg><use href="#i-check"/></svg></span>
+          <div><b style="font-size:13.5px">Marwan Adel</b><div class="faint tiny">Squad</div></div></label>
+        <label class="opt"><span class="box"><svg><use href="#i-check"/></svg></span>
+          <div><b style="font-size:13.5px">Hania Tarek</b><div class="faint tiny">Private</div></div></label>
+      </div>
+
+      <button class="btn ghost sm mt12 group-only" hidden data-toast="Saved current selection as a new cohort">+ Save this selection as a cohort</button>
+
+      <div class="btnrow mt20">
+        <button class="btn ghost" data-step-go="2">Back</button>
+        <button class="btn" data-nav="c-builder">Build session<svg><use href="#i-arrow"/></svg></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     COACH · NEW ASSIGNMENT (3 types)
+     ============================================================ -->
+<section class="screen" data-screen="c-assignment" data-flow="assign">
+  <header class="s-head">
+    <button class="iconbtn" data-back aria-label="Cancel"><svg><use href="#i-x"/></svg></button>
+    <div class="col grow"><div class="eyebrow">For · Diego Elias</div><div class="ttl">New assignment</div></div>
+  </header>
+  <div class="s-body stack-lg">
+    <div class="seg" data-tab-group="assign">
+      <button class="on" data-show="hw">Homework</button>
+      <button data-show="ref">Reflection</button>
+      <button data-show="ma">Match analysis</button>
+    </div>
+
+    <!-- homework -->
+    <div class="tabpane" data-pane="hw">
+      <div class="stack">
+        <div><label class="flabel">Title</label><input class="field" placeholder="e.g. Ghosting — 3 × 90s" /></div>
+        <div><label class="flabel">Instructions</label><textarea class="field" placeholder="What to do, how to film it, what to look for."></textarea></div>
+        <div class="row gap8">
+          <div class="grow"><label class="flabel">Due date</label><input class="field" type="date" value="2026-05-19" /></div>
+          <div class="grow"><label class="flabel">Resource</label><input class="field" placeholder="PDF / image / link" /></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- post-session reflection -->
+    <div class="tabpane" data-pane="ref" hidden>
+      <div class="stack">
+        <div><label class="flabel">Title</label><input class="field" placeholder="e.g. After our Thursday session" /></div>
+        <div><label class="flabel">Instructions</label><textarea class="field" placeholder="Prompts for the athlete to reflect on."></textarea></div>
+        <div class="row gap8">
+          <div class="grow"><label class="flabel">Due date</label><input class="field" type="date" /></div>
+          <div class="grow"><label class="flabel">Resource</label><input class="field" placeholder="PDF / image / link" /></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- post-match analysis -->
+    <div class="tabpane" data-pane="ma" hidden>
+      <div class="stack">
+        <div><label class="flabel">Title</label><input class="field" placeholder="e.g. vs. Omar — semifinal" /></div>
+        <div class="card">
+          <div class="eyebrow">Match context</div>
+          <div class="stack mt8">
+            <input class="field" placeholder="Opponent name" />
+            <div class="row gap8">
+              <input class="field grow" placeholder="Score (e.g. 11–9, 9–11, 11–8, 11–6)" />
+              <input class="field grow" type="date" placeholder="Match date" />
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="eyebrow">Game-plan template</div>
+          <div class="muted tiny mt4">Pre-fill what you know — the athlete completes the rest.</div>
+          <div class="stack mt12">
+            <div><label class="flabel">1 · Opponent style</label>
+              <div class="seg"><button class="on">Attacker</button><button>Runner</button><button>Tricky</button><button>Powerful</button></div></div>
+            <div><label class="flabel">2 · What they do best</label><input class="field" /></div>
+            <div><label class="flabel">3 · Where they're less strong</label><input class="field" /></div>
+            <div><label class="flabel">4 – 8 · Five more inputs</label>
+              <div class="muted tiny">Stuti's prototype shows eight questions total — the remaining five aren't yet enumerated here.</div></div>
+            <div><label class="flabel">Key reminder</label><input class="field" placeholder="One line they should walk on court with" /></div>
+          </div>
+        </div>
+        <div class="row gap8">
+          <div class="grow"><label class="flabel">Due date</label><input class="field" type="date" /></div>
+          <div class="grow"><label class="flabel">Resource</label><input class="field" placeholder="Video / PDF / link" /></div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn" data-back data-toast="Assignment sent to Diego"><svg><use href="#i-send"/></svg>Send to athlete</button>
   </div>
 </section>
 
@@ -1512,45 +1887,112 @@ textarea.field{resize:none;min-height:96px;line-height:1.5;}
     <button class="iconbtn" data-back aria-label="Back"><svg><use href="#i-back"/></svg></button>
     <div class="ttl">Schedule</div>
     <button class="iconbtn" data-toast="Synced — pushed to Google Calendar" aria-label="Sync"><svg><use href="#i-cal-sync"/></svg></button>
+    <button class="iconbtn" data-nav="c-sched-new" aria-label="New session" style="background:var(--accent);color:var(--on-accent);border-color:transparent"><svg><use href="#i-plus"/></svg></button>
   </header>
   <div class="s-body stack-lg">
-    <div class="week">
-      <div class="d"><div class="dn">Mon</div><div class="dd">13</div><div class="has"></div></div>
-      <div class="d on"><div class="dn">Tue</div><div class="dd">14</div><div class="has"></div></div>
-      <div class="d"><div class="dn">Wed</div><div class="dd">15</div><div class="has"></div></div>
-      <div class="d"><div class="dn">Thu</div><div class="dd">16</div></div>
-      <div class="d"><div class="dn">Fri</div><div class="dd">17</div><div class="has"></div></div>
-      <div class="d"><div class="dn">Sat</div><div class="dd">18</div><div class="has"></div></div>
-      <div class="d"><div class="dn">Sun</div><div class="dd">19</div></div>
+
+    <div class="seg" data-tab-group="schedule">
+      <button class="on" data-show="sessions">Sessions</button>
+      <button data-show="assignments">Assignments</button>
     </div>
 
-    <div class="card" style="background:var(--surface-2)">
-      <div class="row gap8">
-        <svg width="17" height="17" style="color:var(--accent)"><use href="#i-cal-sync"/></svg>
-        <div class="grow tiny muted">In-app calendar — sessions push out to Google / Apple. Your personal calendar stays yours.</div>
+    <!-- SESSIONS tab -->
+    <div class="tabpane" data-pane="sessions">
+      <div class="stack-lg">
+        <div class="week">
+          <div class="d"><div class="dn">Mon</div><div class="dd">13</div><div class="has"></div></div>
+          <div class="d on"><div class="dn">Tue</div><div class="dd">14</div><div class="has"></div></div>
+          <div class="d"><div class="dn">Wed</div><div class="dd">15</div><div class="has"></div></div>
+          <div class="d"><div class="dn">Thu</div><div class="dd">16</div></div>
+          <div class="d"><div class="dn">Fri</div><div class="dd">17</div><div class="has"></div></div>
+          <div class="d"><div class="dn">Sat</div><div class="dd">18</div><div class="has"></div></div>
+          <div class="d"><div class="dn">Sun</div><div class="dd">19</div></div>
+        </div>
+
+        <div class="card" style="background:var(--surface-2)">
+          <div class="row gap8">
+            <svg width="17" height="17" style="color:var(--accent)"><use href="#i-cal-sync"/></svg>
+            <div class="grow tiny muted">In-app calendar — sessions push out to Google / Apple. Your personal calendar stays yours.</div>
+          </div>
+        </div>
+
+        <div>
+          <div class="eyebrow">Tuesday 14 May</div>
+          <div class="stack mt8">
+            <div class="agenda">
+              <div class="tcol"><div class="tt">15:00</div><div class="td">45m</div></div>
+              <div class="line"></div>
+              <div class="card grow tap" data-nav="c-session"><b style="font-size:13px">Diego Elias — private</b><div class="faint tiny">Backhand wrist stability · Court 2</div></div>
+            </div>
+            <div class="agenda">
+              <div class="tcol"><div class="tt">17:30</div><div class="td">90m</div></div>
+              <div class="line"></div>
+              <div class="card grow tap" data-nav="c-cohort"><b style="font-size:13px">Junior Squad — group clinic</b><div class="faint tiny">8 athletes · Courts 1–3</div></div>
+            </div>
+            <div class="agenda">
+              <div class="tcol"><div class="tt">19:15</div><div class="td">45m</div></div>
+              <div class="line"></div>
+              <div class="card grow tap" data-nav="c-sched-new"><b style="font-size:13px">Hania Tarek — private</b><div class="faint tiny" style="color:var(--accent)">No plan yet — tap to build</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="eyebrow">Wednesday 15 May</div>
+          <div class="stack mt8">
+            <div class="agenda">
+              <div class="tcol"><div class="tt">16:00</div><div class="td">60m</div></div>
+              <div class="line"></div>
+              <div class="card grow"><b style="font-size:13px">Marwan Adel — private</b><div class="faint tiny">Volley game template</div></div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div>
-      <div class="eyebrow">Tuesday 14 May</div>
-      <div class="stack mt8">
-        <div class="agenda">
-          <div class="tcol"><div class="tt">15:00</div><div class="td">45m</div></div>
-          <div class="line"></div>
-          <div class="card grow tap" data-nav="c-session"><b style="font-size:13px">Diego Elias — private</b><div class="faint tiny">Backhand wrist stability · Court 2</div></div>
+    <!-- ASSIGNMENTS tab -->
+    <div class="tabpane" data-pane="assignments" hidden>
+      <div class="muted tiny">Assignments due across your roster — surfaced here so you can chase them at a glance.</div>
+      <div class="stack mt12">
+        <div class="adue">
+          <span class="avatar sm ghost">NS</span>
+          <div class="grow">
+            <div class="typ">Assessment</div>
+            <b style="font-size:13.5px">Nour El Sherbini · 5 drills (fitness only)</b>
+            <div class="faint tiny">Complete after Monday's session</div>
+          </div>
+          <button class="btn ghost sm" data-toast="Nudge sent to Nour">Nudge</button>
         </div>
-        <div class="agenda">
-          <div class="tcol"><div class="tt">17:30</div><div class="td">90m</div></div>
-          <div class="line"></div>
-          <div class="card grow tap" data-nav="c-cohort"><b style="font-size:13px">Junior Squad — group clinic</b><div class="faint tiny">8 athletes · Courts 1–3</div></div>
+        <div class="adue">
+          <span class="avatar sm">DE</span>
+          <div class="grow">
+            <div class="typ">Match analysis</div>
+            <b style="font-size:13.5px">Diego Elias · vs. Omar — semifinal</b>
+            <div class="faint tiny"><span class="due late">2 days late</span></div>
+          </div>
+          <button class="btn ghost sm" data-toast="Nudge sent to Diego">Nudge</button>
         </div>
-        <div class="agenda">
-          <div class="tcol"><div class="tt">19:15</div><div class="td">45m</div></div>
-          <div class="line"></div>
-          <div class="card grow tap" data-nav="c-builder"><b style="font-size:13px">Hania Tarek — private</b><div class="faint tiny" style="color:var(--accent)">No plan yet — tap to build</div></div>
+        <div class="adue">
+          <span class="avatar sm ghost">MA</span>
+          <div class="grow">
+            <div class="typ">Homework</div>
+            <b style="font-size:13.5px">Marwan Adel · 3× ghosting clip</b>
+            <div class="faint tiny">Due Fri</div>
+          </div>
+          <button class="btn ghost sm" data-toast="Nudge sent to Marwan">Nudge</button>
+        </div>
+        <div class="adue">
+          <span class="avatar sm ghost">YA</span>
+          <div class="grow">
+            <div class="typ">Reflection</div>
+            <b style="font-size:13.5px">Youssef Aboul · after Thu session</b>
+            <div class="faint tiny">Due Sat</div>
+          </div>
+          <button class="btn ghost sm" data-toast="Nudge sent to Youssef">Nudge</button>
         </div>
       </div>
     </div>
+
   </div>
 </section>
 
@@ -1561,25 +2003,52 @@ textarea.field{resize:none;min-height:96px;line-height:1.5;}
   <header class="s-head">
     <button class="iconbtn" data-back aria-label="Back"><svg><use href="#i-back"/></svg></button>
     <div class="ttl">Inbox</div>
+    <button class="iconbtn" data-sheet="inboxNewSheet" aria-label="New message" style="background:var(--accent);color:var(--on-accent);border-color:transparent"><svg><use href="#i-plus"/></svg></button>
   </header>
   <div class="s-body stack">
-    <div class="eyebrow">Needs you · 3</div>
-    <div class="lrow tap" data-toast="Reviewing Diego’s match clip">
-      <span class="iconbtn" style="background:var(--accent);color:var(--on-accent);border-color:transparent"><svg><use href="#i-video"/></svg></span>
-      <div class="grow"><b style="font-size:13px">Diego Elias sent a clip</b><div class="faint tiny">Match reflection · 0:48 · review</div></div>
+    <div class="muted tiny">Centralized threads — every conversation in and out with athletes, cohorts and guardians.</div>
+    <div class="filterbar" id="inboxFilters">
+      <button class="on" data-filter="all">All</button>
+      <button data-filter="unread">Unread</button>
+      <button data-filter="athlete">Athletes</button>
+      <button data-filter="cohort">Cohorts</button>
+      <button data-filter="guardian">Guardians</button>
     </div>
-    <div class="lrow tap" data-toast="Filing voice dictation to Marwan’s log">
-      <span class="iconbtn"><svg><use href="#i-mic"/></svg></span>
-      <div class="grow"><b style="font-size:13px">Voice note to file</b><div class="faint tiny">Marwan · clinic dictation · 0:21</div></div>
+
+    <div class="lrow tap" data-role="guardian" data-state="unread" data-toast="Opening thread · Maria Elias">
+      <span class="avatar sm ghost">ME</span>
+      <div class="grow">
+        <div class="row gap6"><b style="font-size:13px">Maria Elias</b><span class="chip">Guardian</span></div>
+        <div class="faint tiny">“Will Diego be at the Saturday tournament?” · 2h</div>
+      </div>
     </div>
-    <div class="lrow tap" data-toast="Opening parent thread">
-      <span class="iconbtn"><svg><use href="#i-msg"/></svg></span>
-      <div class="grow"><b style="font-size:13px">Message · Hania’s parent</b><div class="faint tiny">“Can we add a Saturday slot?”</div></div>
+    <div class="lrow tap" data-role="athlete" data-state="unread" data-toast="Opening thread · Diego Elias">
+      <span class="avatar sm">DE</span>
+      <div class="grow">
+        <div class="row gap6"><b style="font-size:13px">Diego Elias</b><span class="chip">Athlete</span></div>
+        <div class="faint tiny">Sent a clip · match reflection · 4h</div>
+      </div>
     </div>
-    <div class="eyebrow mt8">Cleared</div>
-    <div class="lrow" style="opacity:.55">
-      <span class="iconbtn"><svg><use href="#i-check"/></svg></span>
-      <div class="grow"><b style="font-size:13px">Nour — questionnaire reviewed</b><div class="faint tiny">Filed to assessment history</div></div>
+    <div class="lrow tap" data-role="cohort" data-state="read" data-toast="Opening Junior Squad thread">
+      <span class="avatar sm ghost">JS</span>
+      <div class="grow">
+        <div class="row gap6"><b style="font-size:13px">Junior Squad</b><span class="chip">Cohort</span></div>
+        <div class="faint tiny">You sent the clinic plan · Yesterday</div>
+      </div>
+    </div>
+    <div class="lrow tap" data-role="guardian" data-state="read" data-toast="Opening thread · Karim Hassan">
+      <span class="avatar sm ghost">KH</span>
+      <div class="grow">
+        <div class="row gap6"><b style="font-size:13px">Karim Hassan</b><span class="chip">Guardian</span></div>
+        <div class="faint tiny">“Can we add a Saturday slot for Layla?” · Yesterday</div>
+      </div>
+    </div>
+    <div class="lrow tap" data-role="athlete" data-state="read" data-toast="Opening thread · Nour El Sherbini">
+      <span class="avatar sm ghost">NS</span>
+      <div class="grow">
+        <div class="row gap6"><b style="font-size:13px">Nour El Sherbini</b><span class="chip">Athlete</span></div>
+        <div class="faint tiny">Questionnaire complete · 2d</div>
+      </div>
     </div>
   </div>
 </section>
@@ -1916,6 +2385,44 @@ textarea.field{resize:none;min-height:96px;line-height:1.5;}
   </div>
 </div>
 
+<div class="sheet" id="inboxNewSheet">
+  <div class="grab"></div>
+  <div class="eyebrow">New message</div>
+  <div class="muted tiny mt4">Pick a recipient category — Athlete and Guardian are single-select.</div>
+  <div class="seg mt12" data-tab-group="newmsg">
+    <button class="on" data-show="athlete">Athlete</button>
+    <button data-show="cohort">Cohort</button>
+    <button data-show="guardian">Guardian</button>
+  </div>
+  <div class="tabpane mt12" data-pane="athlete">
+    <input class="field" placeholder="Search athletes…" />
+    <div class="stack mt8">
+      <label class="opt"><span class="box"><svg><use href="#i-check"/></svg></span><div><b style="font-size:13.5px">Diego Elias</b></div></label>
+      <label class="opt"><span class="box"><svg><use href="#i-check"/></svg></span><div><b style="font-size:13.5px">Nour El Sherbini</b></div></label>
+      <label class="opt"><span class="box"><svg><use href="#i-check"/></svg></span><div><b style="font-size:13.5px">Marwan Adel</b></div></label>
+    </div>
+  </div>
+  <div class="tabpane mt12" data-pane="cohort" hidden>
+    <div class="stack">
+      <label class="opt"><span class="box"><svg><use href="#i-check"/></svg></span><div><b style="font-size:13.5px">Tuesday Elite Squad</b><div class="faint tiny">2 athletes</div></div></label>
+      <label class="opt"><span class="box"><svg><use href="#i-check"/></svg></span><div><b style="font-size:13.5px">Cool Squash Open</b><div class="faint tiny">4 athletes</div></div></label>
+      <label class="opt"><span class="box"><svg><use href="#i-check"/></svg></span><div><b style="font-size:13.5px">Junior Squad — Spring</b><div class="faint tiny">8 athletes</div></div></label>
+    </div>
+  </div>
+  <div class="tabpane mt12" data-pane="guardian" hidden>
+    <input class="field" placeholder="Search guardians…" />
+    <div class="stack mt8">
+      <label class="opt"><span class="box"><svg><use href="#i-check"/></svg></span><div><b style="font-size:13.5px">Maria Elias</b><div class="faint tiny">Diego's mother</div></div></label>
+      <label class="opt"><span class="box"><svg><use href="#i-check"/></svg></span><div><b style="font-size:13.5px">Karim Hassan</b><div class="faint tiny">Layla's father</div></div></label>
+    </div>
+  </div>
+  <textarea class="field mt12" placeholder="Type a message…"></textarea>
+  <div class="btnrow mt16">
+    <button class="btn ghost" data-close-sheet>Cancel</button>
+    <button class="btn" data-close-sheet data-toast="Message sent"><svg><use href="#i-send"/></svg>Send</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"><svg><use href="#i-check"/></svg><span id="toastMsg">Done</span></div>
 
 </div><!-- /stage -->
@@ -1956,19 +2463,26 @@ textarea.field{resize:none;min-height:96px;line-height:1.5;}
 
   function byScreen(id){ return document.querySelector('.screen[data-screen="'+id+'"]'); }
 
+  var FLOW_STEP = {
+    onboard:  {cls:'wstep', ind:'si'},
+    builder:  {cls:'bstep', ind:'bi'},
+    schedule: {cls:'sstep', ind:'ssi'}
+  };
+  function flowCfg(flow){ return FLOW_STEP[flow] || null; }
+
   function resetFlow(el){
     if(!el) return;
     var flow = el.getAttribute('data-flow');
-    if(!flow) return;
-    // reset wizard / builder to step 1
-    var stepClass = flow === 'onboard' ? 'wstep' : 'bstep';
-    var ind = flow === 'onboard' ? 'si' : 'bi';
-    el.querySelectorAll('.'+stepClass).forEach(function(s){
-      s.hidden = s.getAttribute('data-step') !== '1';
-    });
-    el.querySelectorAll('.steps i').forEach(function(i){
-      i.classList.toggle('on', i.getAttribute('data-'+ind) === '1');
-    });
+    var cfg = flowCfg(flow);
+    if(cfg){
+      el.querySelectorAll('.'+cfg.cls).forEach(function(s){
+        s.hidden = s.getAttribute('data-step') !== '1';
+      });
+      el.querySelectorAll('.steps i').forEach(function(i){
+        i.classList.toggle('on', i.getAttribute('data-'+cfg.ind) === '1');
+      });
+    }
+    if(flow === 'schedule') applyLessonType(el);
   }
 
   function show(id, isBack){
@@ -2066,19 +2580,30 @@ textarea.field{resize:none;min-height:96px;line-height:1.5;}
   /* ---- wizard / builder steps ---- */
   function goStep(flowEl, n){
     var flow = flowEl.getAttribute('data-flow');
-    var stepClass = flow === 'onboard' ? 'wstep' : 'bstep';
-    var ind = flow === 'onboard' ? 'si' : 'bi';
-    flowEl.querySelectorAll('.'+stepClass).forEach(function(s){
-      var on = s.getAttribute('data-step') === n;
-      s.hidden = !on;
-      if(on){
-        s.querySelectorAll('*').forEach(function(){});
-      }
+    var cfg = flowCfg(flow);
+    if(!cfg) return;
+    flowEl.querySelectorAll('.'+cfg.cls).forEach(function(s){
+      s.hidden = s.getAttribute('data-step') !== n;
     });
     flowEl.querySelectorAll('.steps i').forEach(function(i){
-      i.classList.toggle('on', Number(i.getAttribute('data-'+ind)) <= Number(n));
+      i.classList.toggle('on', Number(i.getAttribute('data-'+cfg.ind)) <= Number(n));
     });
     flowEl.scrollTop = 0;
+    if(flow === 'schedule' && n === '3') applyLessonType(flowEl);
+  }
+
+  /* ---- schedule wizard : lesson-type single-select + group-only reveal ---- */
+  function applyLessonType(flowEl){
+    var sel = flowEl.querySelector('.opt[data-lesson-type].on');
+    var type = sel ? sel.getAttribute('data-lesson-type') : 'private';
+    flowEl.setAttribute('data-lesson-type', type);
+    var pHint = flowEl.querySelector('.private-hint');
+    var gHint = flowEl.querySelector('.group-hint');
+    if(pHint) pHint.hidden = (type !== 'private');
+    if(gHint) gHint.hidden = (type !== 'group');
+    flowEl.querySelectorAll('.group-only').forEach(function(g){
+      g.hidden = (type !== 'group');
+    });
   }
 
   /* ---- global click delegation ---- */
@@ -2123,8 +2648,117 @@ textarea.field{resize:none;min-height:96px;line-height:1.5;}
     b.classList.add('on');
   });
 
+  // tab-pane swap (.seg button[data-show] → reveal matching .tabpane)
+  document.addEventListener('click', function(e){
+    var btn = e.target.closest('.seg button[data-show]');
+    if(!btn) return;
+    var scope = btn.closest('.screen, .sheet') || document;
+    var target = btn.getAttribute('data-show');
+    scope.querySelectorAll('[data-pane]').forEach(function(p){
+      p.hidden = p.getAttribute('data-pane') !== target;
+    });
+  });
+
+  // lesson-type radio behavior in the schedule wizard
+  document.addEventListener('click', function(e){
+    var t = e.target.closest('.opt[data-lesson-type]');
+    if(!t) return;
+    var screen = t.closest('[data-flow]');
+    if(!screen) return;
+    screen.querySelectorAll('.opt[data-lesson-type]').forEach(function(o){
+      o.classList.toggle('on', o === t);
+    });
+    applyLessonType(screen);
+  });
+
+  /* ---- session-builder: add / delete sections + total time ---- */
+  function recomputeTotal(){
+    var blocks = document.getElementById('blocks');
+    if(!blocks) return;
+    var sum = 0;
+    blocks.querySelectorAll('.b-dur').forEach(function(inp){
+      var v = parseInt(inp.value, 10);
+      if(!isNaN(v)) sum += v;
+    });
+    var t1 = document.getElementById('totalMins');
+    var t2 = document.getElementById('totalMins2');
+    if(t1) t1.textContent = sum;
+    if(t2) t2.textContent = sum;
+  }
+  document.addEventListener('input', function(e){
+    if(e.target.matches && e.target.matches('.b-dur')) recomputeTotal();
+  });
+  document.addEventListener('click', function(e){
+    var del = e.target.closest('.b-del');
+    if(del){
+      var blk = del.closest('.block');
+      if(blk){ blk.remove(); recomputeTotal(); }
+      return;
+    }
+    if(e.target.closest('#addBlock')){
+      var blocks = document.getElementById('blocks');
+      if(!blocks) return;
+      var n = document.createElement('div');
+      n.className = 'block';
+      n.innerHTML =
+        '<div class="b-row">' +
+          '<svg class="grip-h"><use href="#i-grip"/></svg>' +
+          '<input class="field b-title" placeholder="Section title" />' +
+          '<input class="field b-dur" value="10" inputmode="numeric" />' +
+          '<span class="faint tiny">min</span>' +
+          '<button class="b-del" aria-label="Delete"><svg><use href="#i-x"/></svg></button>' +
+        '</div>' +
+        '<input class="field mt8" placeholder="Drill" />' +
+        '<textarea class="field mt8" placeholder="Cues / targets / progressions"></textarea>';
+      blocks.appendChild(n);
+      recomputeTotal();
+    }
+  });
+
+  /* ---- pin priorities (context rail in builder) ---- */
+  function renderPinBay(){
+    var bay = document.getElementById('pinBay');
+    if(!bay) return;
+    bay.innerHTML = '';
+    document.querySelectorAll('#builderRail .rail-item.pinned .pin-lbl').forEach(function(el){
+      var chip = document.createElement('span');
+      chip.className = 'chip accent';
+      chip.textContent = el.textContent.replace(/\s+/g,' ').trim();
+      bay.appendChild(chip);
+    });
+  }
+  document.addEventListener('click', function(e){
+    var btn = e.target.closest('[data-pin-toggle]');
+    if(!btn) return;
+    var item = btn.closest('.rail-item');
+    if(!item) return;
+    var pinned = item.classList.toggle('pinned');
+    var u = btn.querySelector('use');
+    if(u) u.setAttribute('href', pinned ? '#i-check' : '#i-plus');
+    renderPinBay();
+  });
+
+  /* ---- inbox filters ---- */
+  document.addEventListener('click', function(e){
+    var b = e.target.closest('#inboxFilters button');
+    if(!b) return;
+    b.parentElement.querySelectorAll('button').forEach(function(x){ x.classList.remove('on'); });
+    b.classList.add('on');
+    var screen = b.closest('.screen');
+    var filter = b.getAttribute('data-filter');
+    screen.querySelectorAll('[data-role]').forEach(function(row){
+      var role = row.getAttribute('data-role');
+      var state = row.getAttribute('data-state');
+      var match = filter === 'all'
+        || filter === role
+        || (filter === 'unread' && state === 'unread');
+      row.hidden = !match;
+    });
+  });
+
   // boot
   show('c-today');
+  setTimeout(function(){ renderPinBay(); recomputeTotal(); }, 0);
 })();
 </script>
 </body>
