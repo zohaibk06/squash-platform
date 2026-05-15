@@ -787,7 +787,7 @@ textarea.field{resize:none;min-height:96px;line-height:1.5;}
   [data-layout="desktop"] .stage{
     height:auto;min-height:100dvh;max-height:none;
     border-radius:0;box-shadow:none;overflow:visible;
-    display:grid;grid-template-columns:260px minmax(0,1fr);
+    display:grid;grid-template-columns:212px minmax(0,1fr);
   }
   /* left sidebar brand strip */
   [data-layout="desktop"] .stage::before{
@@ -814,12 +814,12 @@ textarea.field{resize:none;min-height:96px;line-height:1.5;}
   }
   [data-layout="desktop"] .s-head .ttl{font-size:38px;}
   [data-layout="desktop"] .s-body{padding:28px 64px 80px;max-width:980px;}
-  /* desktop sidebar nav — replaces the bottom tabbar */
+  /* desktop sidebar nav — tight list, replaces the bottom tabbar */
   [data-layout="desktop"] .tabbar{
     grid-column:1;grid-row:1;
     position:relative;inset:auto;
     flex-direction:column;align-items:stretch;
-    gap:4px;padding:36px 16px;
+    gap:1px;padding:18px 10px 24px;
     background:transparent;border:0;backdrop-filter:none;
     -webkit-backdrop-filter:none;
   }
@@ -829,36 +829,52 @@ textarea.field{resize:none;min-height:96px;line-height:1.5;}
   [data-persona="athlete"][data-layout="desktop"] #athleteTabs{display:flex;}
   [data-layout="desktop"] .tabbar button{
     flex-direction:row;justify-content:flex-start;
-    gap:14px;padding:14px 18px;border-radius:var(--r-btn);
-    position:relative;
+    gap:12px;padding:9px 12px;border-radius:4px;
+    position:relative;color:var(--text-muted);
   }
-  [data-layout="desktop"] .tabbar button .lab{font-size:13px;letter-spacing:.02em;}
+  [data-layout="desktop"] .tabbar button svg{width:17px;height:17px;}
+  [data-layout="desktop"] .tabbar button .lab{font-size:13px;letter-spacing:.005em;font-weight:500;}
+  [data-theme="arpro"][data-layout="desktop"] .tabbar button{border-radius:0;}
+  [data-theme="logbook"][data-layout="desktop"] .tabbar button{border-radius:0;}
+  [data-theme="pulse"][data-layout="desktop"] .tabbar button{border-radius:6px;}
   [data-theme="arpro"][data-layout="desktop"] .tabbar button .lab{
-    letter-spacing:.12em;font-size:11.5px;
+    letter-spacing:.1em;font-size:11.5px;
   }
   [data-theme="logbook"][data-layout="desktop"] .tabbar button .lab{
-    font-family:var(--font-mono);letter-spacing:.14em;font-size:11px;
+    font-family:var(--font-mono);letter-spacing:.14em;font-size:10.5px;
   }
-  [data-layout="desktop"] .tabbar button.on{background:var(--surface);color:var(--accent);}
+  [data-layout="desktop"] .tabbar button:hover{color:var(--text);}
+  [data-layout="desktop"] .tabbar button.on{
+    background:var(--surface-2);color:var(--accent);
+  }
+  [data-theme="logbook"][data-layout="desktop"] .tabbar button.on{
+    background:transparent;
+  }
   [data-layout="desktop"] .tabbar button.on::before{display:none;}
   [data-layout="desktop"] .tabbar button.on::after{
-    content:"";position:absolute;left:0;top:18%;
-    width:3px;height:64%;background:var(--accent);border-radius:0 3px 3px 0;
+    content:"";position:absolute;left:0;top:22%;
+    width:2px;height:56%;background:var(--accent);border-radius:0;
   }
-  /* sidebar header brand label */
+  [data-theme="pulse"][data-layout="desktop"] .tabbar button.on::after{
+    left:-2px;
+  }
+  /* sidebar header brand label — tight */
   [data-layout="desktop"] .tabbar::before{
     content:"ARPROFORMANCE";
     display:block;
     font-family:var(--font-display);
     font-weight:var(--disp-weight);
-    text-transform:uppercase;letter-spacing:.04em;
-    font-size:16px;color:var(--text);
-    padding:6px 18px 32px;
+    text-transform:uppercase;letter-spacing:.06em;
+    font-size:13px;color:var(--text);
+    padding:4px 12px 16px;
+    margin-bottom:8px;
     border-bottom:1px solid var(--hairline);
-    margin-bottom:24px;
   }
   [data-theme="logbook"][data-layout="desktop"] .tabbar::before{
-    font-family:var(--font-display);letter-spacing:-.01em;
+    letter-spacing:-.008em;font-size:14px;
+  }
+  [data-theme="pulse"][data-layout="desktop"] .tabbar::before{
+    letter-spacing:-.012em;font-size:15px;
   }
   /* overlays repositioned for the wider canvas */
   [data-layout="desktop"] .scrim,
@@ -868,14 +884,18 @@ textarea.field{resize:none;min-height:96px;line-height:1.5;}
   }
   [data-layout="desktop"] .sheet{
     left:50%;right:auto;bottom:auto;top:50%;
-    transform:translate(-50%,calc(-50% + 30px));
+    transform:translate(-50%,calc(-50% + 20px));
+    opacity:0;pointer-events:none;
     width:min(560px,calc(100vw - 40px));
     border-radius:var(--r-card);
     border:1px solid var(--border);
     padding:24px 28px 28px;
   }
   [data-theme="arpro"][data-layout="desktop"] .sheet{border-radius:0;border-left:3px solid var(--accent);}
-  [data-layout="desktop"] .sheet.show{transform:translate(-50%,-50%);}
+  [data-layout="desktop"] .sheet.show{
+    transform:translate(-50%,-50%);
+    opacity:1;pointer-events:auto;
+  }
   [data-layout="desktop"] .sheet .grab{display:none;}
   [data-layout="desktop"] .toast{bottom:30px;}
   /* hero & focus get more breathing room */
